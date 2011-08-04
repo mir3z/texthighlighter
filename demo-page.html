@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="lib/rangy-core.js"></script>
+    <script type="text/javascript" src="lib/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="src/jquery.textHighlighter.js"></script>
+    <title>jQuery Text Highlighter Demo Page</title>
+
+    <style type="text/css">
+      #wrapper {
+          width: 960px;
+          margin: 30px auto;
+          border: 1px solid #000;
+          -moz-border-radius: 10px;
+          border-radius: 10px;
+          padding: 20px;
+          background-color: #efefef;
+          text-align: justify;
+      }
+      td, th {
+          border: 1px solid #afafaf;
+      }
+      table {
+          border-spacing: 5px;
+          border: 1px solid #afafaf;
+      }
+      div {
+          border: 1px dashed #afafaf;
+          padding: 3px;
+      }
+      pre {
+          border: 1px #afafaf dotted;
+          width: 40%;
+          margin: 0 auto;
+          padding: 8px;
+      }
+      fieldset {
+          border: 1px solid #afafaf;
+      }
+      span.highlighted {
+          border-left: 1px solid red;
+          border-right: 1px solid red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <h1>jQuery Text Highlighter Demo Page</h1>
+      <p id="p1">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. <span style="font-weight:bold">Patos
+        vitae risus scelerisque.</span> Cras porttitor sodales lacus, id hendrerit massa egestas
+        in. Sed fermentum porttitor turpis lacinia fermentum. Donec molestie rutrum odio, id lacinia
+        odio imperdiet non. <span style="font-weight:bold">Vestibulum ac velit</span> non sapien
+        luctus varius vitae blandit elit. Aenean blandit egestas euismod. Maecenas lorem dui, mattis
+        nec aliquet sit amet, sodales ac tellus. Phasellus eu urna augue, ac venenatis nulla.
+        Vestibulum bibendum elit sit amet leo elementum molestie. Curabitur interdum, turpis et mattis
+        suscipit, dolor nisl tincidunt nunc, dictum tristique augue metus eget urna. Quisque at odio
+        odio, at commodo odio. Sed laoreet dignissim nibh et congue. Vivamus in viverra nunc.
+      </p>
+
+      <p id="p2">
+        Vestibulum nisl orci, viverra in sollicitudin sed, iaculis vel erat. Nam lacus quam, volutpat
+        et porta non, consequat ac tortor. Fusce non lorem vitae libero imperdiet convallis. Morbi
+        vestibulum viverra ligula, porttitor dapibus justo dictum ut. Pellentesque eget laoreet
+        metus. Curabitur rhoncus consectetur nulla, id imperdiet nulla pellentesque sit amet. Cras
+        sodales arcu ac orci suscipit pulvinar sollicitudin risus gravida. Praesent condimentum erat
+        sit amet ipsum tristique mattis. Cras dolor ante, hendrerit vel suscipit a, pellentesque sit
+        amet felis. Vivamus suscipit, tellus ut sollicitudin pulvinar, odio urna auctor quam, ut
+        bibendum ipsum arcu ac nibh. Phasellus sollicitudin, ipsum at pretium consectetur, arcu nisi
+        auctor quam, a lobortis erat neque viverra diam. Nam congue libero sed est gravida
+        dignissim. Nulla pulvinar condimentum diam in porta. Aenean id interdum odio. Fusce cursus
+        sagittis urna dictum scelerisque. Sed nunc massa, cursus et pharetra at, ullamcorper vel
+        est. Aliquam erat volutpat. Ut accumsan commodo lorem, gravida rutrum diam venenatis eu.
+      </p>
+
+      <ul>
+        <li>Sed lacete et nimre gravidae.</li>
+        <li>Vivete et decora petorius.</li>
+        <li>Trisatus erat deminus urna depricae.</li>
+      </ul>
+
+      <p id="p3">
+        Aliquam auctor, enim sit amet rhoncus sollicitudin, ligula nulla tempus dolor, interdum
+        blandit arcu nunc vitae mauris. Sed sed nisi diam, nec varius neque. Nunc ut sapien odio, ac
+        commodo felis. Pellentesque et odio diam. Nulla congue euismod urna ut dictum. Nam iaculis,
+        augue a imperdiet mollis, diam urna laoreet diam, a sodales tellus eros ac enim. Maecenas nibh
+        nisi, hendrerit et rhoncus quis, tempor vel nulla. Pellentesque ut odio lectus, at cursus
+        ipsum. Cras tortor nunc, euismod quis sollicitudin quis, vestibulum eu felis. Mauris at neque
+        tellus, nec hendrerit augue.
+      </p>
+
+      <pre>
+        Lorem
+          ipsum
+            dolor
+          sit
+        amet.</pre>
+
+      <h2>Nested structures</h2>
+
+      <div style="width: 40%; margin: 5px auto">
+        [Wrapper div]
+
+        <div style="margin: 8px">
+          [Outer div] Text above inner div.
+
+        <div style="margin: 8px">
+          [Inner div 1] Text inside inner div 1.
+        </div>
+
+        <div style="margin: 8px">
+          [Inner div 2] Text inside inner div 2.
+        </div>
+
+        [Outer div] Text below inner div.
+        </div>
+
+        [Wrapper div]
+      </div>
+
+
+      <h2>Table</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th><th>Nick</th><th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>John Smith</td><td>Manny</td><td>js152@aol.com</td>
+          </tr>
+          <tr>
+            <td>William Treebone</td><td>w2b</td><td>will@zol.com</td>
+          </tr>
+          <tr>
+            <td>Ted Nerd</td><td>Patchy</td><td>teddy@sol.com</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Image</h2>
+      <p>
+        <img src="http://jquery.org/wp-content/uploads/2010/01/JQuery_logo_color_onwhite-300x74.png"
+             alt="Image" />
+      </p>
+
+      <h2>Form</h2>
+      <fieldset>
+        <legend>Person</legend>
+        <form action="">
+          <p>
+            <label for="i1">First name</label>
+            <input id="i1" type="text" />
+          </p>
+          <p>
+            <label for="i2">Last name</label>
+            <input id="i2" type="text" />
+          </p>
+          <p>
+            <label for="r1">Male</label>
+            <input type="radio" id="r1" value="m" />
+
+            <label for="r2">Female</label>
+            <input type="radio" id="r2" value="f" />
+          </p>
+          <p>
+            <label for="car">Car</label>
+            <select id="car">
+              <option value="volvo">Volvo</option>
+              <option value="saab">Saab</option>
+              <option value="mercedes">Mercedes</option>
+              <option value="audi">Audi</option>
+              <option value="other">other</option>
+            </select>
+          </p>
+          <p>
+            <input type="submit" />
+            <button type="button" id="reset-btn">Reset form</button>
+          </p>
+        </form>
+      </fieldset>
+
+      <script type="text/javascript">
+        $(document).ready(function() {
+            $(document).textHighlighter();
+
+            $('#reset-btn').click(function() {
+                document.forms[0].reset();
+            });
+        });
+      </script>
+    </div>
+  </body>
+</html>
