@@ -197,8 +197,18 @@ THE SOFTWARE.
     }
 
     function getSelection() {
-        return window.getSelection
-            ? window.getSelection() : rangy.getSelection();
+        var currentWindow = window.frame ? window.frame : window;
+        var selection = null;
+
+        if (currentWindow.getSelection) {
+          selection = currentWindow.getSelection();
+        } else if (window.frame) {
+          selection = rangy.getIframeSelection($('iframe').get(0));
+        } else {
+          selection = rangy.getSelection();
+        }
+        
+        return selection;
     }
 
     function getCurrentRange() {

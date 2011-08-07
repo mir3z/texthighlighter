@@ -497,22 +497,73 @@ $(document).ready(function() {
         equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
     });
 
+    // =========================================================================
+
+    module('Iframes', {
+        setup: function() {},
+        teardown: teardown
+    });
+
+    test('Simple', function() {
+        stop();
+
+        var sandboxInitHtml = '<iframe id="frame" name="frame"></iframe>';
+        sandbox.html(sandboxInitHtml);
+
+        $('#frame').load(function() {
+            var frameWnd = window.frames['frame'];
+            var frameBody = $(this).contents().find('body');
+
+            frameBody.append('<p>Lorem ipsum dolor sit amet.</p>');
+            frameBody.textHighlighter();
+
+            equal(frameBody.attr('class'), $.fn.textHighlighter.defaults.contextClass,
+                'Context has valid class');
+
+            var txtNode = frameBody.find('p').contents().get(0);
+            var range = createRange(txtNode, txtNode, 0, 11, frameWnd);
+            var rangeExpectedText = "Lorem ipsum";
+            equal(range.toString(), rangeExpectedText, 'Range text is valid');
+
+            frameBody.trigger('mouseup');
+
+            assertHighlightsCount(1, frameBody);
+            assertHighlightedText(0, rangeExpectedText, frameBody);
+
+            start();
+        });
+
+        $('#frame').attr('src', 'about:blank');
+    });
+
+
     /********************************************************
      *
      * HELPER METHODS
      *
      *******************************************************/
 
-    function createEmptyRange() {
-        return document.createRange
-            ? document.createRange() : rangy.createRange();
+    function createEmptyRange(aWindow) {
+        var wnd = (typeof(aWindow) != 'undefined' ? aWindow : window);
+        var doc = wnd.document;
+        return doc.createRange
+            ? doc.createRange() : rangy.createRange(doc);
     }
 
-    function createRange(startContainer, endContainer, startOffset, endOffset) {
-        var range = rangy.createRange();
+    function getSelection(aWindow) {
+        var wnd = (typeof(aWindow) != 'undefined' ? aWindow : window);
+        return wnd.getSelection ? wnd.getSelection()
+             : window.frame ? rangy.getIframeSelection($('iframe').get(0))
+             : rangy.getSelection();
+    }
+
+    function createRange(startContainer, endContainer, startOffset, endOffset, aWindow) {
+        var wnd = (typeof(aWindow) != 'undefined' ? aWindow : window);
+
+        var range = createEmptyRange(wnd);
         range.setStart(startContainer, startOffset);
         range.setEnd(endContainer, endOffset);
-        rangy.getSelection().addRange(range);
+        getSelection(wnd).addRange(range);
         return range;
     }
 
@@ -552,13 +603,15 @@ $(document).ready(function() {
         equal(range.toString(), rangeTxt, 'Range text is valid');
     }
 
-    function assertHighlightsCount(count) {
-        var hls = sandbox.find('.' + $.fn.textHighlighter.defaults.highlightedClass);
+    function assertHighlightsCount(count, container) {
+        var cont = (typeof(container) != 'undefined' ? container : sandbox);
+        var hls = cont.find('.' + $.fn.textHighlighter.defaults.highlightedClass);
         equal(hls.length, count, 'Number of highlights is valid');
     }
 
-    function assertHighlightedText(index, txt) {
-        var hls = sandbox.find('.' + $.fn.textHighlighter.defaults.highlightedClass);
+    function assertHighlightedText(index, txt, container) {
+        var cont = (typeof(container) != 'undefined' ? container : sandbox);
+        var hls = cont.find('.' + $.fn.textHighlighter.defaults.highlightedClass);
         equal(hls.eq(index).text(), txt, 'Highlighted text ['+index+'] is valid');
     }
 });
