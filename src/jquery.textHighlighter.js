@@ -196,8 +196,22 @@ THE SOFTWARE.
         });
     }
 
+    function getCurrentDocument() {
+        // if ownerDocument is null then context is document
+        return context.ownerDocument ? context.ownerDocument : context;
+    }
+
+    function getCurrentWindow() {
+        var currentDoc = getCurrentDocument();
+        if (currentDoc.defaultView) {
+            return currentDoc.defaultView; // Non-IE
+        } else {
+            return currentDoc.parentWindow; // IE
+        }
+    }
+
     function getSelection() {
-        var currentWindow = window.frame ? window.frame : window;
+        var currentWindow = getCurrentWindow();
         var selection = null;
 
         if (currentWindow.getSelection) {
@@ -207,7 +221,7 @@ THE SOFTWARE.
         } else {
           selection = rangy.getSelection();
         }
-        
+
         return selection;
     }
 
