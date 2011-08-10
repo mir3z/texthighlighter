@@ -28,9 +28,9 @@ THE SOFTWARE.
         init : function(opts) {
             context = this;
             options = $.extend({}, $.fn.textHighlighter.defaults, opts);
+            saveState();
 
             $(context).addClass(options.contextClass);
-
             bindEvents();
         },
         destroy : function() {
@@ -43,19 +43,30 @@ THE SOFTWARE.
         TEXT_NODE: 3
     };
 
+    function saveState() {
+        $(context).data('textHighlighter', options);
+    }
+
+    function restoreState(ctx) {
+        context = ctx
+        options = $(context).data('textHighlighter');
+    }
+
     function bindEvents() {
-        $(context).mouseup(foo);
+        $(context).mouseup(doHighlight);
     }
 
     function unbindEvents() {
-        $(context).unbind('mouseup', foo);
+        $(context).unbind('mouseup', doHighlight);
     }
 
     function teardown() {
         $(context).removeClass(options.contextClass);
     }
 
-    function foo() {
+    function doHighlight() {
+        restoreState(this);
+
         var range = getCurrentRange();
         if (!range || range.collapsed) return;
 
@@ -216,8 +227,13 @@ THE SOFTWARE.
 
         if (currentWindow.getSelection) {
           selection = currentWindow.getSelection();
-        } else if (window.frame) {
-          selection = rangy.getIframeSelection($('iframe').get(0));
+        } else if ($('iframe').length > 0) {
+          $('iframe', top.document).each(function() {
+            if (this.contentWindow === currentWindow) {
+              selection = rangy.getIframeSelection(this);
+              return false;
+            }
+          });
         } else {
           selection = rangy.getSelection();
         }
@@ -263,8 +279,6 @@ THE SOFTWARE.
         color: '#ffff7b',
         highlightedClass: 'highlighted',
         contextClass: 'highlighter-context',
-        normalizeHighlights: true,
-        beforeHighlight: function() {},
-        afterHighlight: function() {}
+        normalizeHighlights: true
     };
 })(jQuery);

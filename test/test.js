@@ -536,6 +536,49 @@ $(document).ready(function() {
         $('#frame').attr('src', 'about:blank');
     });
 
+    // =========================================================================
+
+    module('', {
+        setup: function() {},
+        teardown: function() {}
+    });
+
+    test('Multiple instances', function() {
+        var sandboxInitHtml = '<p id="p1">Lorem ipsum</p><p id="p2">dolor sit amet.</p>';
+        sandbox.html(sandboxInitHtml);
+
+        sandbox.children("#p1").textHighlighter({
+            color: '#FF6666'
+        });
+        sandbox.children("#p2").textHighlighter({
+            color: '#66FF66'
+        });
+
+        var range1 = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 5);
+        var range1ExpectedText = 'Lorem';
+        equal(range1.toString(), range1ExpectedText, 'Range 1 text is valid');
+        sandbox.children("#p1").trigger('mouseup');
+
+        var range2 = createRange(sandbox.textNodes().get(2), sandbox.textNodes().get(2), 0, 5);
+        var range2ExpectedText = 'dolor';
+        equal(range2.toString(), range2ExpectedText, 'Range 2 text is valid');
+        sandbox.children("#p2").trigger('mouseup');
+
+        assertHighlightsCount(2);
+        assertHighlightedText(0, range1ExpectedText);
+        assertHighlightedText(1, range2ExpectedText);
+
+        var color1 = $('span.' + $.fn.textHighlighter.defaults.highlightedClass)
+            .eq(0).css('backgroundColor');
+        var color2 = $('span.' + $.fn.textHighlighter.defaults.highlightedClass)
+            .eq(1).css('backgroundColor');
+
+        notEqual(color1, color2, "Colors are not equal");
+
+        sandbox.textHighlighter('destroy');
+        sandbox.empty();
+    });
+
 
     /********************************************************
      *
