@@ -49,7 +49,7 @@ $(document).ready(function() {
         }, 'Method does not exist');
     });
 
-    test('Creating wrapper', function() {
+    test('Creating default wrapper', function() {
         var wrapper = $.fn.textHighlighter.createWrapper($.fn.textHighlighter.defaults);
         var wrapperColor = wrapper.css('background-color')
             || wrapper.get(0).style.backgroundColor;
@@ -64,6 +64,25 @@ $(document).ready(function() {
         teardown();
     });
 
+    test('Creating custom wrapper', function() {
+        setup();
+        var defaultWrapper = $.fn.textHighlighter.createWrapper;
+        $.fn.textHighlighter.createWrapper = function() {
+            return $('<span>').addClass('custom-wrapper');
+        };
+
+        var nodeTxt = 'Lorem ipsum dolor sit amet.';
+        var rangeTxt = 'ipsum';
+        var nodeWithRange = createTextNodeWithRange(nodeTxt, rangeTxt);
+
+        sandbox.trigger('mouseup');
+
+        equal(sandbox.children('span').length, 1, 'Number of highlights is valid');
+        equal(sandbox.children('span').attr('class'), 'custom-wrapper',
+              'Highlight class is valid');
+        teardown();
+        $.fn.textHighlighter.createWrapper = defaultWrapper;
+    });
     // =========================================================================
 
     module('Highlighting plain range', {

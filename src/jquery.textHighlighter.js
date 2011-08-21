@@ -25,7 +25,7 @@ THE SOFTWARE.
     var context = null;
     var options = {};
     var methods = {
-        init : function(opts) {
+        init: function(opts) {
             context = this;
             options = $.extend({}, $.fn.textHighlighter.defaults, opts);
             saveState();
@@ -75,7 +75,6 @@ THE SOFTWARE.
         var createdHighlights = highlightRange(range, wrapper);
 
         if (options.normalizeHighlights) {
-            // FIXME: Chyba można lepiej
             var normalizationContainer =
                 range.commonAncestorContainer.nodeType == nodeTypes.TEXT_NODE ?
                 range.commonAncestorContainer.parentNode.parentNode :
@@ -89,7 +88,7 @@ THE SOFTWARE.
     function highlightRange(range, wrapper) {
         if (range.collapsed) return;
 
-        // Don't highlight these tags
+        // Don't highlight content of these tags
         var ignoreTags = ['SCRIPT', 'STYLE', 'SELECT', 'BUTTON', 'OBJECT', 'APPLET'];
         var startContainer = range.startContainer;
         var endContainer = range.endContainer;
@@ -148,7 +147,7 @@ THE SOFTWARE.
             } else if (node.nextSibling != null) {
                 node = node.nextSibling;
                 goDeeper = true;
-            } else if (node.nextSibling == null) {
+            } else {
                 node = node.parentNode;
                 goDeeper = false;
             }
