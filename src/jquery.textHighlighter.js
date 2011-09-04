@@ -33,9 +33,13 @@ THE SOFTWARE.
             $(context).addClass(options.contextClass);
             bindEvents();
         },
-        destroy : function() {
+        destroy: function() {
             unbindEvents();
             teardown();
+        },
+        removeHighlights: function(element) {
+            var container = (element != undefined ? element : context);
+            removeHighlights(container);
         }
     }
     var nodeTypes = {
@@ -48,12 +52,19 @@ THE SOFTWARE.
     }
 
     function restoreState(ctx) {
-        context = ctx
+        context = ctx;
         options = $(context).data('textHighlighter');
     }
 
     function bindEvents() {
         $(context).mouseup(doHighlight);
+    }
+
+    function onRemoveHighlightHandler() {
+        var currentHighlight = this;
+        if (options.onRemoveHighlight(currentHighlight) == true) {
+            removeHighlights(currentHighlight);
+        }
     }
 
     function unbindEvents() {
@@ -206,6 +217,43 @@ THE SOFTWARE.
         });
     }
 
+    function getAllHighlights(container, andSelf) {
+        var classSelectorStr = '.' + options.highlightedClass;
+        var highlights = $(container).find(classSelectorStr);
+        if (andSelf == true && $(container).hasClass(options.highlightedClass)) {
+            highlights = highlights.add(container);
+        }
+        return highlights;
+    }
+
+    function removeHighlights(container) {
+        var unwrapHighlight = function(highlight) {
+            return $(highlight).contents().unwrap().get(0);
+        };
+
+        var mergeSiblingTextNodes = function(textNode) {
+            var prev = textNode.previousSibling;
+            var next = textNode.nextSibling;
+
+            if (prev && prev.nodeType == nodeTypes.TEXT_NODE) {
+                textNode.nodeValue = prev.nodeValue + textNode.nodeValue;
+                prev.parentNode.removeChild(prev);
+            }
+            if (next && next.nodeType == nodeTypes.TEXT_NODE) {
+                textNode.nodeValue = textNode.nodeValue + next.nodeValue;
+                next.parentNode.removeChild(next);
+            }
+        };
+
+        var highlights = getAllHighlights(container, true);
+        highlights.each(function() {
+            if (options.onRemoveHighlight(this) == true) {
+                var textNode = unwrapHighlight(this);
+                mergeSiblingTextNodes(textNode);
+            }
+        });
+    }
+
     function getCurrentDocument() {
         // if ownerDocument is null then context is document
         return context.ownerDocument ? context.ownerDocument : context;
@@ -278,6 +326,7 @@ THE SOFTWARE.
         color: '#ffff7b',
         highlightedClass: 'highlighted',
         contextClass: 'highlighter-context',
-        normalizeHighlights: true
+        normalizeHighlights: true,
+        onRemoveHighlight: function() { return true },
     };
 })(jQuery);

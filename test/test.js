@@ -32,9 +32,10 @@ $(document).ready(function() {
 
     test('Destroying', function() {
         sandbox.textHighlighter();
+        var attachedEvents = $.data(sandbox.get(0), 'events');
         sandbox.textHighlighter('destroy');
 
-        var attachedEvents = $.data(sandbox.get(0), 'events');
+        attachedEvents = $.data(sandbox.get(0), 'events');
         ok(attachedEvents === undefined, 'Event handlers are detached');
 
         var defaultContextClass = $.fn.textHighlighter.defaults.contextClass
@@ -598,6 +599,157 @@ $(document).ready(function() {
         sandbox.empty();
     });
 
+    // =========================================================================
+
+    module('Removing highlights', {
+        setup: setup,
+        teardown: teardown
+    });
+
+    test('Simple', function() {
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append('Lorem ')
+            .append($('<span>ipsum</span>').addClass(c))
+            .append(' dolor sit amet.')
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        sandbox.textHighlighter('removeHighlights', sandbox);
+
+        assertHighlightsCount(0);
+        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(1, sandbox);
+    });
+
+    test('Highlight at the beginning', function() {
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append($('<span>Lorem</span>').addClass(c))
+            .append(' ipsum dolor sit amet.');
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        sandbox.textHighlighter('removeHighlights', sandbox);
+
+        assertHighlightsCount(0);
+        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(1, sandbox);
+    });
+
+    test('Highlight at the end', function() {
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append('Lorem ipsum dolor sit ')
+            .append($('<span>amet.</span>').addClass(c));
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        sandbox.textHighlighter('removeHighlights', sandbox);
+
+        assertHighlightsCount(0);
+        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(1, sandbox);
+    });
+
+    test('Multiple highlights', function() {
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append($('<span>Lorem</span>').addClass(c))
+            .append(' ipsum ')
+            .append($('<span>dolor</span>').addClass(c))
+            .append(' sit ')
+            .append($('<span>amet.</span>').addClass(c));
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        sandbox.textHighlighter('removeHighlights', sandbox);
+
+        assertHighlightsCount(0);
+        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(1, sandbox);
+    });
+
+    test('Removing specific highlight', function() {
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append('Lorem ')
+            .append($('<span>ipsum</span>').addClass(c))
+            .append(' dolor sit amet.')
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        sandbox.textHighlighter('removeHighlights', sandbox.find('span'));
+
+        assertHighlightsCount(0);
+        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(1, sandbox);
+    });
+
+    // =========================================================================
+
+    module('Events and callbacks', {
+        setup: function() {},
+        teardown: teardown
+    });
+
+    test('onRemoveHighlight handler returns true', function() {
+        sandbox.textHighlighter({
+            onRemoveHighlight: function() {
+                return true;
+            }
+        });
+
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append($('<span>Lorem</span>').addClass(c))
+            .append(' ipsum ')
+            .append($('<span>dolor</span>').addClass(c))
+            .append(' sit ')
+            .append($('<span>amet.</span>').addClass(c));
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        sandbox.textHighlighter('removeHighlights');
+
+        assertHighlightsCount(0);
+        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(1, sandbox);
+    });
+
+    test('onRemoveHighlight handler returns false', function() {
+        sandbox.textHighlighter({
+            onRemoveHighlight: function() {
+                return false;
+            }
+        });
+
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append($('<span>Lorem</span>').addClass(c))
+            .append(' ipsum ')
+            .append($('<span>dolor</span>').addClass(c))
+            .append(' sit ')
+            .append($('<span>amet.</span>').addClass(c));
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        sandbox.textHighlighter('removeHighlights');
+
+        assertHighlightsCount(3);
+        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+    });
+
+    test('onRemoveHighlight param passing', function() {
+        var hlExpectedText = "Lorem ipsum";
+
+        sandbox.textHighlighter({
+            onRemoveHighlight: function(hl) {
+                equal($(hl).text(), hlExpectedText, 'Passed highlight is valid');
+            }
+        });
+
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append($('<span>'+ hlExpectedText+ '</span>').addClass(c))
+            .append(' dolor sit amet.')
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        sandbox.textHighlighter('removeHighlights');
+    });
 
     /********************************************************
      *
@@ -669,6 +821,15 @@ $(document).ready(function() {
         var cont = (typeof(container) != 'undefined' ? container : sandbox);
         var hls = cont.find('.' + $.fn.textHighlighter.defaults.highlightedClass);
         equal(hls.length, count, 'Number of highlights is valid');
+    }
+
+    function assertTextNodesCount(count, container) {
+        var txtNodes = $(container)
+            .contents()
+            .filter(function() {
+                return this.nodeType == Node.TEXT_NODE;
+            });
+        equal(txtNodes.length, count, 'Number of text nodes is valid');
     }
 
     function assertHighlightedText(index, txt, container) {
