@@ -827,7 +827,7 @@ $(document).ready(function() {
         var txtNodes = $(container)
             .contents()
             .filter(function() {
-                return this.nodeType == Node.TEXT_NODE;
+                return this.nodeType == 3;
             });
         equal(txtNodes.length, count, 'Number of text nodes is valid');
     }

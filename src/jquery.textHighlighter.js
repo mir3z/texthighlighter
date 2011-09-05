@@ -327,6 +327,6 @@ THE SOFTWARE.
         highlightedClass: 'highlighted',
         contextClass: 'highlighter-context',
         normalizeHighlights: true,
-        onRemoveHighlight: function() { return true },
+        onRemoveHighlight: function() { return true }
     };
 })(jQuery);
