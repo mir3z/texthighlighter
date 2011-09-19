@@ -213,11 +213,7 @@
                 }
             });
 
-            $(document).textHighlighter({
-                onRemoveHighlight: function() {
-                    return confirm("Are you sure?");
-                }
-            });
+            $(document).textHighlighter();
 
             $('#reset-btn').click(function() {
                 document.forms[0].reset();

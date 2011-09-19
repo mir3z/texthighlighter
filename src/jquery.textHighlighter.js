@@ -60,13 +60,6 @@ THE SOFTWARE.
         $(context).mouseup(doHighlight);
     }
 
-    function onRemoveHighlightHandler() {
-        var currentHighlight = this;
-        if (options.onRemoveHighlight(currentHighlight) == true) {
-            removeHighlights(currentHighlight);
-        }
-    }
-
     function unbindEvents() {
         $(context).unbind('mouseup', doHighlight);
     }
@@ -81,16 +74,13 @@ THE SOFTWARE.
         var range = getCurrentRange();
         if (!range || range.collapsed) return;
 
-        var wrapper = $.fn.textHighlighter.createWrapper(options);
+        if (options.onBeforeHighlight(range) == true) {
+            var wrapper = $.fn.textHighlighter.createWrapper(options);
 
-        var createdHighlights = highlightRange(range, wrapper);
+            var createdHighlights = highlightRange(range, wrapper);
+            var normalizedHighlights = normalizeHighlights(createdHighlights);
 
-        if (options.normalizeHighlights) {
-            var normalizationContainer =
-                range.commonAncestorContainer.nodeType == nodeTypes.TEXT_NODE ?
-                range.commonAncestorContainer.parentNode.parentNode :
-                range.commonAncestorContainer.parentNode;
-            normalizeHighlights(normalizationContainer);
+            options.onAfterHighlight(normalizedHighlights);
         }
 
         removeAllRanges();
@@ -139,9 +129,9 @@ THE SOFTWARE.
         do {
             if (goDeeper && node.nodeType == nodeTypes.TEXT_NODE) {
                 if(/\S/.test(node.nodeValue)) {
-                    var rawWrapper = wrapper.get(0);
-                    $(node).wrap(rawWrapper);
-                    highlights.push(rawWrapper);
+                    var rawWrapper = wrapper.clone(true).get(0);
+                    var highlight = $(node).wrap(rawWrapper).parent().get(0);
+                    highlights.push(highlight);
                 }
 
                 goDeeper = false;
@@ -167,13 +157,15 @@ THE SOFTWARE.
         return highlights;
     }
 
-    function normalizeHighlights(container) {
-        var highlightsToNormalize = $(container).find('.' + options.highlightedClass);
+    function normalizeHighlights(highlights) {
+        flattenNestedHighlights(highlights);
+        mergeSiblingHighlights(highlights);
 
-        if (highlightsToNormalize.length > 1) {
-            flattenNestedHighlights(highlightsToNormalize);
-            mergeSiblingHighlights(highlightsToNormalize);
-        }
+        var normalizedHighlights = $.map(highlights, function(hl) {
+            return hl.parentNode != null ? hl : null; // omit removed nodes
+        });
+
+        return normalizedHighlights;
     }
 
     function flattenNestedHighlights(highlights) {
@@ -187,7 +179,7 @@ THE SOFTWARE.
 
                 parent.empty();
                 parent.append(newNode);
-                highlights[i] = undefined;
+                $(highlights[i]).remove();
             }
         });
     }
@@ -326,7 +318,8 @@ THE SOFTWARE.
         color: '#ffff7b',
         highlightedClass: 'highlighted',
         contextClass: 'highlighter-context',
-        normalizeHighlights: true,
-        onRemoveHighlight: function() { return true }
+        onRemoveHighlight: function() { return true },
+        onBeforeHighlight: function() { return true },
+        onAfterHighlight: function() { }
     };
 })(jQuery);

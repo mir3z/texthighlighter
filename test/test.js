@@ -751,6 +751,77 @@ $(document).ready(function() {
         sandbox.textHighlighter('removeHighlights');
     });
 
+    test('onBeforeHighlight returns true', function() {
+        sandbox.textHighlighter({
+            onBeforeHighlight: function() {
+                return true;
+            }
+        });
+
+        var sandboxInitText = 'Lorem ipsum dolor sit amet.';
+
+        sandbox.html(sandboxInitText);
+        createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 5);
+
+        sandbox.trigger('mouseup');
+
+        assertHighlightsCount(1);
+        assertHighlightedText(0, 'Lorem');
+    });
+
+    test('onBeforeHighlight returns false', function() {
+        sandbox.textHighlighter({
+            onBeforeHighlight: function() {
+                return false;
+            }
+        });
+
+        var sandboxInitText = 'Lorem ipsum dolor sit amet.';
+
+        sandbox.html(sandboxInitText);
+        createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 5);
+
+        sandbox.trigger('mouseup');
+
+        assertHighlightsCount(0);
+    });
+
+    test('onBeforeHighlight param passing', function() {
+        var rangeExpectedText = 'Lorem';
+
+        sandbox.textHighlighter({
+            onBeforeHighlight: function(range) {
+                equal(range.toString(), rangeExpectedText, 'Passed range is valid');
+            }
+        });
+
+        var sandboxInitText = 'Lorem ipsum dolor sit amet.';
+
+        sandbox.html(sandboxInitText);
+        createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 5);
+
+        sandbox.trigger('mouseup');
+    });
+
+    test('onAfterHighlight', function() {
+        sandbox.textHighlighter({
+            onAfterHighlight: function(hls) {
+                equal(hls.length, 1, 'Highlights length is valid');
+                equal($(hls[0]).text(), 'ipsum dolor sit amet.', 'Text is valid');
+            }
+        });
+
+        var c = $.fn.textHighlighter.defaults.highlightedClass;
+        sandbox
+            .append('Lorem ipsum ')
+            .append($('<span>dolor sit amet.</span>').addClass(c));
+        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
+
+        createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(1), 6, 5);
+        sandbox.trigger('mouseup');
+    });
+
+
     /********************************************************
      *
      * HELPER METHODS
