@@ -37,6 +37,13 @@ THE SOFTWARE.
             unbindEvents();
             teardown();
         },
+        setColor: function(color) {
+            options.color = color;
+            saveState();
+        },
+        getColor: function() {
+            return options.color;
+        },
         removeHighlights: function(element) {
             var container = (element != undefined ? element : context);
             removeHighlights(container);
@@ -297,15 +304,13 @@ THE SOFTWARE.
     $.fn.textHighlighter = function(method) {
         var args = arguments;
 
-        return this.each(function() {
-            if (methods[method]) {
-                return methods[method].apply(this, Array.prototype.slice.call(args, 1));
-            } else if (typeof method === 'object' || !method) {
-                return methods.init.apply(this, args);
-            } else {
-                $.error('Method ' +  method + ' does not exist on jQuery.textHighlighter');
-            }
-        });
+        if (methods[method]) {
+            return methods[method].apply(this, Array.prototype.slice.call(args, 1));
+        } else if (typeof method === 'object' || !method) {
+            return methods.init.apply(this, args);
+        } else {
+            $.error('Method ' +  method + ' does not exist on jQuery.textHighlighter');
+        }
     };
 
     $.fn.textHighlighter.createWrapper = function(opts) {

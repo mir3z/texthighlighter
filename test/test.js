@@ -50,6 +50,24 @@ $(document).ready(function() {
         }, 'Method does not exist');
     });
 
+    test('Set/Get color', function() {
+        sandbox.textHighlighter();
+        var color = '#ff0000';
+
+        sandbox.textHighlighter('setColor', color);
+        equal(sandbox.textHighlighter('getColor'), color, 'getColor is valid');
+
+        var nodeTxt = 'Lorem ipsum dolor sit amet.';
+        var rangeTxt = 'ipsum';
+        var nodeWithRange = createTextNodeWithRange(nodeTxt, rangeTxt);
+
+        sandbox.trigger('mouseup');
+
+        assertHighlightsCount(1);
+        var hl = sandbox.children("." + $.fn.textHighlighter.defaults.highlightedClass);
+        equal(rgb2hex(hl.css('background-color')), color, 'Highlight color is valid');
+    });
+
     test('Creating default wrapper', function() {
         var wrapper = $.fn.textHighlighter.createWrapper($.fn.textHighlighter.defaults);
         var wrapperColor = wrapper.css('background-color')
