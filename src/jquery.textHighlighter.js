@@ -272,16 +272,16 @@ THE SOFTWARE.
         var selection = null;
 
         if (currentWindow.getSelection) {
-          selection = currentWindow.getSelection();
+            selection = currentWindow.getSelection();
         } else if ($('iframe').length > 0) {
-          $('iframe', top.document).each(function() {
-            if (this.contentWindow === currentWindow) {
-              selection = rangy.getIframeSelection(this);
-              return false;
-            }
-          });
+            $('iframe', top.document).each(function() {
+                if (this.contentWindow === currentWindow) {
+                    selection = rangy.getIframeSelection(this);
+                    return false;
+                }
+            });
         } else {
-          selection = rangy.getSelection();
+            selection = rangy.getSelection();
         }
 
         return selection;

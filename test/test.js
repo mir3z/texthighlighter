@@ -109,9 +109,7 @@ $(document).ready(function() {
         teardown: teardown
     });
 
-    test('Simple range in the middle of the container', function() {
-        var nodeTxt = 'Lorem ipsum dolor sit amet.';
-        var rangeTxt = 'ipsum';
+    function testHighlightingPlainRange(nodeTxt, rangeTxt) {
         var nodeWithRange = createTextNodeWithRange(nodeTxt, rangeTxt);
 
         assertTextNodeWithRange(nodeWithRange.node, nodeWithRange.range, nodeTxt, rangeTxt);
@@ -120,45 +118,30 @@ $(document).ready(function() {
 
         assertHighlightsCount(1);
         assertHighlightedText(0, rangeTxt);
+    }
+
+    test('Simple range in the middle of the container', function() {
+        var nodeTxt = 'Lorem ipsum dolor sit amet.';
+        var rangeTxt = 'ipsum';
+        testHighlightingPlainRange(nodeTxt, rangeTxt);
     });
 
     test('Simple range at the beginning of the container', function() {
         var nodeTxt = 'Lorem ipsum dolor sit amet.';
         var rangeTxt = 'Lorem';
-        var nodeWithRange = createTextNodeWithRange(nodeTxt, rangeTxt);
-
-        assertTextNodeWithRange(nodeWithRange.node, nodeWithRange.range, nodeTxt, rangeTxt);
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(1);
-        assertHighlightedText(0, rangeTxt);
+        testHighlightingPlainRange(nodeTxt, rangeTxt);
     });
 
     test('Simple range at the end of the container', function() {
         var nodeTxt = 'Lorem ipsum dolor sit amet.';
         var rangeTxt = 'amet.';
-        var nodeWithRange = createTextNodeWithRange(nodeTxt, rangeTxt);
-
-        assertTextNodeWithRange(nodeWithRange.node, nodeWithRange.range, nodeTxt, rangeTxt);
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(1);
-        assertHighlightedText(0, rangeTxt);
+        testHighlightingPlainRange(nodeTxt, rangeTxt);
     });
 
     test('Maximal range within the container', function() {
         var nodeTxt = 'Lorem ipsum dolor sit amet.';
         var rangeTxt = nodeTxt;
-        var nodeWithRange = createTextNodeWithRange(nodeTxt, rangeTxt);
-
-        assertTextNodeWithRange(nodeWithRange.node, nodeWithRange.range, nodeTxt, rangeTxt);
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(1);
-        assertHighlightedText(0, rangeTxt);
+        testHighlightingPlainRange(nodeTxt, rangeTxt);
     });
 
     test('Only whitespace range', function() {
@@ -180,162 +163,144 @@ $(document).ready(function() {
         teardown: teardown
     });
 
-    // Lorem |ipsum <b>dolor| sit</b> amet.
-    test('Lorem |ipsum &lt;b&gt;dolor| sit&lt;/b&gt; amet.', function() {
-        var sandboxInitHtml = 'Lorem ipsum <b>dolor sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(1), 6, 5);
-        equal(range.toString(), 'ipsum dolor', 'Range text is valid');
+    function testHighlightingInNestedStructures(args) {
+        console.log(args);
+        sandbox.html(args.sandboxInitHtml);
+        var range = createRange(sandbox.textNodes().get(args.startContainer),
+                                sandbox.textNodes().get(args.endContainer),
+                                args.startOffset, args.endOffset);
+        equal(range.toString(), args.expectedRange, 'Range text is valid');
 
         sandbox.trigger('mouseup');
 
-        assertHighlightsCount(2);
-        assertHighlightedText(0, 'ipsum ');
-        assertHighlightedText(1, 'dolor');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        assertHighlights(args.expectedHighlights);
+        ok(sandbox.text() == args.sandboxExpectedText, 'Sandbox text is valid');
+    }
+
+    // Lorem |ipsum <b>dolor| sit</b> amet.
+    test('Lorem |ipsum &lt;b&gt;dolor| sit&lt;/b&gt; amet.', function() {
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem ipsum <b>dolor sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 0,
+            endContainer: 1,
+            startOffset: 6,
+            endOffset: 5,
+            expectedRange: 'ipsum dolor',
+            expectedHighlights: ['ipsum ', 'dolor']
+        });
     });
 
     // Lorem ipsum <b>dolor |sit</b> amet.|
     test('Lorem ipsum &lt;b&gt;dolor |sit&lt;/b&gt; amet.|', function() {
-        var sandboxInitHtml = 'Lorem ipsum <b>dolor sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(1), sandbox.textNodes().get(2), 6, 6);
-        equal(range.toString(), 'sit amet.', 'Range text is valid');
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(2);
-        assertHighlightedText(0, 'sit');
-        assertHighlightedText(1, ' amet.');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem ipsum <b>dolor sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 1,
+            endContainer: 2,
+            startOffset: 6,
+            endOffset: 6,
+            expectedRange: 'sit amet.',
+            expectedHighlights: ['sit', ' amet.']
+        });
     });
 
     // Lorem ipsum |<b>dolor sit</b>| amet.
     test('Lorem ipsum |&lt;b&gt;dolor sit&lt;/b&gt;| amet.', function() {
-        var sandboxInitHtml = 'Lorem ipsum <b>dolor sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(2), 12, 0);
-        equal(range.toString(), 'dolor sit', 'Range text is valid');
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(1);
-        assertHighlightedText(0, 'dolor sit');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem ipsum <b>dolor sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 0,
+            endContainer: 2,
+            startOffset: 12,
+            endOffset: 0,
+            expectedRange: 'dolor sit',
+            expectedHighlights: ['dolor sit']
+        });
     });
 
     // |Lorem ipsum <b>dolor sit</b> amet.|
     test('|Lorem ipsum &lt;b&gt;dolor sit&lt;/b&gt; amet.|', function() {
-        var sandboxInitHtml = 'Lorem ipsum <b>dolor sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(2), 0, 6);
-        equal(range.toString(), 'Lorem ipsum dolor sit amet.', 'Range text is valid');
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(3);
-        assertHighlightedText(0, 'Lorem ipsum ');
-        assertHighlightedText(1, 'dolor sit');
-        assertHighlightedText(2, ' amet.');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem ipsum <b>dolor sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 0,
+            endContainer: 2,
+            startOffset: 0,
+            endOffset: 6,
+            expectedRange: 'Lorem ipsum dolor sit amet.',
+            expectedHighlights: ['Lorem ipsum ', 'dolor sit', ' amet.']
+        });
     });
 
     // Lorem <b>ip|sum</b> dolor <b>si|t</b> amet.
     test('Lorem &lt;b&gt;ip|sum&lt;/b&gt; dolor &lt;b&gt;si|t&lt;/b&gt; amet.', function() {
-        var sandboxInitHtml = 'Lorem <b>ipsum</b> dolor <b>sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(1), sandbox.textNodes().get(3), 2, 2);
-        equal(range.toString(), 'sum dolor si', 'Range text is valid');
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(3);
-        assertHighlightedText(0, 'sum');
-        assertHighlightedText(1, ' dolor ');
-        assertHighlightedText(2, 'si');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem <b>ipsum</b> dolor <b>sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 1,
+            endContainer: 3,
+            startOffset: 2,
+            endOffset: 2,
+            expectedRange: 'sum dolor si',
+            expectedHighlights: ['sum', ' dolor ', 'si']
+        });
     });
 
     // Lorem <b>ipsum|</b> dolor <b>|sit</b> amet.
     test('Lorem &lt;b&gt;ipsum|&lt;/b&gt dolor &lt;b&gt;|sit&lt;/b&gt amet.', function() {
-        var sandboxInitHtml = 'Lorem <b>ipsum</b> dolor <b>sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(1), sandbox.textNodes().get(3), 5, 0);
-        equal(range.toString(), ' dolor ', 'Range text is valid');
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(1);
-        assertHighlightedText(0, ' dolor ');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem <b>ipsum</b> dolor <b>sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 1,
+            endContainer: 3,
+            startOffset: 5,
+            endOffset: 0,
+            expectedRange: ' dolor ',
+            expectedHighlights: [' dolor ']
+        });
     });
 
     // |Lorem <b>ipsum</b> dolor <b>sit</b> amet.|
     test('|Lorem &lt;b&gt;ipsum&lt;/b&gt; dolor &lt;b&gt;sit&lt;/b&gt; amet.|', function() {
-        var sandboxInitHtml = 'Lorem <b>ipsum</b> dolor <b>sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(4), 0, 6);
-        equal(range.toString(), 'Lorem ipsum dolor sit amet.', 'Range text is valid');
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(5);
-        assertHighlightedText(0, 'Lorem ');
-        assertHighlightedText(1, 'ipsum');
-        assertHighlightedText(2, ' dolor ');
-        assertHighlightedText(3, 'sit');
-        assertHighlightedText(4, ' amet.');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem <b>ipsum</b> dolor <b>sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 0,
+            endContainer: 4,
+            startOffset: 0,
+            endOffset: 6,
+            expectedRange: 'Lorem ipsum dolor sit amet.',
+            expectedHighlights: ['Lorem ', 'ipsum', ' dolor ', 'sit', ' amet.']
+        });
     });
 
     // |Lorem <b>ipsum <i>dolor|</i> sit</b> amet.
     test('|Lorem &lt;b&gt;ipsum &lt;i&gt;dolor|&lt;/i&gt; sit&lt;/b&gt; amet.', function() {
-        var sandboxInitHtml = 'Lorem <b>ipsum <i>dolor</i> sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(2), 0, 5);
-        equal(range.toString(), 'Lorem ipsum dolor', 'Range text is valid');
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(3);
-        assertHighlightedText(0, 'Lorem ');
-        assertHighlightedText(1, 'ipsum ');
-        assertHighlightedText(2, 'dolor');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem <b>ipsum <i>dolor</i> sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 0,
+            endContainer: 2,
+            startOffset: 0,
+            endOffset: 5,
+            expectedRange: 'Lorem ipsum dolor',
+            expectedHighlights: ['Lorem ', 'ipsum ', 'dolor']
+        });
     });
 
     // Lorem <b>ipsum <i>|dolor</i> sit</b> amet.|
     test('Lorem &lt;b&gt;ipsum &lt;i&gt;|dolor&lt;/i&gt; sit&lt;/b&gt; amet.|', function() {
-        var sandboxInitHtml = 'Lorem <b>ipsum <i>dolor</i> sit</b> amet.';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(2), sandbox.textNodes().get(4), 0, 6);
-        equal(range.toString(), 'dolor sit amet.', 'Range text is valid');
-
-        sandbox.trigger('mouseup');
-
-        assertHighlightsCount(3);
-        assertHighlightedText(0, 'dolor');
-        assertHighlightedText(1, ' sit');
-        assertHighlightedText(2, ' amet.');
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        testHighlightingInNestedStructures({
+            sandboxInitHtml: 'Lorem <b>ipsum <i>dolor</i> sit</b> amet.',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            startContainer: 2,
+            endContainer: 4,
+            startOffset: 0,
+            endOffset: 6,
+            expectedRange: 'dolor sit amet.',
+            expectedHighlights: ['dolor', ' sit', ' amet.']
+        });
     });
 
     // =========================================================================
@@ -355,9 +320,7 @@ $(document).ready(function() {
 
         sandbox.trigger('mouseup');
 
-        assertHighlightsCount(2);
-        assertHighlightedText(0, 'Lorem ');
-        assertHighlightedText(1, ' dolor.');
+        assertHighlights(['Lorem ', ' dolor.']);
         ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
     });
 
@@ -375,9 +338,7 @@ $(document).ready(function() {
 
         sandbox.trigger('mouseup');
 
-        assertHighlightsCount(2);
-        assertHighlightedText(0, 'Lorem ');
-        assertHighlightedText(1, 'ipsum');
+        assertHighlights(['Lorem ', 'ipsum']);
         ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
     });
 
@@ -395,9 +356,7 @@ $(document).ready(function() {
 
         sandbox.trigger('mouseup');
 
-        assertHighlightsCount(2);
-        assertHighlightedText(0, 'ipsum');
-        assertHighlightedText(1, ' dolor.');
+        assertHighlights(['ipsum', ' dolor.']);
         ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
     });
 
@@ -414,125 +373,159 @@ $(document).ready(function() {
      * (..) - third highlight
      */
 
+    function testNormalization(args) {
+        sandbox.html(args.sandboxInitHtml);
+
+        $.each(args.highlights, function(index, hl) {
+            var range = createRange(sandbox.textNodes().get(hl.startContainer),
+                                    sandbox.textNodes().get(hl.endContainer),
+                                    hl.startOffset, hl.endOffset);
+            var rangeRangeExpectedText = hl.rangeExpectedText;
+            equal(range.toString(), hl.rangeExpectedText, 'Range ' + index + ' text is valid');
+            sandbox.trigger('mouseup');
+            assertHighlights(hl.expectedHighlights);
+            return true;
+        });
+
+        equal(sandbox.text(), args.sandboxExpectedText, 'Sandbox text is valid');
+    }
+
     // <p>Lorem [ipsum {dolor} sit] amet.</p>
     test('&lt;p&gt;Lorem [ipsum {dolor} sit] amet.&lt;/p&gt;', function() {
-        var sandboxInitHtml = '<p>Lorem ipsum dolor sit amet.</p>';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-        sandbox.html(sandboxInitHtml);
-
-        var outerRange = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 6, 21);
-        var outerRangeExpectedText = 'ipsum dolor sit';
-        equal(outerRange.toString(), outerRangeExpectedText, 'Outer range text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, outerRangeExpectedText);
-
-        var innerRange = createRange(sandbox.textNodes().get(1), sandbox.textNodes().get(1), 6, 11);
-        var innerRangeExpectedText = 'dolor';
-        equal(innerRange.toString(), innerRangeExpectedText, 'Inner range text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, outerRangeExpectedText);
-
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        testNormalization({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 21,
+                    rangeExpectedText: 'ipsum dolor sit',
+                    expectedHighlights: ['ipsum dolor sit'],
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 1,
+                    startOffset: 6,
+                    endOffset: 11,
+                    rangeExpectedText: 'dolor',
+                    expectedHighlights: ['ipsum dolor sit']
+                }
+            ]
+        });
     });
 
     // <p>Lorem {ipsum [dolor] sit} amet.</p>
     test('&lt;p&gt;Lorem {ipsum [dolor] sit} amet.&lt;/p&gt;', function() {
-        var sandboxInitHtml = '<p>Lorem ipsum dolor sit amet.</p>';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-        sandbox.html(sandboxInitHtml);
-
-        var innerRange = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 12, 17);
-        var innerRangeExpectedText = 'dolor';
-        equal(innerRange.toString(), innerRangeExpectedText, 'Inner range text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, innerRangeExpectedText);
-
-        var outerRange = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(2), 6, 4);
-        var outerRangeExpectedText = 'ipsum dolor sit';
-        equal(outerRange.toString(), outerRangeExpectedText, 'outer range text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, outerRangeExpectedText);
-
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        testNormalization({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 12,
+                    endOffset: 17,
+                    rangeExpectedText: 'dolor',
+                    expectedHighlights: ['dolor'],
+                },
+                {
+                    startContainer: 0,
+                    endContainer: 2,
+                    startOffset: 6,
+                    endOffset: 4,
+                    rangeExpectedText: 'ipsum dolor sit',
+                    expectedHighlights: ['ipsum dolor sit']
+                }
+            ]
+        });
     });
 
     // <p>Lorem {ipsum [dolor} sit amet.]</p>
     test('&lt;p&gt;Lorem {ipsum [dolor} sit amet.]&lt;/p&gt;', function() {
-        var sandboxInitHtml = '<p>Lorem ipsum dolor sit amet.</p>';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-        sandbox.html(sandboxInitHtml);
-
-        var range1 = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 12, 27);
-        var range1ExpectedText = 'dolor sit amet.';
-        equal(range1.toString(), range1ExpectedText, 'Range 1 text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, range1ExpectedText);
-
-        var range2 = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(1), 6, 5);
-        var range2ExpectedText = 'ipsum dolor';
-        equal(range2.toString(), range2ExpectedText, 'Range 2 text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, 'ipsum dolor sit amet.');
-
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        testNormalization({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 12,
+                    endOffset: 27,
+                    rangeExpectedText: 'dolor sit amet.',
+                    expectedHighlights: ['dolor sit amet.'],
+                },
+                {
+                    startContainer: 0,
+                    endContainer: 1,
+                    startOffset: 6,
+                    endOffset: 5,
+                    rangeExpectedText: 'ipsum dolor',
+                    expectedHighlights: ['ipsum dolor sit amet.']
+                }
+            ]
+        });
     });
 
     // [Lorem ip]{sum dolor} sit amet.
     test('&lt;p&gt;[Lorem ip]{sum dolor} sit amet.&lt;/p&gt;', function() {
-        var sandboxInitHtml = '<p>Lorem ipsum dolor sit amet.</p>';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-        sandbox.html(sandboxInitHtml);
-
-        var leftRange = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 8);
-        var leftRangeExpectedText = 'Lorem ip';
-        equal(leftRange.toString(), leftRangeExpectedText, 'Left range text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, leftRangeExpectedText);
-
-        var rightRange = createRange(sandbox.textNodes().get(1), sandbox.textNodes().get(1), 0, 9);
-        var rightRangeExpectedText = 'sum dolor';
-        equal(rightRange.toString(), rightRangeExpectedText, 'Right range text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, leftRangeExpectedText + rightRangeExpectedText);
-
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        testNormalization({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 0,
+                    endOffset: 8,
+                    rangeExpectedText: 'Lorem ip',
+                    expectedHighlights: ['Lorem ip'],
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 1,
+                    startOffset: 0,
+                    endOffset: 9,
+                    rangeExpectedText: 'sum dolor',
+                    expectedHighlights: ['Lorem ipsum dolor']
+                }
+            ]
+        });
     });
 
     // <p>[Lorem (ipsum] dolor {sit) amet.}</p>
     test('&lt;p&gt;[Lorem (ipsum] dolor {sit) amet.}&lt;/p&gt;', function() {
-        var sandboxInitHtml = '<p>Lorem ipsum dolor sit amet.</p>';
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.';
-        sandbox.html(sandboxInitHtml);
-
-        var range1 = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 11);
-        var range1ExpectedText = 'Lorem ipsum';
-        equal(range1.toString(), range1ExpectedText, 'Range 1 text is valid');
-        sandbox.trigger('mouseup');
-
-        var range2 = createRange(sandbox.textNodes().get(1), sandbox.textNodes().get(1), 7, 16);
-        var range2ExpectedText = 'sit amet.';
-        equal(range2.toString(), range2ExpectedText, 'Range 2 text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(2);
-        assertHighlightedText(0, range1ExpectedText);
-        assertHighlightedText(1, range2ExpectedText);
-
-        var range3 = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(2), 6, 3);
-        var range3ExpectedText = 'ipsum dolor sit';
-        equal(range3.toString(), range3ExpectedText, 'Range 3 text is valid');
-        sandbox.trigger('mouseup');
-        assertHighlightsCount(1);
-        assertHighlightedText(0, sandboxExpectedText);
-
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        testNormalization({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 0,
+                    endOffset: 11,
+                    rangeExpectedText: 'Lorem ipsum',
+                    expectedHighlights: ['Lorem ipsum'],
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 1,
+                    startOffset: 7,
+                    endOffset: 16,
+                    rangeExpectedText: 'sit amet.',
+                    expectedHighlights: ['Lorem ipsum', 'sit amet.']
+                },
+                {
+                    startContainer: 0,
+                    endContainer: 2,
+                    startOffset: 6,
+                    endOffset: 3,
+                    rangeExpectedText: 'ipsum dolor sit',
+                    expectedHighlights: ['Lorem ipsum dolor sit amet.']
+                }
+            ]
+        });
     });
 
     // =========================================================================
@@ -624,79 +617,70 @@ $(document).ready(function() {
         teardown: teardown
     });
 
+    var c = $.fn.textHighlighter.defaults.highlightedClass;
+
+    function testRemovingHighlights(opts) {
+        sandbox = opts.sandbox;
+        sandbox.textHighlighter('removeHighlights', opts.remove || sandbox);
+        assertHighlightsCount(opts.highlightsCount || 0);
+        equal(sandbox.text(), opts.sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(opts.textNodesCount || 1, sandbox);
+    }
+
     test('Simple', function() {
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
-        sandbox
-            .append('Lorem ')
-            .append($('<span>ipsum</span>').addClass(c))
-            .append(' dolor sit amet.')
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
-
-        sandbox.textHighlighter('removeHighlights', sandbox);
-
-        assertHighlightsCount(0);
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
-        assertTextNodesCount(1, sandbox);
+        testRemovingHighlights({
+            sandbox: sandbox
+                .append('Lorem ')
+                .append($('<span>ipsum</span>').addClass(c))
+                .append(' dolor sit amet.'),
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            highlightsCount: 0
+        });
     });
 
     test('Highlight at the beginning', function() {
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
-        sandbox
-            .append($('<span>Lorem</span>').addClass(c))
-            .append(' ipsum dolor sit amet.');
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
-
-        sandbox.textHighlighter('removeHighlights', sandbox);
-
-        assertHighlightsCount(0);
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
-        assertTextNodesCount(1, sandbox);
+        testRemovingHighlights({
+            sandbox: sandbox
+                .append($('<span>Lorem</span>').addClass(c))
+                .append(' ipsum dolor sit amet.'),
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.'
+        });
     });
 
     test('Highlight at the end', function() {
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
-        sandbox
-            .append('Lorem ipsum dolor sit ')
-            .append($('<span>amet.</span>').addClass(c));
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
-
-        sandbox.textHighlighter('removeHighlights', sandbox);
-
-        assertHighlightsCount(0);
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
-        assertTextNodesCount(1, sandbox);
+        testRemovingHighlights({
+            sandbox: sandbox
+                .append('Lorem ipsum dolor sit ')
+                .append($('<span>amet.</span>').addClass(c)),
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.'
+        });
     });
 
     test('Multiple highlights', function() {
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
-        sandbox
-            .append($('<span>Lorem</span>').addClass(c))
-            .append(' ipsum ')
-            .append($('<span>dolor</span>').addClass(c))
-            .append(' sit ')
-            .append($('<span>amet.</span>').addClass(c));
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
-
-        sandbox.textHighlighter('removeHighlights', sandbox);
-
-        assertHighlightsCount(0);
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
-        assertTextNodesCount(1, sandbox);
+        testRemovingHighlights({
+            sandbox: sandbox
+                .append($('<span>Lorem</span>').addClass(c))
+                .append(' ipsum ')
+                .append($('<span>dolor</span>').addClass(c))
+                .append(' sit ')
+                .append($('<span>amet.</span>').addClass(c)),
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.'
+        });
     });
 
     test('Removing specific highlight', function() {
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
-        sandbox
-            .append('Lorem ')
-            .append($('<span>ipsum</span>').addClass(c))
-            .append(' dolor sit amet.')
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
-
-        sandbox.textHighlighter('removeHighlights', sandbox.find('span'));
-
-        assertHighlightsCount(0);
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
-        assertTextNodesCount(1, sandbox);
+        testRemovingHighlights({
+            sandbox: sandbox
+                .append('Lorem ')
+                .append($('<span>ipsum</span>').addClass(c))
+                .append(' dolor ')
+                .append($('<span>sit</span>').addClass(c))
+                .append(' amet.'),
+            sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
+            remove: sandbox.find('span:first'),
+            textNodesCount: 3,
+            highlightsCount: 1
+        });
     });
 
     // =========================================================================
@@ -705,6 +689,7 @@ $(document).ready(function() {
         setup: function() {},
         teardown: teardown
     });
+    var c = $.fn.textHighlighter.defaults.highlightedClass;
 
     test('onRemoveHighlight handler returns true', function() {
         sandbox.textHighlighter({
@@ -713,7 +698,6 @@ $(document).ready(function() {
             }
         });
 
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
         sandbox
             .append($('<span>Lorem</span>').addClass(c))
             .append(' ipsum ')
@@ -913,11 +897,18 @@ $(document).ready(function() {
     }
 
     function assertTextNodesCount(count, container) {
+        var isTextNode = function() {
+            return this.nodeType == 3;
+        };
         var txtNodes = $(container)
             .contents()
-            .filter(function() {
-                return this.nodeType == 3;
-            });
+            .filter(isTextNode)
+            .add(
+                $(container)
+                   .find("*")
+                   .contents()
+                   .filter(isTextNode)
+            );
         equal(txtNodes.length, count, 'Number of text nodes is valid');
     }
 
@@ -925,5 +916,12 @@ $(document).ready(function() {
         var cont = (typeof(container) != 'undefined' ? container : sandbox);
         var hls = cont.find('.' + $.fn.textHighlighter.defaults.highlightedClass);
         equal(hls.eq(index).text(), txt, 'Highlighted text ['+index+'] is valid');
+    }
+
+    function assertHighlights(hls) {
+        assertHighlightsCount(hls.length);
+        $.each(hls, function(index, value) {
+            assertHighlightedText(index, value);
+        });
     }
 });
