@@ -164,7 +164,6 @@ $(document).ready(function() {
     });
 
     function testHighlightingInNestedStructures(args) {
-        console.log(args);
         sandbox.html(args.sandboxInitHtml);
         var range = createRange(sandbox.textNodes().get(args.startContainer),
                                 sandbox.textNodes().get(args.endContainer),
@@ -402,7 +401,7 @@ $(document).ready(function() {
                     startOffset: 6,
                     endOffset: 21,
                     rangeExpectedText: 'ipsum dolor sit',
-                    expectedHighlights: ['ipsum dolor sit'],
+                    expectedHighlights: ['ipsum dolor sit']
                 },
                 {
                     startContainer: 1,
@@ -428,7 +427,7 @@ $(document).ready(function() {
                     startOffset: 12,
                     endOffset: 17,
                     rangeExpectedText: 'dolor',
-                    expectedHighlights: ['dolor'],
+                    expectedHighlights: ['dolor']
                 },
                 {
                     startContainer: 0,
@@ -454,7 +453,7 @@ $(document).ready(function() {
                     startOffset: 12,
                     endOffset: 27,
                     rangeExpectedText: 'dolor sit amet.',
-                    expectedHighlights: ['dolor sit amet.'],
+                    expectedHighlights: ['dolor sit amet.']
                 },
                 {
                     startContainer: 0,
@@ -480,7 +479,7 @@ $(document).ready(function() {
                     startOffset: 0,
                     endOffset: 8,
                     rangeExpectedText: 'Lorem ip',
-                    expectedHighlights: ['Lorem ip'],
+                    expectedHighlights: ['Lorem ip']
                 },
                 {
                     startContainer: 1,
@@ -506,7 +505,7 @@ $(document).ready(function() {
                     startOffset: 0,
                     endOffset: 11,
                     rangeExpectedText: 'Lorem ipsum',
-                    expectedHighlights: ['Lorem ipsum'],
+                    expectedHighlights: ['Lorem ipsum']
                 },
                 {
                     startContainer: 1,

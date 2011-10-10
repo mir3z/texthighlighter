@@ -1,25 +1,25 @@
-/*
-jQuery Text Highlighter
-Copyright (C) 2011 by Mirosław Zemski
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
+/**
+ * @license jQuery Text Highlighter
+ * Copyright (C) 2011 by mirz
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 (function($) {
     var context = null;
@@ -54,10 +54,16 @@ THE SOFTWARE.
         TEXT_NODE: 3
     };
 
+    /**
+     * Associates plugin's options with context element.
+     */
     function saveState() {
         $(context).data('textHighlighter', options);
     }
 
+    /**
+     * Restores plugin's options from data associated with context element.
+     */
     function restoreState(ctx) {
         context = ctx;
         options = $(context).data('textHighlighter');
@@ -75,6 +81,9 @@ THE SOFTWARE.
         $(context).removeClass(options.contextClass);
     }
 
+    /**
+     * Highlights currently selected text.
+     */
     function doHighlight() {
         restoreState(this);
 
@@ -82,9 +91,9 @@ THE SOFTWARE.
         if (!range || range.collapsed) return;
 
         if (options.onBeforeHighlight(range) == true) {
-            var wrapper = $.fn.textHighlighter.createWrapper(options);
+            var $wrapper = $.fn.textHighlighter.createWrapper(options);
 
-            var createdHighlights = highlightRange(range, wrapper);
+            var createdHighlights = highlightRange(range, $wrapper);
             var normalizedHighlights = normalizeHighlights(createdHighlights);
 
             options.onAfterHighlight(normalizedHighlights);
@@ -93,7 +102,10 @@ THE SOFTWARE.
         removeAllRanges();
     }
 
-    function highlightRange(range, wrapper) {
+    /**
+     * Highlights given range, i.e. wraps it in given wrapper.
+     */
+    function highlightRange(range, $wrapper) {
         if (range.collapsed) return;
 
         // Don't highlight content of these tags
@@ -136,8 +148,8 @@ THE SOFTWARE.
         do {
             if (goDeeper && node.nodeType == nodeTypes.TEXT_NODE) {
                 if(/\S/.test(node.nodeValue)) {
-                    var rawWrapper = wrapper.clone(true).get(0);
-                    var highlight = $(node).wrap(rawWrapper).parent().get(0);
+                    var wrapper = $wrapper.clone(true).get(0);
+                    var highlight = $(node).wrap(wrapper).parent().get(0);
                     highlights.push(highlight);
                 }
 
@@ -164,12 +176,20 @@ THE SOFTWARE.
         return highlights;
     }
 
+    /**
+     * Normalizes highlights, i.e. nested highlights are flattened and sibling higlights are merged.
+     */
     function normalizeHighlights(highlights) {
         flattenNestedHighlights(highlights);
         mergeSiblingHighlights(highlights);
 
+        // omit removed nodes
         var normalizedHighlights = $.map(highlights, function(hl) {
-            return hl.parentNode != null ? hl : null; // omit removed nodes
+            if (typeof hl.parentElement != 'undefined') { // IE
+              return hl.parentElement != null ? hl : null;
+            } else {
+              return hl.parentNode != null ? hl : null;
+            }
         });
 
         return normalizedHighlights;
@@ -177,15 +197,15 @@ THE SOFTWARE.
 
     function flattenNestedHighlights(highlights) {
         $.each(highlights, function(i) {
-            var highlight = $(this);
+            var $highlight = $(this);
 
-            if(highlight.parent().hasClass(options.highlightedClass)) {
-                var parent = highlight.parent();
-                var parentTxt = parent.text();
+            if($highlight.parent().hasClass(options.highlightedClass)) {
+                var $parent = $highlight.parent();
+                var parentTxt = $parent.text();
                 var newNode = document.createTextNode(parentTxt);
 
-                parent.empty();
-                parent.append(newNode);
+                $parent.empty();
+                $parent.append(newNode);
                 $(highlights[i]).remove();
             }
         });
@@ -216,13 +236,17 @@ THE SOFTWARE.
         });
     }
 
+    /**
+     * Returns all highlights in given container. If container is a highlight itself and andSelf is
+     * true, container will be also returned
+     */
     function getAllHighlights(container, andSelf) {
         var classSelectorStr = '.' + options.highlightedClass;
-        var highlights = $(container).find(classSelectorStr);
+        var $highlights = $(container).find(classSelectorStr);
         if (andSelf == true && $(container).hasClass(options.highlightedClass)) {
-            highlights = highlights.add(container);
+            $highlights = $highlights.add(container);
         }
-        return highlights;
+        return $highlights;
     }
 
     function removeHighlights(container) {
@@ -244,8 +268,8 @@ THE SOFTWARE.
             }
         };
 
-        var highlights = getAllHighlights(container, true);
-        highlights.each(function() {
+        var $highlights = getAllHighlights(container, true);
+        $highlights.each(function() {
             if (options.onRemoveHighlight(this) == true) {
                 var textNode = unwrapHighlight(this);
                 mergeSiblingTextNodes(textNode);
@@ -253,11 +277,17 @@ THE SOFTWARE.
         });
     }
 
+    /**
+     * Returns context's owner document.
+     */
     function getCurrentDocument() {
         // if ownerDocument is null then context is document
         return context.ownerDocument ? context.ownerDocument : context;
     }
 
+    /**
+     * Returns context's owner window.
+     */
     function getCurrentWindow() {
         var currentDoc = getCurrentDocument();
         if (currentDoc.defaultView) {
@@ -267,7 +297,10 @@ THE SOFTWARE.
         }
     }
 
-    function getSelection() {
+    /**
+     * Returns current selection object.
+     */
+    function getCurrentSelection() {
         var currentWindow = getCurrentWindow();
         var selection = null;
 
@@ -288,7 +321,7 @@ THE SOFTWARE.
     }
 
     function getCurrentRange() {
-        var selection = getSelection();
+        var selection = getCurrentSelection();
         var range = null;
         if (selection.rangeCount > 0) {
             range = selection.getRangeAt(0);
@@ -297,7 +330,7 @@ THE SOFTWARE.
     }
 
     function removeAllRanges() {
-        var selection = getSelection();
+        var selection = getCurrentSelection();
         selection.removeAllRanges();
     }
 
@@ -313,6 +346,9 @@ THE SOFTWARE.
         }
     };
 
+    /**
+     * Returns HTML element to wrap selected text in.
+     */
     $.fn.textHighlighter.createWrapper = function(opts) {
         return $('<span>')
             .css('backgroundColor', opts.color)
