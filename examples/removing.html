@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../lib/rangy-core.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
-    <title>jQuery Text Highlighter Simple Demo Page</title>
+    <title>jQuery Text Highlighter Demo Page</title>
 
     <style type="text/css">
       #sandbox {
@@ -54,20 +54,8 @@
           width: 70%;
           background-color: #74e276;
       }
-      #info-box #color-picker {
-          border: none;
-          display: inline;
-      }
-      #info-box #color-picker div {
-          border: 1px solid #000;
-          width: 10px;
-          height: 10px;
-          display: inline-block;
-          cursor: pointer;
-          border-radius: 2px;
-      }
-      #info-box ul li {
-          margin-top: 8px;
+      #info-box p {
+          text-align: center;
       }
     </style>
   </head>
@@ -75,18 +63,14 @@
     <div id="info-box">
       <ul>
         <li>Select any text in the grey box below to highlight it.</li>
-        <li>
-          Change highlight color:
-          <div id="color-picker">
-            <div class="color" style="background-color: #FF6666"></div>
-            <div class="color" style="background-color: #66FF66"></div>
-            <div class="color" style="background-color: #6666FF"></div>
-          </div>
-        </li>
+        <li>Click highlight while pressing the x key to remove it.</li>
+        <li>Click the button below to remove all highlights.</li>
       </ul>
+      <p><button id="remove-highlights-btn">Remove all highlights</button></p>
     </div>
+
     <div id="sandbox">
-      <h1>jQuery Text Highlighter Simple Demo Page</h1>
+      <h1>jQuery Text Highlighter Demo Page</h1>
       <p id="p1">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. <span style="font-weight:bold">Patos
         vitae risus scelerisque.</span> Cras porttitor sodales lacus, id hendrerit massa egestas
@@ -221,16 +205,31 @@
           </p>
         </form>
       </fieldset>
-    </div>
-    <script type="text/javascript">
-      $(document).ready(function() {
-          $('#sandbox').textHighlighter();
 
-          $('div.color', '#color-picker').click(function() {
-              var color = $(this).css('background-color');
-              $('#sandbox').textHighlighter('setColor', color);
-          });
-      });
-    </script>
+      <script type="text/javascript">
+        $(document).ready(function() {
+            var xKeyPressed = false;
+            var xKeyCode = 88;
+            $(window).keydown(function(e) {
+                xKeyPressed = (e.which == xKeyCode ? true : false);
+            }).keyup(function(e) {
+                xKeyPressed = (e.which == xKeyCode ? false : true);
+            });
+
+            var hlClass = $.fn.textHighlighter.defaults.highlightedClass;
+            $('.' + hlClass).live('mouseup', function() {
+                if (xKeyPressed) {
+                    $('#sandbox').textHighlighter('removeHighlights', this);
+                }
+            });
+
+            $(document).textHighlighter();
+
+            $('#remove-highlights-btn').click(function() {
+                $('#sandbox').textHighlighter('removeHighlights');
+            });
+        });
+      </script>
+    </div>
   </body>
 </html>

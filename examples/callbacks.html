@@ -4,22 +4,46 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="../lib/rangy-core.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
+    <title>jQuery Text Highlighter Simple Demo Page</title>
 
     <style type="text/css">
-      #wrapper {
+      #sandbox {
           width: 960px;
           margin: 30px auto;
           border: 1px solid #000;
           -moz-border-radius: 10px;
+          -webkit-border-radius: 10px;
           border-radius: 10px;
           padding: 20px;
           background-color: #efefef;
           text-align: justify;
       }
+      #info-box {
+          -webkit-border-radius: 2px;
+          -moz-border-radius: 2px;
+          border-radius: 2px;
+          -webkit-box-shadow: 1px 1px 3px #afafaf;
+          -moz-box-shadow: 1px 1px 3px #afafaf;
+          box-shadow: 1px 1px 3px #afafaf;
+          font-size: 12px;
+          border: 1px solid #24aa27;
+          margin: 30px auto;
+          width: 70%;
+          background-color: #74e276;
+      }
     </style>
   </head>
   <body>
-    <div id="wrapper">
+    <div id="info-box">
+      <ul>
+        <li>Select any text in the grey box below to highlight it. You should see 1 or 2 dialog boxes.</li>
+        <li>Click any highlight in the grey box below to remove it. You should see confirmation dialog box.</li>
+      </ul>
+    </div>
+    <div id="sandbox">
       <p id="p1">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et neque vehicula mauris
         interdum pulvinar a et orci. Suspendisse tempus justo sit amet orci tristique eu fringilla
@@ -55,31 +79,27 @@
         hendrerit imperdiet. Morbi purus metus, lobortis ut laoreet vitae, convallis sollicitudin
         ligula.
       </p>
-
-      <p id="p4">
-        Duis interdum sodales orci a faucibus. Vivamus quis neque at velit imperdiet dapibus vitae
-        ut est. Ut nec elit purus. Proin quis venenatis ipsum. Fusce purus diam, imperdiet ac semper
-        et, feugiat id felis. Mauris leo leo, suscipit ac molestie nec, pretium a arcu. Nam
-        bibendum, dui quis pulvinar interdum, massa est pharetra felis, eget imperdiet ante tellus
-        sed purus. Curabitur dolor leo, tempor ac faucibus at, blandit at ante. Etiam nec aliquet
-        orci. Sed dolor odio, vehicula in venenatis et, auctor at ipsum. Donec tempor lobortis odio
-        vel fermentum. Aenean nec sem velit, ac accumsan massa. Praesent orci libero, faucibus id
-        elementum pulvinar, molestie nec risus. Donec lacinia ornare tortor quis convallis. Integer
-        nec magna augue, eu porta eros. Suspendisse et justo mi. Donec nec diam et tellus tincidunt
-        feugiat quis eu mi.
-      </p>
-
-      <p id="p5">
-        Cras quis arcu enim, sit amet posuere lectus. Sed id iaculis nisi. Fusce eget elit vitae
-        ante elementum consequat. Fusce eget libero ante. Proin sollicitudin, tellus sed aliquet
-        tincidunt, lorem metus molestie metus, vitae rutrum nisl nibh nec orci. Cras elementum risus
-        a neque consectetur semper. Mauris ut nisl sit amet ligula facilisis ornare. Vestibulum ante
-        ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse
-        accumsan, odio id dignissim lacinia, sapien velit dapibus ipsum, vel mollis odio purus sit
-        amet diam. Curabitur blandit, tellus sit amet tempus hendrerit, elit lectus aliquet urna, et
-        sollicitudin felis turpis eget massa. Fusce nisl erat, scelerisque ut condimentum congue,
-        rutrum nec ipsum. Mauris et nulla ut ligula volutpat viverra. Suspendisse potenti.
-      </p>
     </div>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+          var hlClass = $.fn.textHighlighter.defaults.highlightedClass;
+          $('.' + hlClass).live('mouseup', function() {
+              $('#sandbox').textHighlighter('removeHighlights', this);
+          });
+
+          $('#sandbox').textHighlighter({
+              onRemoveHighlight: function(hl) {
+                  return confirm('Do you really want to remove this highlight: "' + $(hl).text() + '"?');
+              },
+              onBeforeHighlight: function(range) {
+                  return confirm('Do you really want to highlight this text: "' + range + '"?');
+              },
+              onAfterHighlight: function(hls) {
+                  alert('You have created ' + hls.length + ' highlight(s)!');
+              }
+          });
+      });
+    </script>
   </body>
 </html>

@@ -10,31 +10,48 @@
     <title>jQuery Text Highlighter Demo Page (with multiple instances)</title>
 
     <style type="text/css">
-      #wrapper {
+      #sandbox {
           width: 960px;
           margin: 30px auto;
           border: 1px solid #000;
           -moz-border-radius: 10px;
+          -webkit-border-radius: 10px;
           border-radius: 10px;
           padding: 20px;
           background-color: #efefef;
           text-align: justify;
       }
-      span.highlighted {
-          border-left: 1px solid red;
-          border-right: 1px solid red;
+      #info-box {
+          -webkit-border-radius: 2px;
+          -moz-border-radius: 2px;
+          border-radius: 2px;
+          -webkit-box-shadow: 1px 1px 3px #afafaf;
+          -moz-box-shadow: 1px 1px 3px #afafaf;
+          box-shadow: 1px 1px 3px #afafaf;
+          font-size: 12px;
+          border: 1px solid #24aa27;
+          margin: 30px auto;
+          width: 70%;
+          background-color: #74e276;
       }
-      div {
-          margin: 10px;
-          border: 1px solid #afafaf;
-          padding: 10px;
+      h1 {
+          text-align: left;
+      }
+      #sandbox div {
+          margin: 30px 10px;
+          border: 1px dashed #afafaf;
       }
     </style>
   </head>
   <body>
-    <h1>jQuery Text Highlighter Demo Page (with multiple instances)</h1>
-
-    <div id="wrapper">
+    <div id="info-box">
+      <ul>
+        <li>Select any text in paragraphs in the grey box to highlight it.</li>
+        <li>Each of three paragraphs have different plugin instance.</li>
+      </ul>
+    </div>
+    <div id="sandbox">
+      <h1>jQuery Text Highlighter Demo Page (with multiple instances)</h1>
       <div id="d1">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et neque vehicula mauris
         interdum pulvinar a et orci. Suspendisse tempus justo sit amet orci tristique eu fringilla
