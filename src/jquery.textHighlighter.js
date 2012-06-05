@@ -89,6 +89,7 @@
 
         var range = getCurrentRange();
         if (!range || range.collapsed) return;
+        if (!isInsideContext(range)) return;
 
         if (options.onBeforeHighlight(range) == true) {
             var $wrapper = $.fn.textHighlighter.createWrapper(options);
@@ -327,6 +328,15 @@
             range = selection.getRangeAt(0);
         }
         return range;
+    }
+
+    /**
+     * Returns true if range.startContainer and range.endContainer is inside context.
+     */
+    function isInsideContext(range) {
+        var isStartContainerInContext = $.contains(context, range.startContainer);
+        var isEndContainerInContext = $.contains(context, range.endContainer);
+        return isStartContainerInContext && isEndContainerInContext;
     }
 
     function removeAllRanges() {
