@@ -1,6 +1,6 @@
 /**
  * @license jQuery Text Highlighter
- * Copyright (C) 2011 by mirz
+ * Copyright (C) 2012 by mirz
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,356 +21,368 @@
  * THE SOFTWARE.
  */
 
-(function($) {
-    var context = null;
-    var options = {};
-    var methods = {
-        init: function(opts) {
-            context = this;
-            options = $.extend({}, $.fn.textHighlighter.defaults, opts);
-            saveState();
-
-            $(context).addClass(options.contextClass);
-            bindEvents();
-        },
-        destroy: function() {
-            unbindEvents();
-            teardown();
-        },
-        setColor: function(color) {
-            options.color = color;
-            saveState();
-        },
-        getColor: function() {
-            return options.color;
-        },
-        removeHighlights: function(element) {
-            var container = (element != undefined ? element : context);
-            removeHighlights(container);
-        }
-    }
+(function($, window, document, undefined) {
     var nodeTypes = {
         ELEMENT_NODE: 1,
         TEXT_NODE: 3
     };
 
-    /**
-     * Associates plugin's options with context element.
-     */
-    function saveState() {
-        $(context).data('textHighlighter', options);
+    var plugin = {
+        name: 'textHighlighter'
+    };
+
+    function TextHighlighter(element, options) {
+	this.context = element;
+        this.$context = $(element);
+	this.options = $.extend({}, $[plugin.name].defaults, options);
+
+	this.init();
     }
 
-    /**
-     * Restores plugin's options from data associated with context element.
-     */
-    function restoreState(ctx) {
-        context = ctx;
-        options = $(context).data('textHighlighter');
-    }
+    TextHighlighter.prototype = {
+        init: function() {
+            this.$context.addClass(this.options.contextClass);
+            this.bindEvents();
+        },
 
-    function bindEvents() {
-        $(context).mouseup(doHighlight);
-    }
+        destroy: function() {
+            this.unbindEvents();
+            this.$context.removeClass(this.options.contextClass);
+            this.$context.removeData(plugin.name);
+        },
 
-    function unbindEvents() {
-        $(context).unbind('mouseup', doHighlight);
-    }
+        bindEvents: function() {
+            this.$context.bind('mouseup', {self: this}, this.highlightHandler);
+        },
 
-    function teardown() {
-        $(context).removeClass(options.contextClass);
-    }
+        unbindEvents: function() {
+            this.$context.unbind('mouseup', this.highlightHandler);
+        },
 
-    /**
-     * Highlights currently selected text.
-     */
-    function doHighlight() {
-        restoreState(this);
+        highlightHandler: function(event) {
+            var self = event.data.self;
+            self.doHighlight();
+        },
 
-        var range = getCurrentRange();
-        if (!range || range.collapsed) return;
-        if (!isInsideContext(range)) return;
+        /**
+         * Highlights currently selected text.
+         */
+        doHighlight: function() {
+            var range = this.getCurrentRange();
+            if (!range || range.collapsed) return;
+            if (!this.isRangeInsideContext(range)) return;
 
-        if (options.onBeforeHighlight(range) == true) {
-            var $wrapper = $.fn.textHighlighter.createWrapper(options);
+            if (this.options.onBeforeHighlight(range) == true) {
+                var $wrapper = $.textHighlighter.createWrapper(this.options);
 
-            var createdHighlights = highlightRange(range, $wrapper);
-            var normalizedHighlights = normalizeHighlights(createdHighlights);
+                var createdHighlights = this.highlightRange(range, $wrapper);
+                var normalizedHighlights = this.normalizeHighlights(createdHighlights);
 
-            options.onAfterHighlight(normalizedHighlights);
-        }
-
-        removeAllRanges();
-    }
-
-    /**
-     * Highlights given range, i.e. wraps it in given wrapper.
-     */
-    function highlightRange(range, $wrapper) {
-        if (range.collapsed) return;
-
-        // Don't highlight content of these tags
-        var ignoreTags = ['SCRIPT', 'STYLE', 'SELECT', 'BUTTON', 'OBJECT', 'APPLET'];
-        var startContainer = range.startContainer;
-        var endContainer = range.endContainer;
-        var ancestor = range.commonAncestorContainer;
-        var goDeeper = true;
-
-        if (range.endOffset == 0) {
-            while (!endContainer.previousSibling && endContainer.parentNode != ancestor) {
-                endContainer = endContainer.parentNode;
+                this.options.onAfterHighlight(normalizedHighlights);
             }
-            endContainer = endContainer.previousSibling;
-        } else if (endContainer.nodeType == nodeTypes.TEXT_NODE) {
-            if (range.endOffset < endContainer.nodeValue.length) {
-                endContainer.splitText(range.endOffset);
+
+            this.removeAllRanges();
+        },
+
+        /**
+         * Returns first range of current selection object.
+         */
+        getCurrentRange: function() {
+            var selection = this.getCurrentSelection();
+
+            var range;
+            if (selection.rangeCount > 0) {
+                range = selection.getRangeAt(0);
             }
-        } else if (range.endOffset > 0) {
-            endContainer = endContainer.childNodes.item(range.endOffset - 1);
-        }
+            return range;
+        },
 
-        if (startContainer.nodeType == nodeTypes.TEXT_NODE) {
-            if (range.startOffset == startContainer.nodeValue.length) {
-                goDeeper = false;
-            } else if (range.startOffset > 0) {
-                startContainer = startContainer.splitText(range.startOffset);
-                if (endContainer == startContainer.previousSibling) endContainer = startContainer;
+        removeAllRanges: function() {
+            var selection = this.getCurrentSelection();
+            selection.removeAllRanges();
+        },
+
+        /**
+         * Returns current selection object.
+         */
+        getCurrentSelection: function() {
+            var currentWindow = this.getCurrentWindow();
+            var selection;
+
+            if (currentWindow.getSelection) {
+                selection = currentWindow.getSelection();
+            } else if ($('iframe')) {
+                $('iframe', top.document).each(function() {
+                    if (this.contentWindow === currentWindow) {
+                        selection = rangy.getIframeSelection(this);
+                        return false;
+                    }
+                });
+            } else {
+                selection = rangy.getSelection();
             }
-        } else if (range.startOffset < startContainer.childNodes.length) {
-            startContainer = startContainer.childNodes.item(range.startOffset);
-        } else {
-            startContainer = startContainer.nextSibling;
-        }
 
-        var done = false;
-        var node = startContainer;
-        var highlights = [];
+            return selection;
+        },
 
-        do {
-            if (goDeeper && node.nodeType == nodeTypes.TEXT_NODE) {
-                if(/\S/.test(node.nodeValue)) {
-                    var wrapper = $wrapper.clone(true).get(0);
-                    var highlight = $(node).wrap(wrapper).parent().get(0);
-                    highlights.push(highlight);
+        /**
+         * Returns owner window of this.context.
+         */
+        getCurrentWindow: function() {
+            var currentDoc = this.getCurrentDocument();
+            if (currentDoc.defaultView) {
+                return currentDoc.defaultView; // Non-IE
+            } else {
+                return currentDoc.parentWindow; // IE
+            }
+        },
+
+        /**
+         * Returns owner document of this.context.
+         */
+        getCurrentDocument: function() {
+            // if ownerDocument is null then context is document
+            return this.context.ownerDocument ? this.context.ownerDocument : this.context;
+        },
+
+        /**
+         * Returns true if range.startContainer and range.endContainer is inside context.
+         */
+        isRangeInsideContext: function(range) {
+            var isStartContainerInContext = $.contains(this.context, range.startContainer);
+            var isEndContainerInContext = $.contains(this.context, range.endContainer);
+            return isStartContainerInContext && isEndContainerInContext;
+        },
+
+        /**
+         * Wraps given range (highlight it), in the given wrapper.
+         */
+        highlightRange: function(range, $wrapper) {
+            if (range.collapsed) return;
+
+            // Don't highlight content of these tags
+            var ignoreTags = ['SCRIPT', 'STYLE', 'SELECT', 'BUTTON', 'OBJECT', 'APPLET'];
+            var startContainer = range.startContainer;
+            var endContainer = range.endContainer;
+            var ancestor = range.commonAncestorContainer;
+            var goDeeper = true;
+
+            if (range.endOffset == 0) {
+                while (!endContainer.previousSibling && endContainer.parentNode != ancestor) {
+                    endContainer = endContainer.parentNode;
+                }
+                endContainer = endContainer.previousSibling;
+            } else if (endContainer.nodeType == nodeTypes.TEXT_NODE) {
+                if (range.endOffset < endContainer.nodeValue.length) {
+                    endContainer.splitText(range.endOffset);
+                }
+            } else if (range.endOffset > 0) {
+                endContainer = endContainer.childNodes.item(range.endOffset - 1);
+            }
+
+            if (startContainer.nodeType == nodeTypes.TEXT_NODE) {
+                if (range.startOffset == startContainer.nodeValue.length) {
+                    goDeeper = false;
+                } else if (range.startOffset > 0) {
+                    startContainer = startContainer.splitText(range.startOffset);
+                    if (endContainer == startContainer.previousSibling) endContainer = startContainer;
+                }
+            } else if (range.startOffset < startContainer.childNodes.length) {
+                startContainer = startContainer.childNodes.item(range.startOffset);
+            } else {
+                startContainer = startContainer.nextSibling;
+            }
+
+            var done = false;
+            var node = startContainer;
+            var highlights = [];
+
+            do {
+                if (goDeeper && node.nodeType == nodeTypes.TEXT_NODE) {
+                    if(/\S/.test(node.nodeValue)) {
+                        var wrapper = $wrapper.clone(true).get(0);
+                        var highlight = $(node).wrap(wrapper).parent().get(0);
+                        highlights.push(highlight);
+                    }
+
+                    goDeeper = false;
+                }
+                if (node == endContainer && (!endContainer.hasChildNodes() || !goDeeper)) {
+                    done = true;
                 }
 
-                goDeeper = false;
-            }
-            if (node == endContainer && (!endContainer.hasChildNodes() || !goDeeper)) {
-                done = true;
-            }
+                if ($.inArray(node.tagName, ignoreTags) != -1) {
+                    goDeeper = false;
+                }
+                if (goDeeper && node.hasChildNodes()) {
+                    node = node.firstChild;
+                } else if (node.nextSibling != null) {
+                    node = node.nextSibling;
+                    goDeeper = true;
+                } else {
+                    node = node.parentNode;
+                    goDeeper = false;
+                }
+            } while (!done);
 
-            if ($.inArray(node.tagName, ignoreTags) != -1) {
-                goDeeper = false;
-            }
-            if (goDeeper && node.hasChildNodes()) {
-                node = node.firstChild;
-            } else if (node.nextSibling != null) {
-                node = node.nextSibling;
-                goDeeper = true;
-            } else {
-                node = node.parentNode;
-                goDeeper = false;
-            }
-        } while (!done);
+            return highlights;
+        },
 
-        return highlights;
-    }
+        /**
+         * Normalizes highlights - nested highlights are flattened and sibling higlights are merged.
+         */
+        normalizeHighlights: function(highlights) {
+            this.flattenNestedHighlights(highlights);
+            this.mergeSiblingHighlights(highlights);
 
-    /**
-     * Normalizes highlights, i.e. nested highlights are flattened and sibling higlights are merged.
-     */
-    function normalizeHighlights(highlights) {
-        flattenNestedHighlights(highlights);
-        mergeSiblingHighlights(highlights);
-
-        // omit removed nodes
-        var normalizedHighlights = $.map(highlights, function(hl) {
-            if (typeof hl.parentElement != 'undefined') { // IE
-              return hl.parentElement != null ? hl : null;
-            } else {
-              return hl.parentNode != null ? hl : null;
-            }
-        });
-
-        return normalizedHighlights;
-    }
-
-    function flattenNestedHighlights(highlights) {
-        $.each(highlights, function(i) {
-            var $highlight = $(this);
-
-            if($highlight.parent().hasClass(options.highlightedClass)) {
-                var $parent = $highlight.parent();
-                var parentTxt = $parent.text();
-                var newNode = document.createTextNode(parentTxt);
-
-                $parent.empty();
-                $parent.append(newNode);
-                $(highlights[i]).remove();
-            }
-        });
-    }
-
-    function mergeSiblingHighlights(highlights) {
-        function shouldMerge(node) {
-            return node && node.nodeType == nodeTypes.ELEMENT_NODE &&
-                $(node).hasClass(options.highlightedClass) ? true : false;
-        }
-
-        $.each(highlights, function() {
-            var highlight = this;
-
-            var prev = highlight.previousSibling;
-            var next = highlight.nextSibling;
-
-            if (shouldMerge(prev)) {
-                var mergedTxt = $(prev).text() + $(highlight).text();
-                $(highlight).text(mergedTxt);
-                $(prev).remove();
-            }
-            if(shouldMerge(next)) {
-                var mergedTxt = $(highlight).text() + $(next).text();
-                $(highlight).text(mergedTxt);
-                $(next).remove();
-            }
-        });
-    }
-
-    /**
-     * Returns all highlights in given container. If container is a highlight itself and andSelf is
-     * true, container will be also returned
-     */
-    function getAllHighlights(container, andSelf) {
-        var classSelectorStr = '.' + options.highlightedClass;
-        var $highlights = $(container).find(classSelectorStr);
-        if (andSelf == true && $(container).hasClass(options.highlightedClass)) {
-            $highlights = $highlights.add(container);
-        }
-        return $highlights;
-    }
-
-    function removeHighlights(container) {
-        var unwrapHighlight = function(highlight) {
-            return $(highlight).contents().unwrap().get(0);
-        };
-
-        var mergeSiblingTextNodes = function(textNode) {
-            var prev = textNode.previousSibling;
-            var next = textNode.nextSibling;
-
-            if (prev && prev.nodeType == nodeTypes.TEXT_NODE) {
-                textNode.nodeValue = prev.nodeValue + textNode.nodeValue;
-                prev.parentNode.removeChild(prev);
-            }
-            if (next && next.nodeType == nodeTypes.TEXT_NODE) {
-                textNode.nodeValue = textNode.nodeValue + next.nodeValue;
-                next.parentNode.removeChild(next);
-            }
-        };
-
-        var $highlights = getAllHighlights(container, true);
-        $highlights.each(function() {
-            if (options.onRemoveHighlight(this) == true) {
-                var textNode = unwrapHighlight(this);
-                mergeSiblingTextNodes(textNode);
-            }
-        });
-    }
-
-    /**
-     * Returns context's owner document.
-     */
-    function getCurrentDocument() {
-        // if ownerDocument is null then context is document
-        return context.ownerDocument ? context.ownerDocument : context;
-    }
-
-    /**
-     * Returns context's owner window.
-     */
-    function getCurrentWindow() {
-        var currentDoc = getCurrentDocument();
-        if (currentDoc.defaultView) {
-            return currentDoc.defaultView; // Non-IE
-        } else {
-            return currentDoc.parentWindow; // IE
-        }
-    }
-
-    /**
-     * Returns current selection object.
-     */
-    function getCurrentSelection() {
-        var currentWindow = getCurrentWindow();
-        var selection = null;
-
-        if (currentWindow.getSelection) {
-            selection = currentWindow.getSelection();
-        } else if ($('iframe').length > 0) {
-            $('iframe', top.document).each(function() {
-                if (this.contentWindow === currentWindow) {
-                    selection = rangy.getIframeSelection(this);
-                    return false;
+            // omit removed nodes
+            var normalizedHighlights = $.map(highlights, function(hl) {
+                if (typeof hl.parentElement != 'undefined') { // IE
+                    return hl.parentElement != null ? hl : null;
+                } else {
+                    return hl.parentNode != null ? hl : null;
                 }
             });
-        } else {
-            selection = rangy.getSelection();
+
+            return normalizedHighlights;
+        },
+
+        flattenNestedHighlights: function(highlights) {
+            var self = this;
+
+            $.each(highlights, function(i) {
+                var $highlight = $(this);
+
+                if($highlight.parent().hasClass(self.options.highlightedClass)) {
+                    var $parent = $highlight.parent();
+                    var parentTxt = $parent.text();
+                    var newNode = document.createTextNode(parentTxt);
+
+                    $parent.empty();
+                    $parent.append(newNode);
+                    $(highlights[i]).remove();
+                }
+            });
+        },
+
+        mergeSiblingHighlights: function(highlights) {
+            var self = this;
+
+            function shouldMerge(node) {
+                return node && node.nodeType == nodeTypes.ELEMENT_NODE &&
+                    $(node).hasClass(self.options.highlightedClass) ? true : false;
+            }
+
+            $.each(highlights, function() {
+                var highlight = this;
+
+                var prev = highlight.previousSibling;
+                var next = highlight.nextSibling;
+
+                if (shouldMerge(prev)) {
+                    var mergedTxt = $(prev).text() + $(highlight).text();
+                    $(highlight).text(mergedTxt);
+                    $(prev).remove();
+                }
+                if(shouldMerge(next)) {
+                    var mergedTxt = $(highlight).text() + $(next).text();
+                    $(highlight).text(mergedTxt);
+                    $(next).remove();
+                }
+            });
+        },
+
+        setColor: function(color) {
+            this.options.color = color;
+        },
+
+        getColor: function() {
+            return this.options.color;
+        },
+
+        /**
+         * Removes all highlights in given element or in context if no element given.
+         */
+        removeHighlights: function(element) {
+            var container = (element != undefined ? element : this.context);
+
+            var unwrapHighlight = function(highlight) {
+                return $(highlight).contents().unwrap().get(0);
+            };
+
+            var mergeSiblingTextNodes = function(textNode) {
+                var prev = textNode.previousSibling;
+                var next = textNode.nextSibling;
+
+                if (prev && prev.nodeType == nodeTypes.TEXT_NODE) {
+                    textNode.nodeValue = prev.nodeValue + textNode.nodeValue;
+                    prev.parentNode.removeChild(prev);
+                }
+                if (next && next.nodeType == nodeTypes.TEXT_NODE) {
+                    textNode.nodeValue = textNode.nodeValue + next.nodeValue;
+                    next.parentNode.removeChild(next);
+                }
+            };
+
+            var self = this;
+            var $highlights = this.getAllHighlights(container, true);
+            $highlights.each(function() {
+                if (self.options.onRemoveHighlight(this) == true) {
+                    var textNode = unwrapHighlight(this);
+                    mergeSiblingTextNodes(textNode);
+                }
+            });
+        },
+
+        /**
+         * Returns all highlights in given container. If container is a highlight itself and
+         * andSelf is true, container will be also returned
+         */
+        getAllHighlights: function(container, andSelf) {
+            var classSelectorStr = '.' + this.options.highlightedClass;
+            var $highlights = $(container).find(classSelectorStr);
+            if (andSelf == true && $(container).hasClass(this.options.highlightedClass)) {
+                $highlights = $highlights.add(container);
+            }
+            return $highlights;
         }
 
-        return selection;
+    };
+
+    $.fn.getHighlighter = function() {
+        return this.data(plugin.name);
+    };
+
+    $.fn[plugin.name] = function(options) {
+        return this.each(function() {
+            if (!$.data(this, plugin.name)) {
+                $.data(this, plugin.name, new TextHighlighter(this, options));
+            }
+        });
     }
 
-    function getCurrentRange() {
-        var selection = getCurrentSelection();
-        var range = null;
-        if (selection.rangeCount > 0) {
-            range = selection.getRangeAt(0);
-        }
-        return range;
-    }
-
-    /**
-     * Returns true if range.startContainer and range.endContainer is inside context.
-     */
-    function isInsideContext(range) {
-        var isStartContainerInContext = $.contains(context, range.startContainer);
-        var isEndContainerInContext = $.contains(context, range.endContainer);
-        return isStartContainerInContext && isEndContainerInContext;
-    }
-
-    function removeAllRanges() {
-        var selection = getCurrentSelection();
-        selection.removeAllRanges();
-    }
-
-    $.fn.textHighlighter = function(method) {
-        var args = arguments;
-
-        if (methods[method]) {
-            return methods[method].apply(this, Array.prototype.slice.call(args, 1));
-        } else if (typeof method === 'object' || !method) {
-            return methods.init.apply(this, args);
-        } else {
-            $.error('Method ' +  method + ' does not exist on jQuery.textHighlighter');
+    $.textHighlighter = {
+        createWrapper: function(options) {
+            return $('<span></span>')
+                .css('backgroundColor', options.color)
+                .addClass(options.highlightedClass);
+        },
+        defaults: {
+            color: '#ffff7b',
+            highlightedClass: 'highlighted',
+            contextClass: 'highlighter-context',
+            onRemoveHighlight: function() { return true },
+            onBeforeHighlight: function() { return true },
+            onAfterHighlight: function() { }
         }
     };
 
     /**
      * Returns HTML element to wrap selected text in.
      */
-    $.fn.textHighlighter.createWrapper = function(opts) {
+    $.textHighlighter.createWrapper = function(options) {
         return $('<span>')
-            .css('backgroundColor', opts.color)
-            .addClass(opts.highlightedClass);
+            .css('backgroundColor', options.color)
+            .addClass(options.highlightedClass);
     };
-
-    $.fn.textHighlighter.defaults = {
-        color: '#ffff7b',
-        highlightedClass: 'highlighted',
-        contextClass: 'highlighter-context',
-        onRemoveHighlight: function() { return true },
-        onBeforeHighlight: function() { return true },
-        onAfterHighlight: function() { }
-    };
-})(jQuery);
+})(jQuery, window, document);

@@ -1,13 +1,13 @@
 $(document).ready(function() {
-    var sandbox = $('#sandbox');
+    var $sandbox = $('#sandbox');
 
     function setup() {
-        sandbox.textHighlighter();
+        $sandbox.textHighlighter();
     }
 
     function teardown() {
-        sandbox.textHighlighter('destroy');
-        sandbox.empty();
+        $sandbox.getHighlighter().destroy();
+        $sandbox.empty();
     }
 
     // =========================================================================
@@ -16,68 +16,63 @@ $(document).ready(function() {
         ok(jQuery(), 'jQuery is loaded');
         ok(jQuery().textHighlighter, 'Plugin is loaded');
 
-        sandbox.textHighlighter();
+        $sandbox.textHighlighter();
 
-        ok($.fn.textHighlighter.defaults, '$.fn.textHighlighter.defaults present');
-        ok($.fn.textHighlighter.createWrapper, '$.fn.textHighlighter.createWrapper present');
+        ok($.textHighlighter.defaults, '$.textHighlighter.defaults present');
+        ok($.textHighlighter.createWrapper, '$.textHighlighter.createWrapper present');
 
-        equal(sandbox.attr('class'), $.fn.textHighlighter.defaults.contextClass,
+        equal($sandbox.attr('class'), $.textHighlighter.defaults.contextClass,
               'Context has valid class');
 
-        var attachedEvents = $.data(sandbox.get(0), 'events');
+        var attachedEvents = $.data($sandbox.get(0), 'events');
         ok(attachedEvents['mouseup'], 'Event handler for onmouseup is attached');
 
-        sandbox.textHighlighter('destroy');
+        $sandbox.textHighlighter('destroy');
     });
 
     test('Destroying', function() {
-        sandbox.textHighlighter();
-        var attachedEvents = $.data(sandbox.get(0), 'events');
-        sandbox.textHighlighter('destroy');
+        $sandbox.textHighlighter();
+        $sandbox.getHighlighter().destroy();
 
-        attachedEvents = $.data(sandbox.get(0), 'events');
-        ok(attachedEvents === undefined, 'Event handlers are detached');
+        var attachedEvents = $.data($sandbox.get(0), 'events');
+        ok(!attachedEvents, 'Event handlers are detached');
 
-        var defaultContextClass = $.fn.textHighlighter.defaults.contextClass
-        ok(sandbox.hasClass(defaultContextClass) == false, "Context has't got '" +
+        var defaultContextClass = $.textHighlighter.defaults.contextClass;
+        ok(!$sandbox.hasClass(defaultContextClass), "Context has't got '" +
            defaultContextClass + "' class");
-    });
 
-    test('Non-existing method call', function() {
-        sandbox.textHighlighter();
-        raises(function() {
-            sandbox.textHighlighter('foo');
-        }, 'Method does not exist');
+        ok(!$sandbox.data('textHighlighter'), 'Data is removed');
     });
 
     test('Set/Get color', function() {
-        sandbox.textHighlighter();
+        $sandbox.textHighlighter();
+        var highlighter = $sandbox.getHighlighter();
         var color = '#ff0000';
 
-        sandbox.textHighlighter('setColor', color);
-        equal(sandbox.textHighlighter('getColor'), color, 'getColor is valid');
+        highlighter.setColor(color);
+        equal(highlighter.getColor(), color, 'getColor is valid');
 
         var nodeTxt = 'Lorem ipsum dolor sit amet.';
         var rangeTxt = 'ipsum';
         var nodeWithRange = createTextNodeWithRange(nodeTxt, rangeTxt);
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlightsCount(1);
-        var hl = sandbox.children("." + $.fn.textHighlighter.defaults.highlightedClass);
+        var hl = $sandbox.children("." + $.textHighlighter.defaults.highlightedClass);
         equal(rgb2hex(hl.css('background-color')), color, 'Highlight color is valid');
     });
 
     test('Creating default wrapper', function() {
-        var wrapper = $.fn.textHighlighter.createWrapper($.fn.textHighlighter.defaults);
-        var wrapperColor = wrapper.css('background-color')
-            || wrapper.get(0).style.backgroundColor;
+        var $wrapper = $.textHighlighter.createWrapper($.textHighlighter.defaults);
+        var wrapperColor = $wrapper.css('background-color')
+            || $wrapper.get(0).style.backgroundColor;
 
-        ok(wrapper.html() == '', 'Wrapper is empty');
-        equal(wrapper.get(0).tagName, 'SPAN', 'Wrapper has valid tag name');
-        equal(wrapper.attr('class'), $.fn.textHighlighter.defaults.highlightedClass,
+        ok($wrapper.html() == '', 'Wrapper is empty');
+        equal($wrapper.get(0).tagName, 'SPAN', 'Wrapper has valid tag name');
+        equal($wrapper.attr('class'), $.textHighlighter.defaults.highlightedClass,
               'Wrapper has valid class');
-        equal(rgb2hex(wrapperColor), $.fn.textHighlighter.defaults.color,
+        equal(rgb2hex(wrapperColor), $.textHighlighter.defaults.color,
               'Wrapper has valid color');
 
         teardown();
@@ -85,8 +80,8 @@ $(document).ready(function() {
 
     test('Creating custom wrapper', function() {
         setup();
-        var defaultWrapper = $.fn.textHighlighter.createWrapper;
-        $.fn.textHighlighter.createWrapper = function() {
+        var defaultWrapper = $.textHighlighter.createWrapper;
+        $.textHighlighter.createWrapper = function() {
             return $('<span>').addClass('custom-wrapper');
         };
 
@@ -94,13 +89,13 @@ $(document).ready(function() {
         var rangeTxt = 'ipsum';
         var nodeWithRange = createTextNodeWithRange(nodeTxt, rangeTxt);
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
-        equal(sandbox.children('span').length, 1, 'Number of highlights is valid');
-        equal(sandbox.children('span').attr('class'), 'custom-wrapper',
-              'Highlight class is valid');
+        var $spans = $sandbox.children('span');
+        equal($spans.length, 1, 'Number of highlights is valid');
+        equal($spans.attr('class'), 'custom-wrapper', 'Highlight class is valid');
         teardown();
-        $.fn.textHighlighter.createWrapper = defaultWrapper;
+        $.textHighlighter.createWrapper = defaultWrapper;
     });
     // =========================================================================
 
@@ -114,7 +109,7 @@ $(document).ready(function() {
 
         assertTextNodeWithRange(nodeWithRange.node, nodeWithRange.range, nodeTxt, rangeTxt);
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlightsCount(1);
         assertHighlightedText(0, rangeTxt);
@@ -151,7 +146,7 @@ $(document).ready(function() {
 
         assertTextNodeWithRange(nodeWithRange.node, nodeWithRange.range, nodeTxt, rangeTxt);
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlightsCount(0);
     });
@@ -164,16 +159,17 @@ $(document).ready(function() {
     });
 
     function testHighlightingInNestedStructures(args) {
-        sandbox.html(args.sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(args.startContainer),
-                                sandbox.textNodes().get(args.endContainer),
+        console.log($sandbox);
+        $sandbox.html(args.sandboxInitHtml);
+        var range = createRange($sandbox.textNodes().get(args.startContainer),
+                                $sandbox.textNodes().get(args.endContainer),
                                 args.startOffset, args.endOffset);
         equal(range.toString(), args.expectedRange, 'Range text is valid');
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlights(args.expectedHighlights);
-        ok(sandbox.text() == args.sandboxExpectedText, 'Sandbox text is valid');
+        ok($sandbox.text() == args.sandboxExpectedText, 'Sandbox text is valid');
     }
 
     // Lorem |ipsum <b>dolor| sit</b> amet.
@@ -313,50 +309,50 @@ $(document).ready(function() {
         var sandboxInitHtml = 'Lorem <select><option>ipsum</option></select> dolor.';
         var sandboxExpectedText = 'Lorem ipsum dolor.';
 
-        sandbox.html(sandboxInitHtml);
-        var range = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(2), 0, 7);
+        $sandbox.html(sandboxInitHtml);
+        var range = createRange($sandbox.textNodes().get(0), $sandbox.textNodes().get(2), 0, 7);
         equal(range.toString(), sandboxExpectedText, 'Range text is valid');
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlights(['Lorem ', ' dolor.']);
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        ok($sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
     });
 
     test('End container is not text node', function() {
         var sandboxInitHtml = '<p>Lorem <span>ipsum</span> dolor.';
         var sandboxExpectedText = 'Lorem ipsum dolor.';
 
-        sandbox.html(sandboxInitHtml);
+        $sandbox.html(sandboxInitHtml);
         var range = createRange(
-            sandbox.textNodes().get(0),
-            sandbox.children('p').get(0).childNodes.item(1),
+            $sandbox.textNodes().get(0),
+            $sandbox.children('p').get(0).childNodes.item(1),
             0, 1
         );
         equal(range.toString(), 'Lorem ipsum', 'Range text is valid');
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlights(['Lorem ', 'ipsum']);
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        ok($sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
     });
 
     test('Start container is not text node', function() {
         var sandboxInitHtml = '<p>Lorem <span>ipsum</span> dolor.';
         var sandboxExpectedText = 'Lorem ipsum dolor.';
 
-        sandbox.html(sandboxInitHtml);
+        $sandbox.html(sandboxInitHtml);
         var range = createRange(
-            sandbox.children('p').get(0).childNodes.item(1),
-            sandbox.textNodes().get(2),
+            $sandbox.children('p').get(0).childNodes.item(1),
+            $sandbox.textNodes().get(2),
             0, 7
         );
         equal(range.toString(), 'ipsum dolor.', 'Range text is valid');
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlights(['ipsum', ' dolor.']);
-        ok(sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
+        ok($sandbox.text() == sandboxExpectedText, 'Sandbox text is valid');
     });
 
     // =========================================================================
@@ -373,20 +369,20 @@ $(document).ready(function() {
      */
 
     function testNormalization(args) {
-        sandbox.html(args.sandboxInitHtml);
+        $sandbox.html(args.sandboxInitHtml);
 
         $.each(args.highlights, function(index, hl) {
-            var range = createRange(sandbox.textNodes().get(hl.startContainer),
-                                    sandbox.textNodes().get(hl.endContainer),
+            var range = createRange($sandbox.textNodes().get(hl.startContainer),
+                                    $sandbox.textNodes().get(hl.endContainer),
                                     hl.startOffset, hl.endOffset);
             var rangeRangeExpectedText = hl.rangeExpectedText;
             equal(range.toString(), hl.rangeExpectedText, 'Range ' + index + ' text is valid');
-            sandbox.trigger('mouseup');
+            $sandbox.trigger('mouseup');
             assertHighlights(hl.expectedHighlights);
             return true;
         });
 
-        equal(sandbox.text(), args.sandboxExpectedText, 'Sandbox text is valid');
+        equal($sandbox.text(), args.sandboxExpectedText, 'Sandbox text is valid');
     }
 
     // <p>Lorem [ipsum {dolor} sit] amet.</p>
@@ -531,14 +527,14 @@ $(document).ready(function() {
 
     module('Iframes', {
         setup: function() {},
-        teardown: teardown
+        teardown: function() {}
     });
 
     test('Simple', function() {
         stop();
 
         var sandboxInitHtml = '<iframe id="frame" name="frame"></iframe>';
-        sandbox.html(sandboxInitHtml);
+        $sandbox.html(sandboxInitHtml);
 
         $('#frame').load(function() {
             var frameWnd = window.frames['frame'];
@@ -547,7 +543,7 @@ $(document).ready(function() {
             frameBody.append('<p>Lorem ipsum dolor sit amet.</p>');
             frameBody.textHighlighter();
 
-            equal(frameBody.attr('class'), $.fn.textHighlighter.defaults.contextClass,
+            equal(frameBody.attr('class'), $.textHighlighter.defaults.contextClass,
                 'Context has valid class');
 
             var txtNode = frameBody.find('p').contents().get(0);
@@ -575,38 +571,36 @@ $(document).ready(function() {
 
     test('Multiple instances', function() {
         var sandboxInitHtml = '<p id="p1">Lorem ipsum</p><p id="p2">dolor sit amet.</p>';
-        sandbox.html(sandboxInitHtml);
+        $sandbox.html(sandboxInitHtml);
 
-        sandbox.children("#p1").textHighlighter({
+        $sandbox.children("#p1").textHighlighter({
             color: '#FF6666'
         });
-        sandbox.children("#p2").textHighlighter({
+        $sandbox.children("#p2").textHighlighter({
             color: '#66FF66'
         });
 
-        var range1 = createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 5);
+        var range1 = createRange($sandbox.textNodes().get(0), $sandbox.textNodes().get(0), 0, 5);
         var range1ExpectedText = 'Lorem';
         equal(range1.toString(), range1ExpectedText, 'Range 1 text is valid');
-        sandbox.children("#p1").trigger('mouseup');
+        $sandbox.children("#p1").trigger('mouseup');
 
-        var range2 = createRange(sandbox.textNodes().get(2), sandbox.textNodes().get(2), 0, 5);
+        var range2 = createRange($sandbox.textNodes().get(2), $sandbox.textNodes().get(2), 0, 5);
         var range2ExpectedText = 'dolor';
         equal(range2.toString(), range2ExpectedText, 'Range 2 text is valid');
-        sandbox.children("#p2").trigger('mouseup');
+        $sandbox.children("#p2").trigger('mouseup');
 
         assertHighlightsCount(2);
         assertHighlightedText(0, range1ExpectedText);
         assertHighlightedText(1, range2ExpectedText);
 
-        var color1 = $('span.' + $.fn.textHighlighter.defaults.highlightedClass)
+        var color1 = $('span.' + $.textHighlighter.defaults.highlightedClass)
             .eq(0).css('backgroundColor');
-        var color2 = $('span.' + $.fn.textHighlighter.defaults.highlightedClass)
+        var color2 = $('span.' + $.textHighlighter.defaults.highlightedClass)
             .eq(1).css('backgroundColor');
 
         notEqual(color1, color2, "Colors are not equal");
-
-        sandbox.textHighlighter('destroy');
-        sandbox.empty();
+        $sandbox.empty();
     });
 
     // =========================================================================
@@ -616,19 +610,19 @@ $(document).ready(function() {
         teardown: teardown
     });
 
-    var c = $.fn.textHighlighter.defaults.highlightedClass;
+    var c = $.textHighlighter.defaults.highlightedClass;
 
     function testRemovingHighlights(opts) {
-        sandbox = opts.sandbox;
-        sandbox.textHighlighter('removeHighlights', opts.remove || sandbox);
+        $sandbox = opts.sandbox;
+        $sandbox.getHighlighter().removeHighlights(opts.remove || $sandbox);
         assertHighlightsCount(opts.highlightsCount || 0);
-        equal(sandbox.text(), opts.sandboxExpectedText, 'Sandbox text is valid');
-        assertTextNodesCount(opts.textNodesCount || 1, sandbox);
+        equal($sandbox.text(), opts.sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(opts.textNodesCount || 1, $sandbox);
     }
 
     test('Simple', function() {
         testRemovingHighlights({
-            sandbox: sandbox
+            sandbox: $sandbox
                 .append('Lorem ')
                 .append($('<span>ipsum</span>').addClass(c))
                 .append(' dolor sit amet.'),
@@ -639,7 +633,7 @@ $(document).ready(function() {
 
     test('Highlight at the beginning', function() {
         testRemovingHighlights({
-            sandbox: sandbox
+            sandbox: $sandbox
                 .append($('<span>Lorem</span>').addClass(c))
                 .append(' ipsum dolor sit amet.'),
             sandboxExpectedText: 'Lorem ipsum dolor sit amet.'
@@ -648,7 +642,7 @@ $(document).ready(function() {
 
     test('Highlight at the end', function() {
         testRemovingHighlights({
-            sandbox: sandbox
+            sandbox: $sandbox
                 .append('Lorem ipsum dolor sit ')
                 .append($('<span>amet.</span>').addClass(c)),
             sandboxExpectedText: 'Lorem ipsum dolor sit amet.'
@@ -657,7 +651,7 @@ $(document).ready(function() {
 
     test('Multiple highlights', function() {
         testRemovingHighlights({
-            sandbox: sandbox
+            sandbox: $sandbox
                 .append($('<span>Lorem</span>').addClass(c))
                 .append(' ipsum ')
                 .append($('<span>dolor</span>').addClass(c))
@@ -669,14 +663,14 @@ $(document).ready(function() {
 
     test('Removing specific highlight', function() {
         testRemovingHighlights({
-            sandbox: sandbox
+            sandbox: $sandbox
                 .append('Lorem ')
                 .append($('<span>ipsum</span>').addClass(c))
                 .append(' dolor ')
                 .append($('<span>sit</span>').addClass(c))
                 .append(' amet.'),
             sandboxExpectedText: 'Lorem ipsum dolor sit amet.',
-            remove: sandbox.find('span:first'),
+            remove: $sandbox.find('span:first'),
             textNodesCount: 3,
             highlightsCount: 1
         });
@@ -688,16 +682,16 @@ $(document).ready(function() {
         setup: function() {},
         teardown: teardown
     });
-    var c = $.fn.textHighlighter.defaults.highlightedClass;
+    var c = $.textHighlighter.defaults.highlightedClass;
 
     test('onRemoveHighlight handler returns true', function() {
-        sandbox.textHighlighter({
+        $sandbox.textHighlighter({
             onRemoveHighlight: function() {
                 return true;
             }
         });
 
-        sandbox
+        $sandbox
             .append($('<span>Lorem</span>').addClass(c))
             .append(' ipsum ')
             .append($('<span>dolor</span>').addClass(c))
@@ -705,22 +699,22 @@ $(document).ready(function() {
             .append($('<span>amet.</span>').addClass(c));
         var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
 
-        sandbox.textHighlighter('removeHighlights');
+        $sandbox.getHighlighter().removeHighlights();
 
         assertHighlightsCount(0);
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
-        assertTextNodesCount(1, sandbox);
+        equal($sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        assertTextNodesCount(1, $sandbox);
     });
 
     test('onRemoveHighlight handler returns false', function() {
-        sandbox.textHighlighter({
+        $sandbox.textHighlighter({
             onRemoveHighlight: function() {
                 return false;
             }
         });
 
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
-        sandbox
+        var c = $.textHighlighter.defaults.highlightedClass;
+        $sandbox
             .append($('<span>Lorem</span>').addClass(c))
             .append(' ipsum ')
             .append($('<span>dolor</span>').addClass(c))
@@ -728,32 +722,32 @@ $(document).ready(function() {
             .append($('<span>amet.</span>').addClass(c));
         var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
 
-        sandbox.textHighlighter('removeHighlights');
+        $sandbox.getHighlighter().removeHighlights();
 
         assertHighlightsCount(3);
-        equal(sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
+        equal($sandbox.text(), sandboxExpectedText, 'Sandbox text is valid');
     });
 
     test('onRemoveHighlight param passing', function() {
         var hlExpectedText = "Lorem ipsum";
 
-        sandbox.textHighlighter({
+        $sandbox.textHighlighter({
             onRemoveHighlight: function(hl) {
                 equal($(hl).text(), hlExpectedText, 'Passed highlight is valid');
             }
         });
 
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
-        sandbox
+        var c = $.textHighlighter.defaults.highlightedClass;
+        $sandbox
             .append($('<span>'+ hlExpectedText+ '</span>').addClass(c))
             .append(' dolor sit amet.')
         var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
 
-        sandbox.textHighlighter('removeHighlights');
+        $sandbox.getHighlighter().removeHighlights();
     });
 
     test('onBeforeHighlight returns true', function() {
-        sandbox.textHighlighter({
+        $sandbox.textHighlighter({
             onBeforeHighlight: function() {
                 return true;
             }
@@ -761,17 +755,17 @@ $(document).ready(function() {
 
         var sandboxInitText = 'Lorem ipsum dolor sit amet.';
 
-        sandbox.html(sandboxInitText);
-        createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 5);
+        $sandbox.html(sandboxInitText);
+        createRange($sandbox.textNodes().get(0), $sandbox.textNodes().get(0), 0, 5);
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlightsCount(1);
         assertHighlightedText(0, 'Lorem');
     });
 
     test('onBeforeHighlight returns false', function() {
-        sandbox.textHighlighter({
+        $sandbox.textHighlighter({
             onBeforeHighlight: function() {
                 return false;
             }
@@ -779,10 +773,10 @@ $(document).ready(function() {
 
         var sandboxInitText = 'Lorem ipsum dolor sit amet.';
 
-        sandbox.html(sandboxInitText);
-        createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 5);
+        $sandbox.html(sandboxInitText);
+        createRange($sandbox.textNodes().get(0), $sandbox.textNodes().get(0), 0, 5);
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
 
         assertHighlightsCount(0);
     });
@@ -790,7 +784,7 @@ $(document).ready(function() {
     test('onBeforeHighlight param passing', function() {
         var rangeExpectedText = 'Lorem';
 
-        sandbox.textHighlighter({
+        $sandbox.textHighlighter({
             onBeforeHighlight: function(range) {
                 equal(range.toString(), rangeExpectedText, 'Passed range is valid');
             }
@@ -798,28 +792,28 @@ $(document).ready(function() {
 
         var sandboxInitText = 'Lorem ipsum dolor sit amet.';
 
-        sandbox.html(sandboxInitText);
-        createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(0), 0, 5);
+        $sandbox.html(sandboxInitText);
+        createRange($sandbox.textNodes().get(0), $sandbox.textNodes().get(0), 0, 5);
 
-        sandbox.trigger('mouseup');
+        $sandbox.trigger('mouseup');
     });
 
     test('onAfterHighlight', function() {
-        sandbox.textHighlighter({
+        $sandbox.textHighlighter({
             onAfterHighlight: function(hls) {
                 equal(hls.length, 1, 'Highlights length is valid');
                 equal($(hls[0]).text(), 'ipsum dolor sit amet.', 'Text is valid');
             }
         });
 
-        var c = $.fn.textHighlighter.defaults.highlightedClass;
-        sandbox
+        var c = $.textHighlighter.defaults.highlightedClass;
+        $sandbox
             .append('Lorem ipsum ')
             .append($('<span>dolor sit amet.</span>').addClass(c));
         var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
 
-        createRange(sandbox.textNodes().get(0), sandbox.textNodes().get(1), 6, 5);
-        sandbox.trigger('mouseup');
+        createRange($sandbox.textNodes().get(0), $sandbox.textNodes().get(1), 6, 5);
+        $sandbox.trigger('mouseup');
     });
 
 
@@ -857,7 +851,7 @@ $(document).ready(function() {
         var txtNode = document.createTextNode(txt);
         var startOffset = txt.indexOf(selectedTxt);
         var endOffset = startOffset + selectedTxt.length;
-        sandbox.append(txtNode);
+        $sandbox.append(txtNode);
         var range = createRange(txtNode, txtNode, startOffset, endOffset);
 
         return { node: txtNode, range: range };
@@ -873,7 +867,7 @@ $(document).ready(function() {
             }
         });
         return $(ret);
-    }
+    };
 
     function rgb2hex(rgb) {
         var rgbArray = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
@@ -890,8 +884,8 @@ $(document).ready(function() {
     }
 
     function assertHighlightsCount(count, container) {
-        var cont = (typeof(container) != 'undefined' ? container : sandbox);
-        var hls = cont.find('.' + $.fn.textHighlighter.defaults.highlightedClass);
+        var cont = (typeof(container) != 'undefined' ? container : $sandbox);
+        var hls = cont.find('.' + $.textHighlighter.defaults.highlightedClass);
         equal(hls.length, count, 'Number of highlights is valid');
     }
 
@@ -912,8 +906,8 @@ $(document).ready(function() {
     }
 
     function assertHighlightedText(index, txt, container) {
-        var cont = (typeof(container) != 'undefined' ? container : sandbox);
-        var hls = cont.find('.' + $.fn.textHighlighter.defaults.highlightedClass);
+        var cont = (typeof(container) != 'undefined' ? container : $sandbox);
+        var hls = cont.find('.' + $.textHighlighter.defaults.highlightedClass);
         equal(hls.eq(index).text(), txt, 'Highlighted text ['+index+'] is valid');
     }
 

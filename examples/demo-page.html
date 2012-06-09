@@ -226,9 +226,10 @@
       $(document).ready(function() {
           $('#sandbox').textHighlighter();
 
-          $('div.color', '#color-picker').click(function() {
+          $('#color-picker div.color').click(function() {
               var color = $(this).css('background-color');
-              $('#sandbox').textHighlighter('setColor', color);
+              var highlighter = $('#sandbox').getHighlighter();
+              highlighter.setColor(color);
           });
       });
     </script>

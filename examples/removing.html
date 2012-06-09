@@ -216,17 +216,19 @@
                 xKeyPressed = (e.which == xKeyCode ? false : true);
             });
 
-            var hlClass = $.fn.textHighlighter.defaults.highlightedClass;
+            var hlClass = $.textHighlighter.defaults.highlightedClass;
             $('.' + hlClass).live('mouseup', function() {
                 if (xKeyPressed) {
-                    $('#sandbox').textHighlighter('removeHighlights', this);
+                    var highlighter = $('#sandbox').getHighlighter();
+                    highlighter.removeHighlights(this);
                 }
             });
 
-            $(document).textHighlighter();
+            $('#sandbox').textHighlighter();
 
             $('#remove-highlights-btn').click(function() {
-                $('#sandbox').textHighlighter('removeHighlights');
+                var highlighter = $('#sandbox').getHighlighter();
+                highlighter.removeHighlights();
             });
         });
       </script>
