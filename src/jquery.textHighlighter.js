@@ -70,7 +70,7 @@
         doHighlight: function() {
             var range = this.getCurrentRange();
             if (!range || range.collapsed) return;
-            if (!this.isRangeInsideContext(range)) return;
+            // if (!this.isRangeInsideContext(range)) return;
 
             if (this.options.onBeforeHighlight(range) == true) {
                 var $wrapper = $.textHighlighter.createWrapper(this.options);
@@ -111,7 +111,7 @@
 
             if (currentWindow.getSelection) {
                 selection = currentWindow.getSelection();
-            } else if ($('iframe')) {
+            } else if ($('iframe').length) {
                 $('iframe', top.document).each(function() {
                     if (this.contentWindow === currentWindow) {
                         selection = rangy.getIframeSelection(this);
@@ -147,6 +147,7 @@
 
         /**
          * Returns true if range.startContainer and range.endContainer is inside context.
+         * TODO: $.contains not working in IE
          */
         isRangeInsideContext: function(range) {
             var isStartContainerInContext = $.contains(this.context, range.startContainer);
@@ -201,8 +202,13 @@
                 if (goDeeper && node.nodeType == nodeTypes.TEXT_NODE) {
                     if(/\S/.test(node.nodeValue)) {
                         var wrapper = $wrapper.clone(true).get(0);
-                        var highlight = $(node).wrap(wrapper).parent().get(0);
-                        highlights.push(highlight);
+                        var nodeParent = node.parentNode;
+
+                        // highlight if node is inside the context
+                        if ($.contains(this.context, nodeParent) || nodeParent === this.context) {
+                            var highlight = $(node).wrap(wrapper).parent().get(0);
+                            highlights.push(highlight);
+                        }
                     }
 
                     goDeeper = false;
@@ -359,9 +365,12 @@
                 $.data(this, plugin.name, new TextHighlighter(this, options));
             }
         });
-    }
+    };
 
     $.textHighlighter = {
+        /**
+         * Returns HTML element to wrap selected text in.
+         */
         createWrapper: function(options) {
             return $('<span></span>')
                 .css('backgroundColor', options.color)
@@ -377,12 +386,4 @@
         }
     };
 
-    /**
-     * Returns HTML element to wrap selected text in.
-     */
-    $.textHighlighter.createWrapper = function(options) {
-        return $('<span>')
-            .css('backgroundColor', options.color)
-            .addClass(options.highlightedClass);
-    };
 })(jQuery, window, document);

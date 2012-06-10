@@ -159,7 +159,6 @@ $(document).ready(function() {
     });
 
     function testHighlightingInNestedStructures(args) {
-        console.log($sandbox);
         $sandbox.html(args.sandboxInitHtml);
         var range = createRange($sandbox.textNodes().get(args.startContainer),
                                 $sandbox.textNodes().get(args.endContainer),
