@@ -14,9 +14,9 @@
           width: 960px;
           margin: 30px auto;
           border: 1px solid #000;
-          -moz-border-radius: 10px;
-          -webkit-border-radius: 10px;
-          border-radius: 10px;
+          -moz-border-radius: 3px;
+          -webkit-border-radius: 3px;
+          border-radius: 3px;
           padding: 20px;
           background-color: #efefef;
           text-align: justify;
@@ -40,7 +40,7 @@
     <div id="info-box">
       <ul>
         <li>Select any text in the grey box below to highlight it. You should see 1 or 2 dialog boxes.</li>
-        <li>Click any highlight in the grey box below to remove it. You should see confirmation dialog box.</li>
+        <li>Click any highlighted text in the grey box below to remove it. You should see confirmation dialog box.</li>
       </ul>
     </div>
     <div id="sandbox">
@@ -83,9 +83,8 @@
 
     <script type="text/javascript">
       $(document).ready(function() {
-          var hlClass = $.fn.textHighlighter.defaults.highlightedClass;
-          $('.' + hlClass).live('mouseup', function() {
-              $('#sandbox').textHighlighter('removeHighlights', this);
+          $('.highlighted').live('mouseup', function() {
+              $('#sandbox').getHighlighter().removeHighlights(this);
           });
 
           $('#sandbox').textHighlighter({

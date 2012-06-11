@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../lib/rangy-core.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
-    <title>jQuery Text Highlighter Demo Page (with IFrame)</title>
+    <title>jQuery Text Highlighter Demo Page</title>
 
     <style type="text/css">
       #iframe-wrapper {
@@ -39,11 +39,11 @@
     <div id="wrapper">
       <div id="info-box">
         <ul>
-          <li>The grey box below is loaded within an iframe. Select any text in the iframe to highlight it.</li>
+          <li>The grey box below is loaded within an iframe. Select any text in the iframe to
+          highlight it. Note that iframe content is loaded from localhost. Due to same origin policy
+          plugin won't work on remote iframe content.</li>
         </ul>
       </div>
-
-      <h1>jQuery Text Highlighter Demo Page (with iframe)</h1>
 
       <div id="iframe-wrapper">
         <iframe id="frame" name="frame" src="frame-content.html">
@@ -54,8 +54,8 @@
       <script type="text/javascript">
         $(document).ready(function() {
             var initializeTextHighlighter = function() {
-                var $frameDoc = $('#frame').contents();
-                $frameDoc.textHighlighter();
+                var $frameDocument = $('#frame').contents();
+                $frameDocument.textHighlighter();
             }
 
             $('#frame').load(initializeTextHighlighter);  // Non-IE
