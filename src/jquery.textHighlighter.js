@@ -200,7 +200,7 @@
 
             do {
                 if (goDeeper && node.nodeType == nodeTypes.TEXT_NODE) {
-                    if(/\S/.test(node.nodeValue)) {
+                    if (/\S/.test(node.nodeValue)) {
                         var wrapper = $wrapper.clone(true).get(0);
                         var nodeParent = node.parentNode;
 
@@ -259,7 +259,7 @@
             $.each(highlights, function(i) {
                 var $highlight = $(this);
 
-                if($highlight.parent().hasClass(self.options.highlightedClass)) {
+                if ($highlight.parent().hasClass(self.options.highlightedClass)) {
                     var $parent = $highlight.parent();
                     var parentTxt = $parent.text();
                     var newNode = document.createTextNode(parentTxt);
@@ -290,7 +290,7 @@
                     $(highlight).text(mergedTxt);
                     $(prev).remove();
                 }
-                if(shouldMerge(next)) {
+                if (shouldMerge(next)) {
                     var mergedTxt = $(highlight).text() + $(next).text();
                     $(highlight).text(mergedTxt);
                     $(next).remove();
@@ -310,7 +310,7 @@
          * Removes all highlights in given element or in context if no element given.
          */
         removeHighlights: function(element) {
-            var container = (element != undefined ? element : this.context);
+            var container = (element !== undefined ? element : this.context);
 
             var unwrapHighlight = function(highlight) {
                 return $(highlight).contents().unwrap().get(0);
@@ -380,8 +380,8 @@
             color: '#ffff7b',
             highlightedClass: 'highlighted',
             contextClass: 'highlighter-context',
-            onRemoveHighlight: function() { return true },
-            onBeforeHighlight: function() { return true },
+            onRemoveHighlight: function() { return true; },
+            onBeforeHighlight: function() { return true; },
             onAfterHighlight: function() { }
         }
     };
