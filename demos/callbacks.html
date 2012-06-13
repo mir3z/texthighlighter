@@ -34,12 +34,15 @@
           width: 70%;
           background-color: #74e276;
       }
+      #info-box ul li {
+          margin-top: 5px;
+      }
     </style>
   </head>
   <body>
     <div id="info-box">
       <ul>
-        <li>Select any text in the grey box below to highlight it. You should see 1 or 2 dialog boxes.</li>
+        <li>Select any text in the grey box below to highlight it. You should see 2 dialog boxes.</li>
         <li>Click any highlighted text in the grey box below to remove it. You should see confirmation dialog box.</li>
       </ul>
     </div>
@@ -83,19 +86,19 @@
 
     <script type="text/javascript">
       $(document).ready(function() {
-          $('.highlighted').live('mouseup', function() {
+          $('.highlighted').live('click', function() {
               $('#sandbox').getHighlighter().removeHighlights(this);
           });
 
           $('#sandbox').textHighlighter({
-              onRemoveHighlight: function(hl) {
-                  return confirm('Do you really want to remove this highlight: "' + $(hl).text() + '"?');
+              onRemoveHighlight: function(highlight) {
+                  return confirm('Do you really want to remove this highlight: "' + $(highlight).text() + '"?');
               },
               onBeforeHighlight: function(range) {
                   return confirm('Do you really want to highlight this text: "' + range + '"?');
               },
-              onAfterHighlight: function(hls) {
-                  alert('You have created ' + hls.length + ' highlight(s)!');
+              onAfterHighlight: function(highlights, range) {
+                  alert('You have selected "' + range + '" and created ' + highlights.length + ' highlight(s)!');
               }
           });
       });

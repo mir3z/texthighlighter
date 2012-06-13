@@ -952,9 +952,10 @@ $(document).ready(function() {
 
     test('onAfterHighlight', function() {
         $sandbox.textHighlighter({
-            onAfterHighlight: function(hls) {
+            onAfterHighlight: function(hls, range) {
                 equal(hls.length, 1, 'Highlights length is valid');
                 equal($(hls[0]).text(), 'ipsum', 'Text is valid');
+                equal(range.toString(), 'ipsum', 'Range text is valid');
             }
         });
 

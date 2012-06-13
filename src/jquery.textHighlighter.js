@@ -70,6 +70,7 @@
         doHighlight: function() {
             var range = this.getCurrentRange();
             if (!range || range.collapsed) return;
+            var rangeText = range.toString();
 
             if (this.options.onBeforeHighlight(range) == true) {
                 var $wrapper = $.textHighlighter.createWrapper(this.options);
@@ -77,8 +78,7 @@
                 var createdHighlights = this.highlightRange(range, $wrapper);
                 var normalizedHighlights = this.normalizeHighlights(createdHighlights);
 
-                console.log(normalizedHighlights);
-                this.options.onAfterHighlight(normalizedHighlights);
+                this.options.onAfterHighlight(normalizedHighlights, rangeText);
             }
 
             this.removeAllRanges();
