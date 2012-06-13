@@ -356,7 +356,7 @@ $(document).ready(function() {
 
     // =========================================================================
 
-    module('Normalization', {
+    module('Single-color normalization', {
         setup: setup,
         teardown: teardown
     });
@@ -376,6 +376,10 @@ $(document).ready(function() {
                                     hl.startOffset, hl.endOffset);
             var rangeRangeExpectedText = hl.rangeExpectedText;
             equal(range.toString(), hl.rangeExpectedText, 'Range ' + index + ' text is valid');
+
+            if (hl.color) {
+                $sandbox.getHighlighter().setColor(hl.color);
+            }
             $sandbox.trigger('mouseup');
             assertHighlights(hl.expectedHighlights);
             return true;
@@ -520,6 +524,155 @@ $(document).ready(function() {
                 }
             ]
         });
+    });
+
+    // =========================================================================
+
+    module('Multi-color normalization', {
+        setup: setup,
+        teardown: teardown
+    });
+
+    var color = {
+        red: '#ff6666',
+        green: '#66ff66',
+        blue: '#6666ff'
+    };
+
+    /**
+     * [..] - denotes first highlight
+     * {..} - second highlight
+     * (..) - third highlight
+     * Each highlight has a different color
+     */
+
+    // <p>Lorem {ipsum [dolor} sit] amet.}</p>
+    test('&lt;p&gt;Lorem {ipsum [dolor} sit] amet.&lt;/p&gt;', function() {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 12,
+                    endOffset: 21,
+                    rangeExpectedText: 'dolor sit',
+                    color: color.red
+                },
+                {
+                    startContainer: 0,
+                    endContainer: 1,
+                    startOffset: 6,
+                    endOffset: 5,
+                    rangeExpectedText: 'ipsum dolor',
+                    color: color.green
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'ipsum dolor', color: color.green },
+            { text: ' sit', color: color.red }
+        ]);
+    });
+
+    // <p>Lorem [ipsum {dolor] sit} amet.</p>
+    test('&lt;p&gt;Lorem [ipsum {dolor] sit} amet.&lt;/p&gt;', function() {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 17,
+                    rangeExpectedText: 'ipsum dolor',
+                    color: color.red
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 2,
+                    startOffset: 6,
+                    endOffset: 4,
+                    rangeExpectedText: 'dolor sit',
+                    color: color.green
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'ipsum ', color: color.red },
+            { text: 'dolor sit', color: color.green }
+        ]);
+    });
+
+    // <p>Lorem [ipsum {dolor} sit] amet.</p>
+    test('&lt;p&gt;Lorem [ipsum {dolor} sit] amet.&lt;/p&gt;', function() {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 21,
+                    rangeExpectedText: 'ipsum dolor sit',
+                    color: color.red
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 1,
+                    startOffset: 6,
+                    endOffset: 11,
+                    rangeExpectedText: 'dolor',
+                    color: color.green
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'ipsum dolor sit', color: color.red },
+            { text: 'dolor', color: color.green }
+        ]);
+    });
+
+    // <p>Lor(em [ip)sum dol{or] sit} amet.</p>
+    test('&lt;p&gt;Lor(em [ip)sum dol{or] sit} amet.&lt;/p&gt;', function() {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 17,
+                    rangeExpectedText: 'ipsum dolor',
+                    color: color.red
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 2,
+                    startOffset: 9,
+                    endOffset: 4,
+                    rangeExpectedText: 'or sit',
+                    color: color.green
+                },
+                {
+                    startContainer: 0,
+                    endContainer: 1,
+                    startOffset: 3,
+                    endOffset: 2,
+                    rangeExpectedText: 'em ip',
+                    color: color.blue
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'em ip', color: color.blue },
+            { text: 'sum dol', color: color.red },
+            { text: 'or sit', color: color.green }
+        ]);
     });
 
     // =========================================================================
@@ -801,17 +954,12 @@ $(document).ready(function() {
         $sandbox.textHighlighter({
             onAfterHighlight: function(hls) {
                 equal(hls.length, 1, 'Highlights length is valid');
-                equal($(hls[0]).text(), 'ipsum dolor sit amet.', 'Text is valid');
+                equal($(hls[0]).text(), 'ipsum', 'Text is valid');
             }
         });
 
-        var c = $.textHighlighter.defaults.highlightedClass;
-        $sandbox
-            .append('Lorem ipsum ')
-            .append($('<span>dolor sit amet.</span>').addClass(c));
-        var sandboxExpectedText = 'Lorem ipsum dolor sit amet.'
-
-        createRange($sandbox.textNodes().get(0), $sandbox.textNodes().get(1), 6, 5);
+        $sandbox.text('Lorem ipsum dolor sit amet.');
+        createRange($sandbox.textNodes().get(0), $sandbox.textNodes().get(0), 6, 11);
         $sandbox.trigger('mouseup');
     });
 
@@ -910,10 +1058,44 @@ $(document).ready(function() {
         equal(hls.eq(index).text(), txt, 'Highlighted text ['+index+'] is valid');
     }
 
+    function assertHighlightColor(index, color, container) {
+        var cont = (typeof(container) != 'undefined' ? container : $sandbox);
+        var hls = cont.find('.' + $.textHighlighter.defaults.highlightedClass);
+        equal(rgb2hex(hls.eq(index).css('background-color')), color,
+              'Highlighted color ['+index+'] is valid');
+    }
+
     function assertHighlights(hls) {
         assertHighlightsCount(hls.length);
         $.each(hls, function(index, value) {
             assertHighlightedText(index, value);
+        });
+    }
+
+    function assertHighlightsWithColor(hls) {
+        assertHighlightsCount(hls.length);
+        $.each(hls, function(index, value) {
+            assertHighlightedText(index, value.text);
+            assertHighlightColor(index, value.color);
+        });
+    }
+
+    function createHighlights(args) {
+        $sandbox.html(args.sandboxInitHtml);
+
+        $.each(args.highlights, function(index, hl) {
+            var range = createRange($sandbox.textNodes().get(hl.startContainer),
+                                    $sandbox.textNodes().get(hl.endContainer),
+                                    hl.startOffset, hl.endOffset);
+            var rangeRangeExpectedText = hl.rangeExpectedText;
+            equal(range.toString(), hl.rangeExpectedText, 'Range ' + index + ' text is valid');
+
+            if (hl.color) {
+                $sandbox.getHighlighter().setColor(hl.color);
+            }
+            $sandbox.trigger('mouseup');
+
+            return true;
         });
     }
 });

@@ -70,7 +70,6 @@
         doHighlight: function() {
             var range = this.getCurrentRange();
             if (!range || range.collapsed) return;
-            // if (!this.isRangeInsideContext(range)) return;
 
             if (this.options.onBeforeHighlight(range) == true) {
                 var $wrapper = $.textHighlighter.createWrapper(this.options);
@@ -78,6 +77,7 @@
                 var createdHighlights = this.highlightRange(range, $wrapper);
                 var normalizedHighlights = this.normalizeHighlights(createdHighlights);
 
+                console.log(normalizedHighlights);
                 this.options.onAfterHighlight(normalizedHighlights);
             }
 
@@ -143,16 +143,6 @@
         getCurrentDocument: function() {
             // if ownerDocument is null then context is document
             return this.context.ownerDocument ? this.context.ownerDocument : this.context;
-        },
-
-        /**
-         * Returns true if range.startContainer and range.endContainer is inside context.
-         * TODO: $.contains not working in IE
-         */
-        isRangeInsideContext: function(range) {
-            var isStartContainerInContext = $.contains(this.context, range.startContainer);
-            var isEndContainerInContext = $.contains(this.context, range.endContainer);
-            return isStartContainerInContext && isEndContainerInContext;
         },
 
         /**
@@ -258,15 +248,36 @@
 
             $.each(highlights, function(i) {
                 var $highlight = $(this);
+                var $parent = $highlight.parent();
+                var $parentPrev = $parent.prev();
+                var $parentNext = $parent.next();
 
-                if ($highlight.parent().hasClass(self.options.highlightedClass)) {
-                    var $parent = $highlight.parent();
-                    var parentTxt = $parent.text();
-                    var newNode = document.createTextNode(parentTxt);
+                if (self.isHighlight($parent)) {
+                    if ($parent.css('background-color') != $highlight.css('background-color')) {
+                        if (self.isHighlight($parentPrev)
+                            && $parentPrev.css('background-color') != $parent.css('background-color')
+                            && $parentPrev.css('background-color') == $highlight.css('background-color')) {
 
-                    $parent.empty();
-                    $parent.append(newNode);
-                    $(highlights[i]).remove();
+                            $highlight.insertAfter($parentPrev);
+                        }
+
+                        if (self.isHighlight($parentNext)
+                            && $parentNext.css('background-color') != $parent.css('background-color')
+                            && $parentNext.css('background-color') == $highlight.css('background-color')) {
+
+                            $highlight.insertBefore($parentNext);
+                        }
+
+                        if ($parent.is(':empty')) {
+                            $parent.remove();
+                        }
+                    } else {
+                        var newNode = document.createTextNode($parent.text());
+
+                        $parent.empty();
+                        $parent.append(newNode);
+                        $(highlights[i]).remove();
+                    }
                 }
             });
         },
@@ -274,9 +285,11 @@
         mergeSiblingHighlights: function(highlights) {
             var self = this;
 
-            function shouldMerge(node) {
-                return node && node.nodeType == nodeTypes.ELEMENT_NODE &&
-                    $(node).hasClass(self.options.highlightedClass) ? true : false;
+            function shouldMerge(current, node) {
+                return node && node.nodeType == nodeTypes.ELEMENT_NODE
+                    && $(current).css('background-color') == $(node).css('background-color')
+                    && $(node).hasClass(self.options.highlightedClass)
+                    ? true : false;
             }
 
             $.each(highlights, function() {
@@ -285,12 +298,12 @@
                 var prev = highlight.previousSibling;
                 var next = highlight.nextSibling;
 
-                if (shouldMerge(prev)) {
+                if (shouldMerge(highlight, prev)) {
                     var mergedTxt = $(prev).text() + $(highlight).text();
                     $(highlight).text(mergedTxt);
                     $(prev).remove();
                 }
-                if (shouldMerge(next)) {
+                if (shouldMerge(highlight, next)) {
                     var mergedTxt = $(highlight).text() + $(next).text();
                     $(highlight).text(mergedTxt);
                     $(next).remove();
@@ -351,6 +364,13 @@
                 $highlights = $highlights.add(container);
             }
             return $highlights;
+        },
+
+        /**
+         * Returns true if element is highlight, ie. has proper class.
+         */
+        isHighlight: function($el) {
+            return $el.hasClass(this.options.highlightedClass);
         }
 
     };
