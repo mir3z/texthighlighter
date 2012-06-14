@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="jquery plugin highlighting text wrap range" />
+    <meta name="description" content="jQuery Text Highlighter is a jQuery plugin for highlighting text fragments in HTML documents" />
+    <title>jQuery Text Highlighter</title>
+
+    <style type="text/css">
+      body {
+          font-family: "Trebuchet MS",sans-serif;
+          margin: 0 60px 60px;
+          color: #404040;
+      }
+      a {
+          color: #000;
+      }
+      h1 {
+        font-family: Georgia,serif;
+        font-style: italic;
+        text-align: center;
+        text-shadow: 1px 1px 1px #afafaf;
+        filter: dropshadow(color=#afafaf, offx=1, offy=1);
+      }
+
+      div.short-info {
+          margin-bottom: 40px;
+      }
+
+      ul {
+          list-style-type: square;
+      }
+
+      table {
+          margin: 0 auto;
+          border: 1px solid #afafaf;
+      }
+
+      table td, table th {
+          padding: 3px 5px;
+      }
+
+      table th {
+          border-bottom: 1px solid #afafaf;
+          background: #afafaf;
+      }
+
+      table tr {
+          background-color: #efefef;
+      }
+      pre {
+          background-color: #efefef;
+          -webkit-border-radius: 4px;
+          -moz-border-radius: 4px;
+          border-radius: 4px;
+          padding: 8px;
+
+      }
+    </style>
+  </head>
+  <body>
+    <h1>jQuery Text Highlighter</h1>
+
+    <div class="short-info">
+      <b>Version:</b> 0.1<br/>
+      <b>Download:</b> <br/>
+      <b>Repository:</b> <a href="https://github.com/mir3z/jquery.texthighlighter.git">github</a><br/>
+      <b>Bugtracker:</b> <a href="https://github.com/mir3z/jquery.texthighlighter/issues">github</a><br/>
+      <b>Licence:</b> <a href="http://www.opensource.org/licenses/mit-license.php">MIT</a> <br/>
+      <b>Contact:</b> <a href="mailto:mirz.hq@gmail.com">mirz.hq@gmail.com</a>
+    </div>
+
+    <h2>Overview</h2>
+    <p>
+      jQuery Text Highlighter is a <a href="http://jquery.com">jQuery</a> plugin for highlighting
+      text fragments in HTML documents. Highlighting is realized by wrapping selected text in
+      &lt;span&gt; tags.
+    </p>
+
+    <h2>Demos</h2>
+    <ul>
+      <li><a href="demos/demo-page.html">Simple demo</a></li>
+      <li><a href="demos/removing.html">Removing highlights</a></li>
+      <li><a href="demos/callbacks.html" >Callbacks</a></li>
+      <li><a href="demos/multiple-instances.html">Multiple instances</a></li>
+      <li><a href="demos/demo-page-with-iframe.html">Iframe</a></li>
+    </ul>
+
+    <h2>Features</h2>
+    <ul>
+      <li>Highlighting text that spanning multiple tags.</li>
+      <li>Removing highlights.</li>
+      <li>Setting highlight color and custom text wrapper.</li>
+      <li>Callbacks for highlighting and removing highlights.</li>
+    </ul>
+
+    <h2>Compability</h2>
+    <p>
+      This plugin has been tested to work in following browsers:
+    </p>
+    <ul>
+      <li>Mozilla Firefox 3, 3.6, 4, 5, 6, 7, 12</li>
+      <li>Internet Explorer 7, 8, 9</li>
+      <li>Google Chrome 14, 18</li>
+      <li>Opera 11.62</li>
+      <li>Safari 5.1</li>
+    </ul>
+
+    <h2>Dependencies</h2>
+    <ul>
+      <li><a href="http://jquery.com">jQuery</a> 1.4 or higher.</li>
+      <li>
+        Functioning of the plugin rely on <a
+        href="http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html">DOM Level 2 Range
+        object</a> but IE prior to version 9 doesn't support it, providing <a
+        href="http://msdn.microsoft.com/en-us/library/ms535872%28v=vs.85%29.aspx">TextRange</a>
+        instead. This plugin takes advantage of <a href="http://code.google.com/p/rangy/">rangy</a>
+        &ndash; a cross-browser range library which provides standards-based API for performing
+        common DOM Range tasks. The plugin is distributed with ("pack" version) and without rangy
+        library, but bear in mind that the latter doesn't work in older versions of IE.
+      </li>
+    </ul>
+
+    <h2>Usage</h2>
+    <ul>
+      <li>
+        To use jQuery Text Highlighter include <a href="http://jquery.com">jQuery</a> and plugin
+        source file inside the <code>&lt;head&gt;</code> tag of your HTML document:
+        <pre>&lt;script type="text/javascript" src="/path/to/jquery.min.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="/path/to/jquery.textHighlighter.pack.js"&gt;&lt;/script&gt;</pre>
+      </li>
+      <li>
+        To setup the plugin on DOM element with <code>id="sandbox"</code>, add the following code:
+        <pre>&lt;script type="text/javascript"&gt;
+    $(document).ready(function() {
+        $('#sandbox').textHighlighter();
+    });
+&lt;/script&gt;</pre>
+      </li>
+      <li>
+        You can access <code>TextHighlighter</code> object with the following code:
+        <pre>$('#sandbox').getHighlighter();</pre>
+      </li>
+      <li>
+        And then you can call one of its methods:
+        <pre>$('#sandbox').getHighlighter().setColor('#00ff00');</pre>
+      </li>
+    </ul>
+
+    <h2>Configuration</h2>
+    <table>
+      <thead>
+        <tr>
+          <th class="prop">Property</th>
+          <th class="type">Type</th>
+          <th class="default">Default</th>
+          <th class="desc">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>color</td>
+          <td>string</td>
+          <td>#ffff7b</td>
+          <td>Highlight color. Must be valid CSS color.</td>
+        </tr>
+        <tr class="even">
+          <td>highlightedClass</td>
+          <td>string</td>
+          <td>highlighted</td>
+          <td>Class given to a wrapper of highlighted text.</td>
+        </tr>
+        <tr>
+          <td>contextClass</td>
+          <td>string</td>
+          <td>highlighter-context</td>
+          <td>Class given to en element on which the plugin is initialized.</td>
+        </tr>
+        <tr class="even">
+          <td>onRemoveHighlight</td>
+          <td>function</td>
+          <td></td>
+          <td>
+            Function that is called right before removing a highlight. The highlight is passed to
+            the function as param. If function returns false, highlight won't be removed. See the
+            source of the <a href="demos/callbacks.html">callbacks demo</a> for details.
+          </td>
+        </tr>
+        <tr>
+          <td>onBeforeHighlight</td>
+          <td>function</td>
+          <td></td>
+          <td>
+            Function that is called before highlighting a text. Range object is passed to the
+            function as param. If function returns false, text won't be highlighted. See the source
+            of the <a href="demos/callbacks.html">callbacks demo</a> for details.
+          </td>
+        </tr>
+        <tr class="even">
+          <td>onAfterHighlight</td>
+          <td>function</td>
+          <td></td>
+          <td>
+            Function that is called after highlighting a text. Array of created and normalized
+            highlights is passed as a first argument. Range object is passed as second argument. See
+            the source of the <a href="demos/callbacks.html">callbacks demo</a> for details.
+          </td>
+        </tr>
+        <tr>
+          <td>$.textHighlighter.defaults</td>
+          <td>object</td>
+          <td>...</td>
+          <td>Defines default plugin values.</td>
+        </tr>
+        <tr class="even">
+          <td>$.textHighlighter.createWrapper</td>
+          <td>function</td>
+          <td>...</td>
+          <td>
+            Function that should return wrapper which is used to wrap selected text (i.e. highlight
+            that text). Actual options defined in initialization are passed as param.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Methods</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>destroy()</td>
+          <td>Disables plugin leaving all highlights untouched.</td>
+        </tr>
+        <tr class="even">
+          <td>setColor(color)</td>
+          <td>Sets highlight color. Color must be valid CSS color.</td>
+        </tr>
+        <tr>
+          <td>getColor()</td>
+          <td>Returns highlight color.</td>
+        </tr>
+        <tr class="even">
+          <td>removeHighlights([element])</td>
+          <td>
+            Removes all highlights within given element or within context element if no element
+            given.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </body>
+</html>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="../lib/rangy-core.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
+    <title>jQuery Text Highlighter Demo Page</title>
+
+    <style type="text/css">
+      #iframe-wrapper {
+          text-align: center;
+      }
+
+      iframe {
+          margin: 10px auto;
+          height: 500px;
+          width: 95%;
+          border: 3px double #afafaf;
+      }
+      #info-box {
+          -webkit-border-radius: 2px;
+          -moz-border-radius: 2px;
+          border-radius: 2px;
+          -webkit-box-shadow: 1px 1px 3px #afafaf;
+          -moz-box-shadow: 1px 1px 3px #afafaf;
+          box-shadow: 1px 1px 3px #afafaf;
+          font-size: 12px;
+          border: 1px solid #24aa27;
+          margin: 30px auto;
+          width: 70%;
+          background-color: #74e276;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="info-box">
+        <ul>
+          <li>The grey box below is loaded within an iframe. Select any text in the iframe to
+          highlight it. Note that iframe content is loaded from localhost. Due to same origin policy
+          plugin won't work on remote iframe content.</li>
+        </ul>
+      </div>
+
+      <div id="iframe-wrapper">
+        <iframe id="frame" name="frame" src="frame-content.html">
+          Your browser doesn't support iframes!
+        </iframe>
+      </div>
+
+      <script type="text/javascript">
+        $(document).ready(function() {
+            var initializeTextHighlighter = function() {
+                var $frameDocument = $('#frame').contents();
+                $frameDocument.textHighlighter();
+            }
+
+            $('#frame').load(initializeTextHighlighter);  // Non-IE
+            $('#frame').ready(initializeTextHighlighter); // IE
+        });
+      </script>
+    </div>
+  </body>
+</html>
