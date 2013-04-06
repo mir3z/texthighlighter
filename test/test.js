@@ -6,7 +6,12 @@ $(document).ready(function() {
     }
 
     function teardown() {
-        $sandbox.getHighlighter().destroy();
+        var hl = $sandbox.getHighlighter();
+
+        if (typeof(hl) !== 'undefined') {
+            $sandbox.getHighlighter().destroy();
+        }
+
         $sandbox.empty();
     }
 
@@ -670,6 +675,86 @@ $(document).ready(function() {
 
         assertHighlightsWithColor([
             { text: 'em ip', color: color.blue },
+            { text: 'sum dol', color: color.red },
+            { text: 'or sit', color: color.green }
+        ]);
+    });
+
+    // https://github.com/mir3z/jquery.texthighlighter/issues/1
+    // <p>Lor{em [ip}sum dol{or] sit} amet.</p> right -> left
+    test('&lt;p&gt;Lor{em [ip}sum dol{or] sit} amet.&lt;/p&gt;', function() {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 17,
+                    rangeExpectedText: 'ipsum dolor',
+                    color: color.red
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 2,
+                    startOffset: 9,
+                    endOffset: 4,
+                    rangeExpectedText: 'or sit',
+                    color: color.green
+                },
+                {
+                    startContainer: 0,
+                    endContainer: 1,
+                    startOffset: 3,
+                    endOffset: 2,
+                    rangeExpectedText: 'em ip',
+                    color: color.green
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'em ip', color: color.green },
+            { text: 'sum dol', color: color.red },
+            { text: 'or sit', color: color.green }
+        ]);
+    });
+
+    // https://github.com/mir3z/jquery.texthighlighter/issues/1
+    // <p>Lor{em [ip}sum dol{or] sit} amet.</p> left -> right
+    test('&lt;p&gt;Lor{em [ip}sum dol{or] sit} amet.&lt;/p&gt;', function() {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 17,
+                    rangeExpectedText: 'ipsum dolor',
+                    color: color.red
+                },
+                {
+                    startContainer: 0,
+                    endContainer: 1,
+                    startOffset: 3,
+                    endOffset: 2,
+                    rangeExpectedText: 'em ip',
+                    color: color.green
+                },
+                {
+                    startContainer: 2,
+                    endContainer: 3,
+                    startOffset: 7,
+                    endOffset: 4,
+                    rangeExpectedText: 'or sit',
+                    color: color.green
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'em ip', color: color.green },
             { text: 'sum dol', color: color.red },
             { text: 'or sit', color: color.green }
         ]);
