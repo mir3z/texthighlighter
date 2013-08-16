@@ -11,7 +11,7 @@
     <style type="text/css">
       body {
           font-family: "Trebuchet MS",sans-serif;
-          margin: 0 60px 60px;
+          margin: 0 60px 0;
           color: #404040;
       }
       a {
@@ -58,6 +58,14 @@
           padding: 8px;
 
       }
+      #footer {
+          text-align: center;
+          margin: 30px auto 0;
+          padding: 15px;
+          width: 40%;
+          font-size: 10px;
+          color: #afafaf;
+      }
     </style>
 
     <script type="text/javascript">
@@ -76,10 +84,10 @@
     <h1>jQuery Text Highlighter</h1>
 
     <div class="short-info">
-      <b>Version:</b> 0.1.1<br/>
+      <b>Version:</b> 0.2<br/>
       <b>Download:</b>
-      <a href="https://github.com/mir3z/jquery.texthighlighter/archive/v0.1.1.zip">[zip]</a>
-      <a href="https://github.com/mir3z/jquery.texthighlighter/archive/v0.1.1.tar.gz">[tar.gz]</a>
+      <a href="https://github.com/mir3z/jquery.texthighlighter/archive/v0.2.zip">[zip]</a>
+      <a href="https://github.com/mir3z/jquery.texthighlighter/archive/v0.2.tar.gz">[tar.gz]</a>
 
       <br/>
       <b>Repository:</b> <a href="https://github.com/mir3z/jquery.texthighlighter.git">github</a><br/>
@@ -99,30 +107,43 @@
     <ul>
       <li><a href="demos/demo-page.html">Simple demo</a></li>
       <li><a href="demos/removing.html">Removing highlights</a></li>
-      <li><a href="demos/callbacks.html" >Callbacks</a></li>
+      <li><a href="demos/callbacks.html">Callbacks</a></li>
       <li><a href="demos/multiple-instances.html">Multiple instances</a></li>
       <li><a href="demos/demo-page-with-iframe.html">Iframe</a></li>
+      <li><a href="demos/custom-wrapper.html">Custom wrapper</a></li>
+      <li><a href="demos/serialization.html">Serialization & deserialization</a></li>
     </ul>
 
     <h2>Features</h2>
     <ul>
-      <li>Highlighting text that spanning multiple tags.</li>
+      <li>Highlighting text that spans multiple HTML tags.</li>
       <li>Removing highlights.</li>
       <li>Setting highlight color and custom text wrapper.</li>
       <li>Callbacks for highlighting and removing highlights.</li>
+      <li>Serialization & deserialization of highlights.</li>
     </ul>
 
-    <h2>Compability</h2>
+    <h2>Compability notes</h2>
     <p>
       This plugin has been tested to work in following browsers:
     </p>
     <ul>
-      <li>Mozilla Firefox 3, 3.6, 4, 5, 6, 7, 12, 19, 20</li>
+      <li>Mozilla Firefox 3, 3.6, 4, 5, 6, 7, 12, 19, 20, 22</li>
       <li>Internet Explorer 7, 8, 9, 10</li>
-      <li>Google Chrome 14, 18, 26</li>
-      <li>Opera 11.62, 12.4</li>
+      <li>Google Chrome 14, 18, 26, 28</li>
+      <li>Opera 11.62, 12.4, 15, 16</li>
       <li>Safari 5.1, 6</li>
     </ul>
+
+    <p>
+      However, serialization needs a few words of explanation. Let's
+      divide web browsers into 2 groups: IE prior to version 9 and
+      the rest. Currently highlights from one group cannot be
+      successfully deserialized in web browser from the second group due
+      to the fact that IE < 9 ignores whitespace text nodes. So
+      generally it's not recommended to use the plugin in IE older
+      than version 9.
+    </p>
 
     <h2>Dependencies</h2>
     <ul>
@@ -136,6 +157,11 @@
         &ndash; a cross-browser range library which provides standards-based API for performing
         common DOM Range tasks. The plugin is distributed with ("pack" version) and without rangy
         library, but bear in mind that the latter doesn't work in older versions of IE.
+      </li>
+      <li>
+        Serialization uses JSON but IE prior to version 8 doesn't support it natively. You can
+        use <a href="https://github.com/douglascrockford/JSON-js">Douglas Crckford's
+        implementation</a> if you are going to use the plugin in old versions of IE.
       </li>
     </ul>
 
@@ -236,7 +262,8 @@
           <td>...</td>
           <td>
             Function that should return wrapper which is used to wrap selected text (i.e. highlight
-            that text). Actual options defined in initialization are passed as param.
+            that text). Actual options defined in initialization are passed as param. See
+            <a href="demos/custom-wrapper.html">custom wrapper example</a> for details.
           </td>
         </tr>
       </tbody>
@@ -270,8 +297,27 @@
             given.
           </td>
         </tr>
+        <tr>
+          <td>getAllHighlights(container, andSelf)</td>
+          <td>
+            Returns all highlights in given container. If container is a highlight itself
+            and andSelf is true, container will be returned as well.
+          </td>
+        </tr>
+        <tr>
+          <td>serializeHighlights()</td>
+          <td>Serializes all highlights to stringified JSON object. See <a href="demos/serialization.html">serialization example</a> for more details.</td>
+        </tr>
+        <tr class="even">
+          <td>deserializeHighlights(json)</td>
+          <td>Deserializes highlights given as stringified JSON. See <a href="demos/serialization.html">serialization example</a> for more details.</td>
+        </tr>
       </tbody>
     </table>
+
+    <div id="footer">
+      Copyright &copy; 2011 - 2013 by mirz. All Rights Reserved.
+    </div>
 
   </body>
 </html>
