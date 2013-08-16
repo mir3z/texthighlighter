@@ -32,6 +32,12 @@
           border: 1px dashed #afafaf;
           padding: 3px;
       }
+      #snippet pre {
+          margin: 10px auto;
+          padding: 10px 0;
+          background-color: #fff;
+          width: 97%;
+      }
       pre {
           border: 1px #afafaf dotted;
           width: 40%;
@@ -41,7 +47,7 @@
       fieldset {
           border: 1px solid #afafaf;
       }
-      #info-box {
+      .info-box {
           -webkit-border-radius: 2px;
           -moz-border-radius: 2px;
           border-radius: 2px;
@@ -51,14 +57,16 @@
           font-size: 12px;
           border: 1px solid #24aa27;
           margin: 30px auto;
+          padding: 10px;
           width: 70%;
           background-color: #74e276;
+          font-family: sans-serif;
       }
-      #info-box #color-picker {
+      .info-box #color-picker {
           border: none;
           display: inline;
       }
-      #info-box #color-picker div {
+      .info-box #color-picker div {
           border: 1px solid #000;
           width: 10px;
           height: 10px;
@@ -66,13 +74,13 @@
           cursor: pointer;
           border-radius: 2px;
       }
-      #info-box ul li {
+      .info-box ul li {
           margin-top: 8px;
       }
     </style>
   </head>
   <body>
-    <div id="info-box">
+    <div class="info-box">
       <ul>
         <li>Select any text in the grey box below to highlight it.</li>
         <li>
@@ -183,7 +191,7 @@
 
       <h2>Image</h2>
       <p>
-        <img src="http://jquery.org/wp-content/uploads/2010/01/JQuery_logo_color_onwhite-300x74.png"
+        <img src="http://farm1.staticflickr.com/40/113736041_ea31831d21_m.jpg"
              alt="Image" />
       </p>
 
@@ -222,7 +230,18 @@
         </form>
       </fieldset>
     </div>
+
+    <div class="info-box" id="snippet">
+      Source script used in this example:
+    </div>
+
     <script type="text/javascript">
+      $(document).ready(function() {
+          $('#snippet').append('<pre>' + $('#snippet-source').html() + '</pre>');
+      });
+    </script>
+
+    <script type="text/javascript" id="snippet-source">
       $(document).ready(function() {
           $('#sandbox').textHighlighter();
 

@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../lib/rangy-core.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
-    <title>jQuery Text Highlighter Demo Page</title>
+    <title>jQuery Text Highlighter Demo Page :: Removing Highlights</title>
 
     <style type="text/css">
       #sandbox {
@@ -41,7 +41,7 @@
       fieldset {
           border: 1px solid #afafaf;
       }
-      #info-box {
+      .info-box {
           -webkit-border-radius: 2px;
           -moz-border-radius: 2px;
           border-radius: 2px;
@@ -51,16 +51,24 @@
           font-size: 12px;
           border: 1px solid #24aa27;
           margin: 30px auto;
+          padding: 10px;
           width: 70%;
           background-color: #74e276;
+          font-family: sans-serif;
       }
-      #info-box p {
+      .info-box p {
           text-align: center;
+      }
+      #snippet pre {
+          margin: 10px auto;
+          padding: 10px 0;
+          background-color: #fff;
+          width: 97%;
       }
     </style>
   </head>
   <body>
-    <div id="info-box">
+    <div class="info-box">
       <ul>
         <li>Select any text in the grey box below to highlight it.</li>
         <li>Click highlighted text while pressing the "x" key to remove it.</li>
@@ -167,7 +175,7 @@
 
       <h2>Image</h2>
       <p>
-        <img src="http://jquery.org/wp-content/uploads/2010/01/JQuery_logo_color_onwhite-300x74.png"
+        <img src="http://farm1.staticflickr.com/40/113736041_ea31831d21_m.jpg"
              alt="Image" />
       </p>
 
@@ -205,30 +213,42 @@
           </p>
         </form>
       </fieldset>
-
-      <script type="text/javascript">
-        $(document).ready(function() {
-            var xKeyPressed = false;
-            var xKeyCode = 88;
-            $(window).keydown(function(e) {
-                xKeyPressed = (e.which == xKeyCode);
-            }).keyup(function(e) {
-                xKeyPressed = !(e.which == xKeyCode);
-            });
-
-            $('.highlighted').live('mouseup', function() {
-                if (xKeyPressed) {
-                    $('#sandbox').getHighlighter().removeHighlights(this);
-                }
-            });
-
-            $('#remove-highlights-btn').click(function() {
-                $('#sandbox').getHighlighter().removeHighlights();
-            });
-
-            $('#sandbox').textHighlighter();
-        });
-      </script>
     </div>
+
+    <div class="info-box" id="snippet">
+      Source script used in this example:
+    </div>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+          $('#snippet').append('<pre>' + $('#snippet-source').html() + '</pre>');
+      });
+    </script>
+
+    <script type="text/javascript" id="snippet-source">
+      $(document).ready(function() {
+          var xKeyPressed = false;
+          var xKeyCode = 88;
+
+          $(window).keydown(function(e) {
+              xKeyPressed = (e.which == xKeyCode);
+          }).keyup(function(e) {
+              xKeyPressed = !(e.which == xKeyCode);
+          });
+
+          $('.highlighted').live('mouseup', function() {
+              if (xKeyPressed) {
+                  $('#sandbox').getHighlighter().removeHighlights(this);
+              }
+          });
+
+          $('#remove-highlights-btn').click(function() {
+              $('#sandbox').getHighlighter().removeHighlights();
+          });
+
+          $('#sandbox').textHighlighter();
+      });
+    </script>
+
   </body>
 </html>

@@ -1049,6 +1049,141 @@ $(document).ready(function() {
         $sandbox.trigger('mouseup');
     });
 
+    // =========================================================================
+
+    module('Serialization', {
+        setup: setup,
+        teardown: teardown
+    });
+
+    function testSerialization(params) {
+        createHighlights(params);
+
+        var hl = $sandbox.getHighlighter();
+        var highlights = hl.getAllHighlights($sandbox);
+        var jsonStr = hl.serializeHighlights();
+        var expectedHtml = $sandbox.html();
+
+        $sandbox.html(params.sandboxInitHtml);
+        var deserializedHighlights = hl.deserializeHighlights(jsonStr);
+        var actualHtml = $sandbox.html();
+
+        equal(expectedHtml, actualHtml, 'Serialization and deserialization successful');
+        equal(highlights.length, deserializedHighlights.length, 'All highlights deserialized');
+    }
+
+    test('Serialize one highlight', function() {
+        testSerialization({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            highlights: [{
+                startContainer: 0,
+                endContainer: 0,
+                startOffset: 6,
+                endOffset: 11,
+                rangeExpectedText: 'ipsum',
+                color: color.red
+            }]
+        });
+    });
+
+    test('Serialize multiple highlights', function() {
+        testSerialization({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet.</p>',
+            highlights: [{
+                startContainer: 0,
+                endContainer: 0,
+                startOffset: 0,
+                endOffset: 5,
+                rangeExpectedText: 'Lorem',
+                color: color.red
+            }, {
+                startContainer: 1,
+                endContainer: 1,
+                startOffset: 7,
+                endOffset: 12,
+                rangeExpectedText: 'dolor',
+                color: color.green
+            }, {
+                startContainer: 3,
+                endContainer: 3,
+                startOffset: 5,
+                endOffset: 10,
+                rangeExpectedText: 'amet.',
+                color: color.blue
+            }]
+        });
+    });
+
+    test('Serialization on splitted highlight 1', function() {
+        testSerialization({
+            sandboxInitHtml: '<p>Lorem ipsum <b>dolor sit</b> amet.</p>',
+            highlights: [{
+                startContainer: 0,
+                endContainer: 1,
+                startOffset: 6,
+                endOffset: 5,
+                rangeExpectedText: 'ipsum dolor',
+                color: color.red
+            }]
+        });
+    });
+
+    test('Serialization on splitted highlight 2', function() {
+        testSerialization({
+            sandboxInitHtml: '<p>Lorem ipsum <b>dolor sit</b> amet.</p>',
+            highlights: [{
+                startContainer: 1,
+                endContainer: 2,
+                startOffset: 6,
+                endOffset: 5,
+                rangeExpectedText: 'sit amet',
+                color: color.red
+            }]
+        });
+    });
+
+    test('Serialization on splitted highlight 3', function() {
+        testSerialization({
+            sandboxInitHtml: '<p>Lorem ipsum <b>dolor</b> sit amet.</p>',
+            highlights: [{
+                startContainer: 0,
+                endContainer: 2,
+                startOffset: 6,
+                endOffset: 4,
+                rangeExpectedText: 'ipsum dolor sit',
+                color: color.red
+            }]
+        });
+    });
+
+    test('Serialization in nested structures 1', function() {
+        testSerialization({
+            sandboxInitHtml: '<p>Lorem <div>ipsum <b>dolor</b> sit</div> amet.</p>',
+            highlights: [{
+                startContainer: 0,
+                endContainer: 2,
+                startOffset: 2,
+                endOffset: 3,
+                rangeExpectedText: 'rem ipsum dol',
+                color: color.red
+            }]
+        });
+    });
+
+    test('Serialization in nested structures 2', function() {
+        testSerialization({
+            sandboxInitHtml: '<p>Lorem <div>ipsum <b>dolor</b> sit </div>amet.</p>',
+            highlights: [{
+                startContainer: 2,
+                endContainer: 4,
+                startOffset: 0,
+                endOffset: 3,
+                rangeExpectedText: 'dolor sit ame',
+                color: color.red
+            }]
+        });
+    });
+
 
     /********************************************************
      *

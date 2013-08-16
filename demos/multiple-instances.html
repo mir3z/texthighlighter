@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../lib/rangy-core.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
-    <title>jQuery Text Highlighter Demo Page</title>
+    <title>jQuery Text Highlighter Demo Page :: Multiple Instances</title>
 
     <style type="text/css">
       #sandbox {
@@ -21,7 +21,7 @@
           background-color: #efefef;
           text-align: justify;
       }
-      #info-box {
+      .info-box {
           -webkit-border-radius: 2px;
           -moz-border-radius: 2px;
           border-radius: 2px;
@@ -33,6 +33,14 @@
           margin: 30px auto;
           width: 70%;
           background-color: #74e276;
+          font-family: sans-serif;
+          padding: 10px;
+      }
+      #snippet pre {
+          margin: 10px auto;
+          padding: 10px 0;
+          background-color: #fff;
+          width: 97%;
       }
       h1 {
           text-align: left;
@@ -44,7 +52,7 @@
     </style>
   </head>
   <body>
-    <div id="info-box">
+    <div class="info-box">
       <ul>
         <li>Select any text in paragraphs in the grey box to highlight it.</li>
         <li>Each of three paragraphs have different plugin instance.</li>
@@ -88,21 +96,30 @@
         ligula.
       </div>
     </div>
+    <div class="info-box" id="snippet">
+      Source script used in this example:
+    </div>
 
-      <script type="text/javascript">
-        $(document).ready(function() {
-            $('#d1').textHighlighter({
-                color: '#FF6666'
-            });
+    <script type="text/javascript">
+      $(document).ready(function() {
+          $('#snippet').append('<pre>' + $('#snippet-source').html() + '</pre>');
+      });
+    </script>
 
-            $('#d2').textHighlighter({
-                color: '#66FF66'
-            });
+    <script type="text/javascript" id="snippet-source">
+      $(document).ready(function() {
+          $('#d1').textHighlighter({
+              color: '#FF6666'
+          });
 
-            $('#d3').textHighlighter({
-                color: '#6666FF'
-            });
-        });
-      </script>
+          $('#d2').textHighlighter({
+              color: '#66FF66'
+          });
+
+          $('#d3').textHighlighter({
+              color: '#6666FF'
+          });
+      });
+    </script>
   </body>
 </html>

@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../lib/rangy-core.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
-    <title>jQuery Text Highlighter Simple Demo Page</title>
+    <title>jQuery Text Highlighter Demo Page :: Callbacks</title>
 
     <style type="text/css">
       #sandbox {
@@ -21,7 +21,13 @@
           background-color: #efefef;
           text-align: justify;
       }
-      #info-box {
+      #snippet pre {
+          margin: 10px auto;
+          padding: 10px 0;
+          background-color: #fff;
+          width: 97%;
+      }
+      .info-box {
           -webkit-border-radius: 2px;
           -moz-border-radius: 2px;
           border-radius: 2px;
@@ -31,16 +37,18 @@
           font-size: 12px;
           border: 1px solid #24aa27;
           margin: 30px auto;
+          padding: 10px;
           width: 70%;
           background-color: #74e276;
+          font-family: sans-serif;
       }
-      #info-box ul li {
+      .info-box ul li {
           margin-top: 5px;
       }
     </style>
   </head>
   <body>
-    <div id="info-box">
+    <div class="info-box">
       <ul>
         <li>Select any text in the grey box below to highlight it. You should see 2 dialog boxes.</li>
         <li>Click any highlighted text in the grey box below to remove it. You should see confirmation dialog box.</li>
@@ -84,7 +92,17 @@
       </p>
     </div>
 
+    <div class="info-box" id="snippet">
+      Source script used in this example:
+    </div>
+
     <script type="text/javascript">
+      $(document).ready(function() {
+          $('#snippet').append('<pre>' + $('#snippet-source').html() + '</pre>');
+      });
+    </script>
+
+    <script type="text/javascript" id="snippet-source">
       $(document).ready(function() {
           $('.highlighted').live('click', function() {
               $('#sandbox').getHighlighter().removeHighlights(this);
