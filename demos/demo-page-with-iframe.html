@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../lib/rangy-core.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
-    <title>jQuery Text Highlighter Demo Page</title>
+    <title>jQuery Text Highlighter Demo Page :: Iframe</title>
 
     <style type="text/css">
       #iframe-wrapper {
@@ -20,7 +20,7 @@
           width: 95%;
           border: 3px double #afafaf;
       }
-      #info-box {
+      .info-box {
           -webkit-border-radius: 2px;
           -moz-border-radius: 2px;
           border-radius: 2px;
@@ -32,12 +32,20 @@
           margin: 30px auto;
           width: 70%;
           background-color: #74e276;
+          font-family: sans-serif;
+          padding: 10px;
+      }
+      #snippet pre {
+          margin: 10px auto;
+          padding: 10px 0;
+          background-color: #fff;
+          width: 97%;
       }
     </style>
   </head>
   <body>
     <div id="wrapper">
-      <div id="info-box">
+      <div class="info-box">
         <ul>
           <li>The grey box below is loaded within an iframe. Select any text in the iframe to
           highlight it. Note that iframe content is loaded from localhost. Due to same origin policy
@@ -50,18 +58,29 @@
           Your browser doesn't support iframes!
         </iframe>
       </div>
-
-      <script type="text/javascript">
-        $(document).ready(function() {
-            var initializeTextHighlighter = function() {
-                var $frameDocument = $('#frame').contents();
-                $frameDocument.textHighlighter();
-            }
-
-            $('#frame').load(initializeTextHighlighter);  // Non-IE
-            $('#frame').ready(initializeTextHighlighter); // IE
-        });
-      </script>
     </div>
+
+    <div class="info-box" id="snippet">
+      Source script used in this example:
+    </div>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+          $('#snippet').append('<pre>' + $('#snippet-source').html() + '</pre>');
+      });
+    </script>
+
+    <script type="text/javascript" id="snippet-source">
+      $(document).ready(function() {
+          var initializeTextHighlighter = function() {
+              var $frameDocument = $('#frame').contents();
+              $frameDocument.textHighlighter();
+          };
+
+          $('#frame').load(initializeTextHighlighter);  // Non-IE
+          $('#frame').ready(initializeTextHighlighter); // IE
+      });
+    </script>
+
   </body>
 </html>
