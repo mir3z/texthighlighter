@@ -1,6 +1,6 @@
 /**
  * @license jQuery Text Highlighter
- * Copyright (C) 2012 by mirz
+ * Copyright (C) 2011 - 2013 by mirz
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,11 +32,11 @@
     };
 
     function TextHighlighter(element, options) {
-	this.context = element;
+        this.context = element;
         this.$context = $(element);
-	this.options = $.extend({}, $[plugin.name].defaults, options);
+        this.options = $.extend({}, $[plugin.name].defaults, options);
 
-	this.init();
+        this.init();
     }
 
     TextHighlighter.prototype = {
@@ -146,7 +146,7 @@
         },
 
         /**
-         * Wraps given range (highlight it), in the given wrapper.
+         * Wraps given range (highlights it) object in the given wrapper.
          */
         highlightRange: function(range, $wrapper) {
             if (range.collapsed) return;
@@ -311,10 +311,16 @@
             });
         },
 
+        /**
+         * Sets color of future highlights.
+         */
         setColor: function(color) {
             this.options.color = color;
         },
 
+        /**
+         * Returns current highlights color.
+         */
         getColor: function() {
             return this.options.color;
         },
@@ -371,10 +377,115 @@
          */
         isHighlight: function($el) {
             return $el.hasClass(this.options.highlightedClass);
+        },
+
+        /**
+         * Serializes all highlights to stringified JSON object.
+         */
+        serializeHighlights: function() {
+            var $highlights = this.getAllHighlights(this.context);
+            var refEl = this.context;
+            var hlDescriptors = [];
+            var self = this;
+
+            var getElementPath = function (el, refElement) {
+                var path = [];
+
+                do {
+                    var elIndex = $.inArray(el, el.parentNode.childNodes);
+                    path.unshift(elIndex);
+                    el = el.parentNode;
+                } while (el !== refElement);
+
+                return path;
+            };
+
+            $highlights.each(function(i, highlight) {
+                var offset = 0; // Hl offset from previous sibling within parent node.
+                var length = highlight.firstChild.length;
+                var hlPath = getElementPath(highlight, refEl);
+                var wrapper = $(highlight).clone().empty().get(0).outerHTML;
+
+                if (highlight.previousSibling && highlight.previousSibling.nodeType === nodeTypes.TEXT_NODE) {
+                    offset = highlight.previousSibling.length;
+                }
+
+                hlDescriptors.push([
+                    wrapper,
+                    highlight.innerText,
+                    hlPath.join(':'),
+                    offset,
+                    length
+                ]);
+            });
+
+            return JSON.stringify(hlDescriptors);
+        },
+
+        /**
+         * Deserializes highlights from stringified JSON given as parameter.
+         */
+        deserializeHighlights: function(json) {
+            try {
+                var hlDescriptors = JSON.parse(json);
+            } catch (e) {
+                throw "Can't parse serialized highlights: " + e;
+            }
+            var highlights = [];
+            var self = this;
+
+            var deserializationFn = function (hlDescriptor) {
+                var wrapper = hlDescriptor[0];
+                var hlText = hlDescriptor[1];
+                var hlPath = hlDescriptor[2].split(':');
+                var elOffset = hlDescriptor[3];
+                var hlLength = hlDescriptor[4];
+                var elIndex = hlPath.pop();
+                var idx = null;
+                var node = self.context;
+
+                while ((idx = hlPath.shift()) !== undefined) {
+                    node = node.childNodes[idx];
+                }
+
+                if (node.childNodes[elIndex-1] && node.childNodes[elIndex-1].nodeType === nodeTypes.TEXT_NODE) {
+                    elIndex -= 1;
+                }
+
+                var textNode = node.childNodes[elIndex];
+                var hlNode = textNode.splitText(elOffset);
+                hlNode.splitText(hlLength);
+
+                if (hlNode.nextSibling && hlNode.nextSibling.nodeValue == '') {
+                    hlNode.parentNode.removeChild(hlNode.nextSibling);
+                }
+
+                if (hlNode.previousSibling && hlNode.previousSibling.nodeValue == '') {
+                    hlNode.parentNode.removeChild(hlNode.previousSibling);
+                }
+
+                var highlight = $(hlNode).wrap(wrapper).parent().get(0);
+                highlights.push(highlight);
+            };
+
+            $.each(hlDescriptors, function(i, hlDescriptor) {
+                try {
+                    deserializationFn(hlDescriptor);
+                } catch (e) {
+                    console && console.warn
+                        && console.warn("Can't deserialize " + i + "-th descriptor. Cause: " + e);
+                    return true;
+                }
+            });
+
+            return highlights;
         }
 
     };
 
+    /**
+     * Returns TextHighlighter instance.
+     */
     $.fn.getHighlighter = function() {
         return this.data(plugin.name);
     };
