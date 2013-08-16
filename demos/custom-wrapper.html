@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../lib/rangy-core.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
-    <title>jQuery Text Highlighter Demo Page :: Callbacks</title>
+    <title>jQuery Text Highlighter Demo Page :: Custom Wrapper</title>
 
     <style type="text/css">
       #sandbox {
@@ -50,8 +50,11 @@
   <body>
     <div class="info-box">
       <ul>
-        <li>Select any text in the grey box below to highlight it. You should see 2 dialog boxes.</li>
-        <li>Click any highlighted text in the grey box below to remove it. You should see confirmation dialog box.</li>
+        <li>Select any text in the grey box below to highlight it.</li>
+        <li>
+          Custom wrapper object is provided in this example. Text snippets are highlighted by wrapping
+          them in &lt;b&gt; tags instead of defaults &lt;span&gt; tags.
+        </li>
       </ul>
     </div>
     <div id="sandbox">
@@ -98,26 +101,23 @@
 
     <script type="text/javascript">
       $(document).ready(function() {
-          $('#snippet').append('<pre>' + $('#snippet-source').html() + '</pre>');
+          var src = $('#snippet-source').html();
+          src = src.replace(/>/g, '&gt;');
+          src = src.replace(/</g, '&lt;');
+          $('#snippet').append('<pre>'+src+'</pre>');
       });
     </script>
 
     <script type="text/javascript" id="snippet-source">
       $(document).ready(function() {
-          $('.highlighted').live('click', function() {
-              $('#sandbox').getHighlighter().removeHighlights(this);
-          });
+          $.textHighlighter.createWrapper = function(options) {
+              return $('<b></b>')
+                  .addClass(options.highlightedClass)
+                  .css('color', options.color);
+          };
 
           $('#sandbox').textHighlighter({
-              onRemoveHighlight: function(highlight) {
-                  return confirm('Do you really want to remove this highlight: "' + $(highlight).text() + '"?');
-              },
-              onBeforeHighlight: function(range) {
-                  return confirm('Do you really want to highlight this text: "' + range + '"?');
-              },
-              onAfterHighlight: function(highlights, range) {
-                  alert('You have selected "' + range + '" and created ' + highlights.length + ' highlight(s)!');
-              }
+              color: '#7c1493'
           });
       });
     </script>
