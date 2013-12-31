@@ -1062,14 +1062,18 @@ $(document).ready(function() {
         var hl = $sandbox.getHighlighter();
         var highlights = hl.getAllHighlights($sandbox);
         var jsonStr = hl.serializeHighlights();
+        var json = JSON.parse(jsonStr);
         var expectedHtml = $sandbox.html();
 
         $sandbox.html(params.sandboxInitHtml);
         var deserializedHighlights = hl.deserializeHighlights(jsonStr);
         var actualHtml = $sandbox.html();
+        var serializedText = ($.map(json, function (val) { return val[1]; })).join('');
+        var expectedText = ($.map(params.highlights, function (val) { return val.rangeExpectedText; })).join('');
 
         equal(expectedHtml, actualHtml, 'Serialization and deserialization successful');
         equal(highlights.length, deserializedHighlights.length, 'All highlights deserialized');
+        equal(serializedText, expectedText, 'Highlights text ok');
     }
 
     test('Serialize one highlight', function() {
