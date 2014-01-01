@@ -254,14 +254,14 @@
 
                 if (self.isHighlight($parent)) {
                     if ($parent.css('background-color') != $highlight.css('background-color')) {
-                        if (self.isHighlight($parentPrev)
+                        if (self.isHighlight($parentPrev) && !$highlight.get(0).previousSibling
                             && $parentPrev.css('background-color') != $parent.css('background-color')
                             && $parentPrev.css('background-color') == $highlight.css('background-color')) {
 
                             $highlight.insertAfter($parentPrev);
                         }
 
-                        if (self.isHighlight($parentNext)
+                        if (self.isHighlight($parentNext) && !$highlight.get(0).nextSibling
                             && $parentNext.css('background-color') != $parent.css('background-color')
                             && $parentNext.css('background-color') == $highlight.css('background-color')) {
 
@@ -412,7 +412,7 @@
 
                 hlDescriptors.push([
                     wrapper,
-                    highlight.innerText,
+                    $(highlight).text(),
                     hlPath.join(':'),
                     offset,
                     length
