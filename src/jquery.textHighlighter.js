@@ -80,8 +80,9 @@
 
                 this.options.onAfterHighlight(normalizedHighlights, rangeText);
             }
-
-            this.removeAllRanges();
+            if (this.options.removeSelection) {
+              this.removeAllRanges();
+            }
         },
 
         /**
@@ -513,7 +514,8 @@
             contextClass: 'highlighter-context',
             onRemoveHighlight: function() { return true; },
             onBeforeHighlight: function() { return true; },
-            onAfterHighlight: function() { }
+            onAfterHighlight: function() { },
+            removeSelection: true
         }
     };
 
