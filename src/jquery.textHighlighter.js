@@ -53,10 +53,12 @@
 
         bindEvents: function() {
             this.$context.bind('mouseup', {self: this}, this.highlightHandler);
+            this.$context.bind('touchend', { self: this }, this.highlightHandler);
         },
 
         unbindEvents: function() {
             this.$context.unbind('mouseup', this.highlightHandler);
+            this.$context.unbind('touchend', this.highlightHandler);
         },
 
         highlightHandler: function(event) {
