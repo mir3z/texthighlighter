@@ -31,6 +31,78 @@
         name: 'textHighlighter'
     };
 
+    function c($el) {
+        return $el.css('background-color');
+    }
+
+    var tree = {
+        flatten: function ($highlights) {
+
+            $highlights = $highlights.sort(function (a, b) {
+                return $(b).parents().length - $(a).parents().length;
+            });
+
+            console.warn($highlights);
+
+            var again;
+
+            do {
+
+                again = false;
+
+
+                $.each($highlights, function (i) {
+                    var $hl = $(this);
+                    var hl = this;
+                    var $parent = $hl.parent();
+                    var $parentPrev = $parent.prev();
+                    var $parentNext = $parent.next();
+
+                    if (tree.isHighlight($parent)) {
+
+                        if (c($parent) !== c($hl)) {
+
+                            if (tree.isHighlight($parentPrev)
+                                && c($parentPrev) === c($hl)
+                                && hl.previousSibling === null
+                                ) {
+
+                                $hl.insertAfter($parentPrev);
+                                again = true;
+                            }
+
+                            if (tree.isHighlight($parentNext)
+                                && c($parentNext) === c($hl)
+                                && hl.nextSibling === null
+                                ) {
+
+                                $hl.insertBefore($parentNext);
+                                again = true;
+                            }
+
+                            if ($parent.is(':empty')) {
+                                $parent.remove();
+                            }
+
+                        } else {
+                            $parent.get(0).replaceChild(this.childNodes[0], hl);
+                            //$($highlights[i]).remove();
+                            $highlights[i] = $parent.get(0);
+                            again = true;
+                        }
+
+                    }
+
+                });
+            } while (again);
+
+        },
+
+        isHighlight: function ($el) {
+            return $el.hasClass('highlighted');
+        }
+    };
+
     function TextHighlighter(element, options) {
         this.context = element;
         this.$context = $(element);
@@ -225,10 +297,11 @@
         },
 
         /**
-         * Normalizes highlights - nested highlights are flattened and sibling higlights are merged.
+         * Normalizes highlights - nested highlights are flattened and sibling highlights are merged.
          */
         normalizeHighlights: function(highlights) {
             this.flattenNestedHighlights(highlights);
+            return;
             this.mergeSiblingHighlights(highlights);
 
             // omit removed nodes
@@ -244,46 +317,72 @@
         },
 
         flattenNestedHighlights: function(highlights) {
-            var self = this;
 
-            $.each(highlights, function(i) {
-                var $highlight = $(this);
-                var $parent = $highlight.parent();
-                var $parentPrev = $parent.prev();
-                var $parentNext = $parent.next();
 
-                if (self.isHighlight($parent)) {
-                    if ($parent.css('background-color') != $highlight.css('background-color')) {
-                        if (self.isHighlight($parentPrev) && !$highlight.get(0).previousSibling
-                            && $parentPrev.css('background-color') != $parent.css('background-color')
-                            && $parentPrev.css('background-color') == $highlight.css('background-color')) {
-
-                            $highlight.insertAfter($parentPrev);
-                        }
-
-                        if (self.isHighlight($parentNext) && !$highlight.get(0).nextSibling
-                            && $parentNext.css('background-color') != $parent.css('background-color')
-                            && $parentNext.css('background-color') == $highlight.css('background-color')) {
-
-                            $highlight.insertBefore($parentNext);
-                        }
-
-                        if ($parent.is(':empty')) {
-                            $parent.remove();
-                        }
-                    } else {
-                        var newNode = document.createTextNode($parent.text());
-
-                        $parent.empty();
-                        $parent.append(newNode);
-                        $(highlights[i]).remove();
-                    }
-                }
+            var $highlights = highlights.sort(function (a, b) {
+                return $(b).parents().length - $(a).parents().length;
             });
+
+            var again;
+
+            do {
+
+                again = false;
+
+
+                $.each($highlights, function (i) {
+                    var $hl = $(this);
+                    var hl = this;
+                    var $parent = $hl.parent();
+                    var $parentPrev = $parent.prev();
+                    var $parentNext = $parent.next();
+
+                    if (tree.isHighlight($parent)) {
+
+                        if (c($parent) !== c($hl)) {
+
+                            if (tree.isHighlight($parentPrev)
+                                && c($parentPrev) === c($hl)
+                                && hl.previousSibling === null
+                                ) {
+
+                                $hl.insertAfter($parentPrev);
+                                again = true;
+                            }
+
+                            if (tree.isHighlight($parentNext)
+                                && c($parentNext) === c($hl)
+                                && hl.nextSibling === null
+                                ) {
+
+                                $hl.insertBefore($parentNext);
+                                again = true;
+                            }
+
+                            if ($parent.is(':empty')) {
+                                $parent.remove();
+                            }
+
+                        } else {
+                            $parent.get(0).replaceChild(this.childNodes[0], hl);
+                            //$($highlights[i]).remove();
+                            $highlights[i] = $parent.get(0);
+                            again = true;
+                        }
+
+                    }
+
+                });
+            } while (again);
+
         },
 
         mergeSiblingHighlights: function(highlights) {
             var self = this;
+
+            $.each(highlights, function () {
+                this.normalize();
+            });
 
             function shouldMerge(current, node) {
                 return node && node.nodeType == nodeTypes.ELEMENT_NODE

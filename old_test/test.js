@@ -760,6 +760,119 @@ $(document).ready(function() {
         ]);
     });
 
+    // https://github.com/mir3z/jquery.texthighlighter/issues/8
+    //
+    test('#8', function () {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet obi lacrum desiquotum est.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 37,
+                    rangeExpectedText: 'ipsum dolor sit amet obi lacrum',
+                    color: color.red
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 1,
+                    startOffset: 6,
+                    endOffset: 11,
+                    rangeExpectedText: 'dolor',
+                    color: color.green
+                },
+                {
+                    startContainer: 3,
+                    endContainer: 3,
+                    startOffset: 5,
+                    endOffset: 9,
+                    rangeExpectedText: 'amet',
+                    color: color.red
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'ipsum dolor sit amet obi lacrum', color: color.red },
+            { text: 'dolor', color: color.green }
+        ]);
+    });
+
+    test('Normalization', function () {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet obi lacrum desiquotum est.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 37,
+                    rangeExpectedText: 'ipsum dolor sit amet obi lacrum',
+                    color: color.red
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 1,
+                    startOffset: 6,
+                    endOffset: 11,
+                    rangeExpectedText: 'dolor',
+                    color: color.green
+                },
+                {
+                    startContainer: 3,
+                    endContainer: 4,
+                    startOffset: 5,
+                    endOffset: 4,
+                    rangeExpectedText: 'amet obi lacrum des',
+                    color: color.red
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'ipsum dolor sit amet obi lacrum des', color: color.red },
+            { text: 'dolor', color: color.green }
+        ]);
+    });
+
+    test('Normalization 2', function () {
+        createHighlights({
+            sandboxInitHtml: '<p>Lorem ipsum dolor sit amet obi lacrum desiquotum est.</p>',
+            highlights: [
+                {
+                    startContainer: 0,
+                    endContainer: 0,
+                    startOffset: 6,
+                    endOffset: 37,
+                    rangeExpectedText: 'ipsum dolor sit amet obi lacrum',
+                    color: color.red
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 1,
+                    startOffset: 12,
+                    endOffset: 20,
+                    rangeExpectedText: 'sit amet',
+                    color: color.green
+                },
+                {
+                    startContainer: 1,
+                    endContainer: 2,
+                    startOffset: 6,
+                    endOffset: 3,
+                    rangeExpectedText: 'dolor sit',
+                    color: color.red
+                }
+            ]
+        });
+
+        assertHighlightsWithColor([
+            { text: 'ipsum dolor sit amet obi lacrum', color: color.red },
+            { text: ' amet', color: color.green }
+        ]);
+    });
+
     // =========================================================================
 
     module('Iframes', {
