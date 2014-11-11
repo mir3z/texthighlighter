@@ -224,7 +224,7 @@
             if (range.collapsed) return;
 
             // Don't highlight content of these tags
-            var ignoreTags = ['SCRIPT', 'STYLE', 'SELECT', 'BUTTON', 'OBJECT', 'APPLET'];
+            var ignoreTags = ['SCRIPT', 'STYLE', 'SELECT', 'OPTION', 'BUTTON', 'OBJECT', 'APPLET', 'VIDEO', 'AUDIO', 'CANVAS', 'EMBED', 'PARAM', 'METER', 'PROGRESS'];
             var startContainer = range.startContainer;
             var endContainer = range.endContainer;
             var ancestor = range.commonAncestorContainer;
@@ -262,7 +262,12 @@
 
             do {
                 if (goDeeper && node.nodeType == nodeTypes.TEXT_NODE) {
-                    if (/\S/.test(node.nodeValue)) {
+
+                    if ($.inArray(node.parentNode.tagName, ignoreTags) != -1) {
+
+                    }
+
+                    else if (/\S/.test(node.nodeValue)) {
                         var wrapper = $wrapper.clone(true).get(0);
                         var nodeParent = node.parentNode;
 
@@ -279,7 +284,11 @@
                     done = true;
                 }
 
-                if ($.inArray(node.tagName, ignoreTags) != -1) {
+                if (node.tagName && $.inArray(node.tagName, ignoreTags) != -1) {
+
+                    if (endContainer.parentNode === node) {
+                        done = true;
+                    }
                     goDeeper = false;
                 }
                 if (goDeeper && node.hasChildNodes()) {
@@ -301,17 +310,19 @@
          */
         normalizeHighlights: function(highlights) {
             this.flattenNestedHighlights(highlights);
-            return;
             this.mergeSiblingHighlights(highlights);
 
             // omit removed nodes
             var normalizedHighlights = $.map(highlights, function(hl) {
-                if (typeof hl.parentElement != 'undefined') { // IE
-                    return hl.parentElement != null ? hl : null;
-                } else {
-                    return hl.parentNode != null ? hl : null;
-                }
+                return hl.parentElement ? hl : null;
+//                if (typeof hl.parentElement != 'undefined') { // IE
+//                    return hl.parentElement != null ? hl : null;
+//                } else {
+//                    return hl.parentNode != null ? hl : null;
+//                }
             });
+
+            normalizedHighlights = $.unique(normalizedHighlights);
 
             return normalizedHighlights;
         },
@@ -380,10 +391,6 @@
         mergeSiblingHighlights: function(highlights) {
             var self = this;
 
-            $.each(highlights, function () {
-                this.normalize();
-            });
-
             function shouldMerge(current, node) {
                 return node && node.nodeType == nodeTypes.ELEMENT_NODE
                     && $(current).css('background-color') == $(node).css('background-color')
@@ -398,16 +405,26 @@
                 var next = highlight.nextSibling;
 
                 if (shouldMerge(highlight, prev)) {
-                    var mergedTxt = $(prev).text() + $(highlight).text();
-                    $(highlight).text(mergedTxt);
+//                    var mergedTxt = $(prev).text() + $(highlight).text();
+//                    $(highlight).text(mergedTxt);
+//                    $(prev).remove();
+                    $(highlight).prepend($(prev).contents());
                     $(prev).remove();
                 }
                 if (shouldMerge(highlight, next)) {
-                    var mergedTxt = $(highlight).text() + $(next).text();
-                    $(highlight).text(mergedTxt);
+//                    var mergedTxt = $(highlight).text() + $(next).text();
+//                    $(highlight).text(mergedTxt);
+//                    $(next).remove();
+                    $(highlight).append($(next).contents());
                     $(next).remove();
                 }
             });
+
+            $.each(highlights, function () {
+                this.normalize();
+            });
+
+            //console.warn(highlights);
         },
 
         /**

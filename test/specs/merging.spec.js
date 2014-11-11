@@ -1,4 +1,6 @@
 describe('Merging DOM nodes', function () {
+    'use strict';
+
     var hl;
 
     fixtures.load([
@@ -18,7 +20,10 @@ describe('Merging DOM nodes', function () {
         '14.flat', '14.merge',
         '15.flat', '15.merge',
         '16.flat', '16.merge',
-        '17.flat', '17.merge'
+        '17.flat', '17.merge',
+        '18.flat', '18.merge',
+        '19.flat', '19.merge',
+        '20.flat', '20.merge'
     ]);
 
     beforeEach(function () {
@@ -55,5 +60,8 @@ describe('Merging DOM nodes', function () {
     testMerging({ fixture: '15', expectedTextNodesCount: 6 });
     testMerging({ fixture: '16', expectedTextNodesCount: 6 });
     testMerging({ fixture: '17', expectedTextNodesCount: 1 });
+    testMerging({ fixture: '18', expectedTextNodesCount: 4 });
+    testMerging({ fixture: '19', expectedTextNodesCount: 4 });
+    testMerging({ fixture: '20', expectedTextNodesCount: 6 });
 });
 

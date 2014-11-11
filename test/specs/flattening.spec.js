@@ -1,4 +1,6 @@
 describe('Flattening DOM tree', function () {
+    'use strict';
+
     var hl;
 
     fixtures.load([
@@ -18,7 +20,10 @@ describe('Flattening DOM tree', function () {
         '14', '14.flat',
         '15', '15.flat',
         '16', '16.flat',
-        '17', '17.flat'
+        '17', '17.flat',
+        '18', '18.flat',
+        '19', '19.flat',
+        '20', '20.flat'
     ]);
 
     beforeEach(function () {
@@ -55,4 +60,7 @@ describe('Flattening DOM tree', function () {
     testFlattening({ fixture: '15', expectedTextNodesCount: 7 });
     testFlattening({ fixture: '16', expectedTextNodesCount: 7 });
     testFlattening({ fixture: '17', expectedTextNodesCount: 1 });
+    testFlattening({ fixture: '18', expectedTextNodesCount: 6 });
+    testFlattening({ fixture: '19', expectedTextNodesCount: 6 });
+    testFlattening({ fixture: '20', expectedTextNodesCount: 7 });
 });

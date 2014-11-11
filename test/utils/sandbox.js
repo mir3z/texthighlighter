@@ -30,7 +30,7 @@ var sandbox = (function () {
             if (removeMarkedAttr) {
                 wrapper = $('<div></div>').append(html);
                 wrapper
-                    .find('[data-marked=true]')
+                    .find('[data-marked]')
                     .removeAttr('data-marked');
 
                 return wrapper.html();
@@ -40,10 +40,32 @@ var sandbox = (function () {
         },
 
         setFixture: function (name) {
-            var dom = fixtures.get(name);
+            var dom = fixtures.get(name),
+                marked,
+                markings = {};
 
-            $sandbox.append(dom);
-            return $sandbox.find('[data-marked=true]').removeAttr('data-marked');
+            $sandbox.html(dom);
+
+            marked = $sandbox.find('[data-marked]');
+
+            marked.each(function () {
+                var value = $(this).data('marked');
+
+                if (typeof markings[value] !== 'undefined') {
+                    markings[value] = markings[value].add($(this));
+                } else {
+                    markings[value] = $(this);
+                }
+
+            });
+
+            marked.removeAttr('data-marked');
+
+            if (markings.true && Object.keys(markings).length === 1) {
+                return markings.true;
+            } else {
+                return markings;
+            }
         },
 
         getTextNodes: function () {
@@ -56,6 +78,17 @@ var sandbox = (function () {
                 }
             });
             return textNodes;
+        },
+
+        addRange: function (startNode, endNode, startOffset, endOffset) {
+            window.getSelection().removeAllRanges();
+
+            var range = document.createRange();
+            range.setStart(startNode, startOffset);
+            range.setEnd(endNode, endOffset);
+            window.getSelection().addRange(range);
+
+            return range;
         }
     };
 })();

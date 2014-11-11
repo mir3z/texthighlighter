@@ -4,6 +4,33 @@ var fixtures = (function () {
     var FIXTURES_DIR = 'fixtures';
     var fixtures = {};
 
+    var _createElement = DOMBuilder.createElement;
+    DOMBuilder.createElement = function (tagName, attr, children, mode) {
+        attr = attr || {};
+
+        if (attr.color) {
+            attr.style = 'background-color: ' + attr.color;
+            delete attr.color;
+        }
+
+        if (attr.marked) {
+            attr['data-marked'] = attr.marked;
+            delete attr.marked;
+        }
+
+        if (attr.startNode) {
+            attr['data-start-node'] = attr.startNode;
+            delete attr.startNode;
+        }
+
+        if (attr.endNode) {
+            attr['data-end-node'] = attr.endNode;
+            delete attr.endNode;
+        }
+
+        return _createElement.call(DOMBuilder, tagName, attr, children, mode);
+    };
+
     DOMBuilder.dom.HIGHLIGHT = function () {
         var args = Array.prototype.slice.call(arguments),
             attr = {},
@@ -13,19 +40,21 @@ var fixtures = (function () {
             attr = args.shift();
         }
 
-        if (attr.color) {
-            attr.style = 'background-color: ' + attr.color;
-            delete attr.color;
-        }
-
-        if (attr.marked) {
-            attr['data-marked'] = true;
-            delete attr.marked;
-        }
-
         attr.class = 'highlighted';
 
-        return DOMBuilder.createElement('span', attr, children, 'dom');
+        return DOMBuilder.createElement('span', attr, children, this.mode);
+    };
+
+    DOMBuilder.dom.APPLET = function () {
+        var args = Array.prototype.slice.call(arguments),
+            attr = {},
+            children = args;
+
+        if (typeof args[0] === 'object') {
+            attr = args.shift();
+        }
+
+        return DOMBuilder.createElement('applet', attr, children, this.mode);
     };
 
     function loadFixture(name, callback) {
