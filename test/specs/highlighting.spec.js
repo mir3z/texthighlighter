@@ -3,7 +3,7 @@ describe('Highlighting Range', function () {
 
     var hl;
 
-    fixtures.load([
+    fixtures.loadFiles([
         'lorem.01',
         'lorem.02',
         'lorem.03',

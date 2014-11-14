@@ -3,27 +3,27 @@ describe('Flattening DOM tree', function () {
 
     var hl;
 
-    fixtures.load([
-        '01', '01.flat',
-        '02', '02.flat',
-        '03', '03.flat',
-        '04', '04.flat',
-        '05', '05.flat',
-        '06', '06.flat',
-        '07', '07.flat',
-        '08', '08.flat',
-        '09', '09.flat',
-        '10', '10.flat',
-        '11', '11.flat',
-        '12', '12.flat',
-        '13', '13.flat',
-        '14', '14.flat',
-        '15', '15.flat',
-        '16', '16.flat',
-        '17', '17.flat',
-        '18', '18.flat',
-        '19', '19.flat',
-        '20', '20.flat'
+    fixtures.loadFiles([
+        'norm.01',
+        'norm.02',
+        'norm.03',
+        'norm.04',
+        'norm.05',
+        'norm.06',
+        'norm.07',
+        'norm.08',
+        'norm.09',
+        'norm.10',
+        'norm.11',
+        'norm.12',
+        'norm.13',
+        'norm.14',
+        'norm.15',
+        'norm.16',
+        'norm.17',
+        'norm.18',
+        'norm.19',
+        'norm.20'
     ]);
 
     beforeEach(function () {

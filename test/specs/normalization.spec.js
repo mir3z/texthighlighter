@@ -3,27 +3,27 @@ describe('Normalization', function () {
 
     var hl;
 
-    fixtures.load([
-        '01',
-        '02',
-        '03',
-        '04',
-        '05',
-        '06',
-        '07',
-        '08',
-        '09',
-        '10',
-        '11',
-        '12',
-        '13',
-        '14',
-        '15',
-        '16',
-        '17',
-        '18',
-        '19',
-        '20'
+    fixtures.loadFiles([
+        'norm.01',
+        'norm.02',
+        'norm.03',
+        'norm.04',
+        'norm.05',
+        'norm.06',
+        'norm.07',
+        'norm.08',
+        'norm.09',
+        'norm.10',
+        'norm.11',
+        'norm.12',
+        'norm.13',
+        'norm.14',
+        'norm.15',
+        'norm.16',
+        'norm.17',
+        'norm.18',
+        'norm.19',
+        'norm.20'
     ]);
 
     beforeEach(function () {

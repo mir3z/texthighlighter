@@ -72,7 +72,7 @@ var fixtures = (function () {
         });
     }
 
-    function loadFixtures(names, callback) {
+    function loadFixtureFiles(names, callback) {
         var fixturesLength = names.length,
             i = 0;
 
@@ -98,7 +98,7 @@ var fixtures = (function () {
         el = fixture.cloneNode(true);
 
         if (removeMarkedAttr) {
-            $('<div></div>').append(el).find('[data-marked=true]').removeAttr('data-marked');
+            $('<div></div>').append(el).find('[data-marked]').removeAttr('data-marked');
         }
 
         return el;
@@ -122,7 +122,7 @@ var fixtures = (function () {
     return {
         get: getFixture,
         getAsHtml: getFixtureAsHtml,
-        load: loadFixtures,
+        loadFiles: loadFixtureFiles,
         clear: clearFixtures,
         register: registerFixture
     };

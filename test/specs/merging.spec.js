@@ -3,27 +3,27 @@ describe('Merging DOM nodes', function () {
 
     var hl;
 
-    fixtures.load([
-        '01.flat', '01.merge',
-        '02.flat', '02.merge',
-        '03.flat', '03.merge',
-        '04.flat', '04.merge',
-        '05.flat', '05.merge',
-        '06.flat', '06.merge',
-        '07.flat', '07.merge',
-        '08.flat', '08.merge',
-        '09.flat', '09.merge',
-        '10.flat', '10.merge',
-        '11.flat', '11.merge',
-        '12.flat', '12.merge',
-        '13.flat', '13.merge',
-        '14.flat', '14.merge',
-        '15.flat', '15.merge',
-        '16.flat', '16.merge',
-        '17.flat', '17.merge',
-        '18.flat', '18.merge',
-        '19.flat', '19.merge',
-        '20.flat', '20.merge'
+    fixtures.loadFiles([
+        'norm.01',
+        'norm.02',
+        'norm.03',
+        'norm.04',
+        'norm.05',
+        'norm.06',
+        'norm.07',
+        'norm.08',
+        'norm.09',
+        'norm.10',
+        'norm.11',
+        'norm.12',
+        'norm.13',
+        'norm.14',
+        'norm.15',
+        'norm.16',
+        'norm.17',
+        'norm.18',
+        'norm.19',
+        'norm.20'
     ]);
 
     beforeEach(function () {

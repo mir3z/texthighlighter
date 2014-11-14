@@ -42,8 +42,6 @@
                 return $(b).parents().length - $(a).parents().length;
             });
 
-            console.warn($highlights);
-
             var again;
 
             do {
@@ -150,7 +148,7 @@
                 var createdHighlights = this.highlightRange(range, $wrapper);
                 var normalizedHighlights = this.normalizeHighlights(createdHighlights);
 
-                this.options.onAfterHighlight(normalizedHighlights, rangeText);
+                this.options.onAfterHighlight(rangeText, normalizedHighlights);
             }
 
             this.removeAllRanges();
@@ -448,7 +446,9 @@
             var container = (element !== undefined ? element : this.context);
 
             var unwrapHighlight = function(highlight) {
-                return $(highlight).contents().unwrap().get(0);
+                return $(highlight).contents().unwrap().filter(function () {
+                    return this.nodeType === nodeTypes.TEXT_NODE;
+                });
             };
 
             var mergeSiblingTextNodes = function(textNode) {
@@ -467,10 +467,18 @@
 
             var self = this;
             var $highlights = this.getAllHighlights(container, true);
+
+            $highlights = $highlights.sort(function (a, b) {
+                return $(b).parents().length - $(a).parents().length;
+            });
+
+
             $highlights.each(function() {
                 if (self.options.onRemoveHighlight(this) == true) {
-                    var textNode = unwrapHighlight(this);
-                    mergeSiblingTextNodes(textNode);
+                    var textNodes = unwrapHighlight(this);
+                    $.each(textNodes, function () {
+                        mergeSiblingTextNodes(this);
+                    });
                 }
             });
         },
@@ -502,7 +510,10 @@
             var $highlights = this.getAllHighlights(this.context);
             var refEl = this.context;
             var hlDescriptors = [];
-            var self = this;
+
+            $highlights = $highlights.sort(function (a, b) {
+                return $(a).parents().length - $(b).parents().length;
+            });
 
             var getElementPath = function (el, refElement) {
                 var path = [];
@@ -518,7 +529,8 @@
 
             $highlights.each(function(i, highlight) {
                 var offset = 0; // Hl offset from previous sibling within parent node.
-                var length = highlight.firstChild.length;
+                //var length = highlight.firstChild.length || -1;
+                var length = highlight.textContent.length;
                 var hlPath = getElementPath(highlight, refEl);
                 var wrapper = $(highlight).clone().empty().get(0).outerHTML;
 
