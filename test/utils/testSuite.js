@@ -1,7 +1,33 @@
+/* global sandbox  */
+
+/**
+ * Initializes test harness and starts Jasmine test runner.
+ * @global
+ */
 var testSuite = (function () {
     'use strict';
 
-    function initializeIframe() {
+    /**
+     * Renders sandbox.
+     * @param params
+     */
+    function initSandbox(params) {
+        var target = document.body;
+
+        params = params || {};
+
+        if (params.inIframe) {
+            target = createIframe();
+        }
+
+        sandbox.render().appendTo(target);
+    }
+
+    /**
+     * Creates iframe and adds it to the document.
+     * @returns {HTMLElement} - body element of the iframe.
+     */
+    function createIframe() {
         var iframe = document.createElement('iframe'),
             body;
 
@@ -20,26 +46,20 @@ var testSuite = (function () {
 
     return {
 
+        /**
+         * Initializes sandbox and starts Jasmine tests.
+         * @param params
+         * @param {boolean} params.inIframe - if set to true, sandbox will be placed to the iframe.
+         */
         initialize: function (params) {
             window.onload = function () {
-                testSuite.initSandbox(params);
+                initSandbox(params);
 
+                // Wait for the iframe...
                 window.setTimeout(function () {
                     window.runJasmine(); // defined in jasmine/boot.js
                 }, 50);
             };
-        },
-
-        initSandbox: function (params) {
-            var target = document.body;
-
-            params = params || {};
-
-            if (params.inIframe) {
-                target = initializeIframe();
-            }
-
-            sandbox.render().appendTo(target);
         }
 
     };

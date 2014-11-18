@@ -1,35 +1,75 @@
+/* global fixtures, $  */
+
+/**
+ * Manages test sandbox.
+ * Sandbox is a specific div element to which highlighter is applied.
+ * All tests are being performed within this element.
+ * @global
+ */
 var sandbox = (function () {
     'use strict';
 
     var ID = 'sandbox';
 
+    /**
+     * Returns owner window of the sandbox.
+     * This method is useful when sandbox is placed within an iframe.
+     * @returns {Window}
+     */
     function getWindow() {
         var doc = sandbox.$.get(0).ownerDocument;
         return doc.defaultView || doc.parentWindow;
     }
 
     return {
+        /**
+         * jQuery object of the sandbox
+         */
         $: null,
 
+        /**
+         * Renders sandbox and returns its jQuery object.
+         * @returns {jQuery}
+         */
         render: function () {
             this.$ = $('<div></div>').attr('id', ID);
             return this.$;
         },
 
+        /**
+         * Initializes sandbox.
+         * Applies TextHighlighter to the sandbox and returns its instance.
+         * Note: Sandbox must be already initialized.
+         * @param {object} params - TextHighlighter options
+         * @returns {object}
+         */
         init: function (params) {
             this.$.textHighlighter(params);
             return sandbox.getHighlighter();
         },
 
+        /**
+         * Returns highlighter instance.
+         * Note: Sandbox must be already initialized.
+         * @returns {object}
+         */
         getHighlighter: function () {
             return this.$.getHighlighter();
         },
 
+        /**
+         * Empties sandbox and destroys highlighter.
+         */
         empty: function () {
             this.$.empty();
             sandbox.getHighlighter().destroy();
         },
 
+        /**
+         * Returns sandbox's html
+         * @param {boolean} removeMarkedAttr - if set to true, removes all 'marked' attributes.
+         * @returns {string}
+         */
         html: function (removeMarkedAttr) {
             var html = this.$.html(),
                 wrapper;
@@ -46,8 +86,13 @@ var sandbox = (function () {
             }
         },
 
+        /**
+         * Loads fixture in sandbox.
+         * @param {string} name - fixture name
+         * @returns {object} - marked nodes. Nodes in fixture can by marked in order to use them easily in test spec.
+         */
         setFixture: function (name) {
-            var dom = fixtures.get(name),
+            var dom = fixtures.get(name, false),
                 marked,
                 markings = {};
 
@@ -75,6 +120,10 @@ var sandbox = (function () {
             }
         },
 
+        /**
+         * Returns array of text nodes of within the sandbox.
+         * @returns {Array}
+         */
         getTextNodes: function () {
             var textNodes = [];
             this.$.contents().each(function getChildTextNodes() {
@@ -87,6 +136,14 @@ var sandbox = (function () {
             return textNodes;
         },
 
+        /**
+         * Adds DOM Range to the sandbox.
+         * @param {Node} startNode
+         * @param {Node} endNode
+         * @param {number} startOffset
+         * @param {number} endOffset
+         * @returns {Range}
+         */
         addRange: function (startNode, endNode, startOffset, endOffset) {
             var selection = getWindow().getSelection();
 

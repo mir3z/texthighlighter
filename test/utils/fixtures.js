@@ -1,9 +1,16 @@
-var fixtures = (function () {
+/* global DOMBuilder, $  */
+
+/**
+ * Manages test fixtures.
+ * @global
+ */
+var fixtures = (function (global) {
     'use strict';
 
-    var FIXTURES_DIR = 'fixtures';
-    var fixtures = {};
+    var FIXTURES_DIR = 'fixtures',
+        fixtures = {};
 
+    // Patch DOMBuilder.createElement so that it accepts a few special options
     var _createElement = DOMBuilder.createElement;
     DOMBuilder.createElement = function (tagName, attr, children, mode) {
         attr = attr || {};
@@ -31,6 +38,7 @@ var fixtures = (function () {
         return _createElement.call(DOMBuilder, tagName, attr, children, mode);
     };
 
+    // Add method which builds highlight span element
     DOMBuilder.dom.HIGHLIGHT = function () {
         var args = Array.prototype.slice.call(arguments),
             attr = {},
@@ -57,6 +65,11 @@ var fixtures = (function () {
         return DOMBuilder.createElement('applet', attr, children, this.mode);
     };
 
+    /**
+     * Load fixture file
+     * @param {string} name - name of the fixture
+     * @param {function} callback - function called after fixture is loaded
+     */
     function loadFixture(name, callback) {
         var file = FIXTURES_DIR + '/' + name + '.js';
 
@@ -72,6 +85,11 @@ var fixtures = (function () {
         });
     }
 
+    /**
+     * Loads fixtures from given array
+     * @param {array} names - array of fixture files to load
+     * @param {function} callback - function called after all fixtures ale loaded.
+     */
     function loadFixtureFiles(names, callback) {
         var fixturesLength = names.length,
             i = 0;
@@ -87,6 +105,12 @@ var fixtures = (function () {
         loadFixture(names[i], supervise);
     }
 
+    /**
+     * Returns fixture as DOM tree
+     * @param {string} name - fixture name
+     * @param {boolean} removeMarkedAttr - if set to true, any 'marked' attributes are removed
+     * @returns {Node} - root node of fixture
+     */
     function getFixture(name, removeMarkedAttr) {
         var fixture = fixtures[name],
             el;
@@ -104,17 +128,31 @@ var fixtures = (function () {
         return el;
     }
 
+    /**
+     * Returns fixture as HTML string
+     * @param {string} name - fixture name
+     * @param {boolean} removeMarkedAttr - if set to true, any 'marked' attributes are removed
+     * @returns {string}
+     */
     function getFixtureAsHtml(name, removeMarkedAttr) {
         return getFixture(name, removeMarkedAttr).outerHTML;
     }
 
+    /**
+     * Registers fixture under given name. After calling this function a fixture can be retrieved using its name.
+     * @param {string} name - name of the fixture
+     * @param {function} func - Function which defines the fixture
+     */
     function registerFixture(name, func) {
         var funcStr = func.toString(),
             funcBody = funcStr.slice(funcStr.indexOf('{') + 1, funcStr.lastIndexOf('}')).trim();
 
-        fixtures[name] = domBuilderEval(funcBody);
+        fixtures[name] = global.domBuilderEval(funcBody);
     }
 
+    /**
+     * Clears internal fixtures array
+     */
     function clearFixtures() {
         fixtures = {};
     }
@@ -126,15 +164,15 @@ var fixtures = (function () {
         clear: clearFixtures,
         register: registerFixture
     };
-})();
+})(window);
 
-(function () {
+(function (global) {
 
     // eval + with, hell yeah!
-    window.domBuilderEval = function (code) {
+    global.domBuilderEval = function (code) {
         with (DOMBuilder.dom) {
             return eval('(function () { return ' + code + '; })()');
         }
     };
 
-})();
+})(window);
