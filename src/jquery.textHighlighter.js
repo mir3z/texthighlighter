@@ -35,6 +35,20 @@
         return $el.css('background-color');
     }
 
+    function normalizeTextNodes(el) {
+        if (!el) { return; }
+
+        if (el.nodeType === nodeTypes.TEXT_NODE) {
+            while (el.nextSibling && el.nextSibling.nodeType === nodeTypes.TEXT_NODE) {
+                el.nodeValue += el.nextSibling.nodeValue;
+                el.parentNode.removeChild(el.nextSibling);
+            }
+        } else {
+            normalizeTextNodes(el.firstChild);
+        }
+        normalizeTextNodes(el.nextSibling);
+    }
+
     var tree = {
         flatten: function ($highlights) {
 
@@ -179,18 +193,21 @@
             var currentWindow = this.getCurrentWindow();
             var selection;
 
-            if (currentWindow.getSelection) {
-                selection = currentWindow.getSelection();
-            } else if ($('iframe').length) {
-                $('iframe', top.document).each(function() {
-                    if (this.contentWindow === currentWindow) {
-                        selection = rangy.getIframeSelection(this);
-                        return false;
-                    }
-                });
-            } else {
-                selection = rangy.getSelection();
-            }
+
+            selection = currentWindow.getSelection();
+
+//            if (currentWindow.getSelection) {
+//                selection = currentWindow.getSelection();
+//            } else if ($('iframe').length) {
+//                $('iframe', top.document).each(function() {
+//                    if (this.contentWindow === currentWindow) {
+//                        selection = rangy.getIframeSelection(this);
+//                        return false;
+//                    }
+//                });
+//            } else {
+//                selection = rangy.getSelection();
+//            }
 
             return selection;
         },
@@ -419,7 +436,8 @@
             });
 
             $.each(highlights, function () {
-                this.normalize();
+                //this.normalize();
+                normalizeTextNodes(this);
             });
 
             //console.warn(highlights);

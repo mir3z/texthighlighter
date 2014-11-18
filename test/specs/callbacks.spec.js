@@ -16,7 +16,6 @@ describe('Callbacks', function () {
 
         it(params.title, function () {
             var markings = sandbox.setFixture(params.fixture),
-                range,
                 nodes;
 
             if (markings.node) {

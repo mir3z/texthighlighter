@@ -3,28 +3,35 @@ var sandbox = (function () {
 
     var ID = 'sandbox';
 
-    var $sandbox = $('<div></div>').attr('id', ID);
-    $sandbox.appendTo(document.body);
+    function getWindow() {
+        var doc = sandbox.$.get(0).ownerDocument;
+        return doc.defaultView || doc.parentWindow;
+    }
 
     return {
-        $: $sandbox,
+        $: null,
+
+        render: function () {
+            this.$ = $('<div></div>').attr('id', ID);
+            return this.$;
+        },
 
         init: function (params) {
-            $sandbox.textHighlighter(params);
+            this.$.textHighlighter(params);
             return sandbox.getHighlighter();
         },
 
         getHighlighter: function () {
-            return $sandbox.getHighlighter();
+            return this.$.getHighlighter();
         },
 
         empty: function () {
-            $sandbox.empty();
+            this.$.empty();
             sandbox.getHighlighter().destroy();
         },
 
         html: function (removeMarkedAttr) {
-            var html = $sandbox.html(),
+            var html = this.$.html(),
                 wrapper;
 
             if (removeMarkedAttr) {
@@ -44,9 +51,9 @@ var sandbox = (function () {
                 marked,
                 markings = {};
 
-            $sandbox.html(dom);
+            this.$.html(dom);
 
-            marked = $sandbox.find('[data-marked]');
+            marked = this.$.find('[data-marked]');
 
             marked.each(function () {
                 var value = $(this).data('marked');
@@ -70,7 +77,7 @@ var sandbox = (function () {
 
         getTextNodes: function () {
             var textNodes = [];
-            $sandbox.contents().each(function getChildTextNodes() {
+            this.$.contents().each(function getChildTextNodes() {
                 if (this.nodeType === 3) {
                     textNodes.push(this);
                 } else {
@@ -81,12 +88,21 @@ var sandbox = (function () {
         },
 
         addRange: function (startNode, endNode, startOffset, endOffset) {
-            window.getSelection().removeAllRanges();
+            var selection = getWindow().getSelection();
+
+            selection.removeAllRanges();
 
             var range = document.createRange();
             range.setStart(startNode, startOffset);
             range.setEnd(endNode, endOffset);
-            window.getSelection().addRange(range);
+
+            // IE throws "Unspecified error" when trying to add range in some unusual places like <button> or
+            // <style> elements. This will silence it.
+            try {
+                selection.addRange(range);
+            } catch (e) {
+                console.warn(e);
+            }
 
             return range;
         }

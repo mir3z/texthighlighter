@@ -28,8 +28,6 @@ describe('Serialization', function () {
             htmlBefore = sandbox.html();
             serialized = hl.serializeHighlights();
 
-            console.warn(JSON.parse(serialized))
-
             text = JSON.parse(serialized).map(function (hlDesc) { return hlDesc[1] });
             expect(text).toEqual(params.expectedText);
 

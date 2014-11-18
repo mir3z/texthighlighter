@@ -10,8 +10,7 @@ describe('Removing highlights', function () {
         'removing.04',
         'removing.05',
         'removing.06',
-        'removing.07',
-        'removing.08'
+        'removing.07'
     ]);
 
     beforeEach(function () {
