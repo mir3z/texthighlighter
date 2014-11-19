@@ -49,6 +49,7 @@ var fixtures = (function (global) {
         }
 
         attr.class = 'highlighted';
+        attr['data-highlighted'] = true;
 
         return DOMBuilder.createElement('span', attr, children, this.mode);
     };
