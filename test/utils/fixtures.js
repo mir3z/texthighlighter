@@ -66,43 +66,31 @@ var fixtures = (function (global) {
     };
 
     /**
-     * Load fixture file
+     * Load fixture file in synchronous manner.
      * @param {string} name - name of the fixture
-     * @param {function} callback - function called after fixture is loaded
      */
-    function loadFixture(name, callback) {
+    function loadFixture(name) {
         var file = FIXTURES_DIR + '/' + name + '.js';
 
         $.ajax({
             url: file,
             dataType: 'script',
-            async: false,
-            success: function () {
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            }
+            async: false
         });
     }
 
     /**
      * Loads fixtures from given array
-     * @param {array} names - array of fixture files to load
-     * @param {function} callback - function called after all fixtures ale loaded.
+     * @param {string[]} names - array of fixture files to load
      */
-    function loadFixtureFiles(names, callback) {
+    function loadFixtureFiles(names) {
         var fixturesLength = names.length,
             i = 0;
 
-        function supervise(data) {
-            if (i === fixturesLength - 1) {
-                callback();
-            } else {
-                loadFixture(names[++i], supervise);
-            }
+        for (; i < fixturesLength; ++i) {
+            loadFixture(names[i]);
         }
 
-        loadFixture(names[i], supervise);
     }
 
     /**

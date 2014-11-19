@@ -1,3 +1,5 @@
+/* global describe, it, afterEach, beforeEach, expect, fixtures, sandbox */
+
 describe('Callbacks', function () {
     'use strict';
 
@@ -12,6 +14,23 @@ describe('Callbacks', function () {
         sandbox.empty();
     });
 
+    /**
+     * Tests functioning of the highlighter callbacks.
+     * Procedure:
+     * [1] Load fixture.
+     * [2] Create selection range.
+     * [3] Initialize highlighter with defined callbacks.
+     * [4] Highlight range. If params.onRemoveHighlight is defined then remove all ranges to trigger callback.
+     * [5] Check text content of created highlights.
+     * @param params
+     * @param {string} params.title - test title
+     * @param {string} params.fixture - name of the fixture to load
+     * @param {function} params.rangeCreator - function which should create range object for this test
+     * @param {function} params.onBeforeHighlight - highlighter callback
+     * @param {function} params.onAfterHighlight - highlighter callback
+     * @param {function} params.onRemoveHighlight - highlighter callback
+     * @param {array} params.expectedHighlights - array of expected highlights text content
+     */
     function testCallbacks(params) {
 
         it(params.title, function () {
@@ -45,9 +64,6 @@ describe('Callbacks', function () {
     }
 
     describe('onBeforeHighlight', function () {
-        var singleNodeRangeCreator = function (node) {
-            return sandbox.addRange(node.childNodes[0], node.childNodes[0], 6, 11);
-        };
 
         testCallbacks({
             fixture: 'lorem.01',
@@ -57,7 +73,9 @@ describe('Callbacks', function () {
                 return true;
             },
             expectedHighlights: [ 'ipsum' ],
-            rangeCreator: singleNodeRangeCreator
+            rangeCreator: function (node) {
+                return sandbox.addRange(node.childNodes[0], node.childNodes[0], 6, 11);
+            }
         });
 
         testCallbacks({
@@ -68,7 +86,9 @@ describe('Callbacks', function () {
                 return false;
             },
             expectedHighlights: [],
-            rangeCreator: singleNodeRangeCreator
+            rangeCreator: function (node) {
+                return sandbox.addRange(node.childNodes[0], node.childNodes[0], 6, 11);
+            }
         });
 
     });
@@ -96,14 +116,14 @@ describe('Callbacks', function () {
                 expect(range.toString()).toEqual('dolor sit amet consectetur');
                 expect(highlights.length).toEqual(3);
                 expect(
-                    highlights.map(function (h) { return h.textContent })
+                    highlights.map(function (h) { return h.textContent; })
                 ).toEqual(['dolor ', 'sit amet', ' consectetur']);
             },
             expectedHighlights: [ 'dolor ', 'sit amet', ' consectetur' ],
             rangeCreator: function (node1) {
                 return sandbox.addRange(node1.childNodes[0], node1.childNodes[2], 12, 12);
             }
-        })
+        });
     });
 
     describe('onRemoveHighlight', function () {

@@ -1,3 +1,5 @@
+/* global describe, it, afterEach, beforeEach, expect, fixtures, sandbox */
+
 describe('Serialization', function () {
     'use strict';
 
@@ -20,6 +22,21 @@ describe('Serialization', function () {
         sandbox.empty();
     });
 
+    /**
+     * Tests serialization and deserialization.
+     * Procedure:
+     * [1] Load fixture named: params.fixturePrefix + '.' + params.fixturePostfix (fixture with highlights).
+     * [2] Serialize highlights.
+     * [3] Compare JSON form of serialized highlights with params.expectedText
+     * [4] Load fixture named: params.fixturePrefix + '.base' (fixture with highlights removed).
+     * [5] Deserialize previously obtained JSON form of serialized highlights.
+     * [6] Compare HTML of deserialized highlights with fixture from step [1].
+     * @param params
+     * @param {string} params.title - test title
+     * @param {string} params.fixturePrefix - fixture name prefix
+     * @param {string} params.fixturePostfix - fixture name postfix
+     * @param {string} params.expectedText - expected text content of serialized highlights
+     */
     function testSerialization(params) {
         it(params.title, function () {
             var htmlBefore, htmlAfter, serialized, text;
@@ -28,7 +45,7 @@ describe('Serialization', function () {
             htmlBefore = sandbox.html();
             serialized = hl.serializeHighlights();
 
-            text = JSON.parse(serialized).map(function (hlDesc) { return hlDesc[1] });
+            text = JSON.parse(serialized).map(function (hlDesc) { return hlDesc[1]; });
             expect(text).toEqual(params.expectedText);
 
             sandbox.setFixture(params.fixturePrefix + '.base');

@@ -40,7 +40,7 @@ var sandbox = (function () {
          * Initializes sandbox.
          * Applies TextHighlighter to the sandbox and returns its instance.
          * Note: Sandbox must be already initialized.
-         * @param {object} params - TextHighlighter options
+         * @param {object} [params] - TextHighlighter options
          * @returns {object}
          */
         init: function (params) {
@@ -67,7 +67,7 @@ var sandbox = (function () {
 
         /**
          * Returns sandbox's html
-         * @param {boolean} removeMarkedAttr - if set to true, removes all 'marked' attributes.
+         * @param {boolean} [removeMarkedAttr] - if set to true, removes all 'marked' attributes.
          * @returns {string}
          */
         html: function (removeMarkedAttr) {
