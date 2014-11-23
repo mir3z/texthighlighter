@@ -38,7 +38,7 @@ describe('Callbacks', function () {
                 nodes;
 
             if (markings.node) {
-                nodes = markings.node.map(function (i, el) { return el; });
+                nodes = markings.node;
             }
 
             params.rangeCreator.apply(this, nodes);
@@ -56,7 +56,7 @@ describe('Callbacks', function () {
             }
 
             expect(
-                hl.getAllHighlights(sandbox.$, true).get().map(function (h) {
+                hl.getAllHighlights(sandbox.el, true).map(function (h) {
                     return h.textContent;
                 })
             ).toEqual(params.expectedHighlights);
@@ -117,7 +117,7 @@ describe('Callbacks', function () {
                 expect(highlights.length).toEqual(3);
                 expect(
                     highlights.map(function (h) { return h.textContent; })
-                ).toEqual(['dolor ', 'sit amet', ' consectetur']);
+                ).toEqual([ 'sit amet', 'dolor ', ' consectetur' ]);
             },
             expectedHighlights: [ 'dolor ', 'sit amet', ' consectetur' ],
             rangeCreator: function (node1) {

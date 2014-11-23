@@ -45,7 +45,7 @@ describe('Normalization', function () {
      * @param params
      * @param {string} params.title - test title
      * @param {string} params.fixture - name of the fixture to load
-     * @param {number} params.highlights - expected text content of highlights returned by normalization
+     * @param {string[]} params.highlights - expected text content of highlights returned by normalization
      */
     function testNormalization(params) {
         it(params.title, function () {
@@ -174,7 +174,7 @@ describe('Normalization', function () {
     testNormalization({ 
 		title: 'use case #20', 
 		fixture: '20', 
-		highlights: [ 'Lorem ipsum ', 'dolor', ' sit ', 'amet' ]
+		highlights: [ 'dolor', 'amet', 'Lorem ipsum ', ' sit ' ]
     });
 
 });

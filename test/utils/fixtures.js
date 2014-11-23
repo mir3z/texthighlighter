@@ -1,4 +1,4 @@
-/* global DOMBuilder, $  */
+/* global DOMBuilder, $ */
 
 /**
  * Manages test fixtures.

@@ -1,4 +1,4 @@
-/* global sandbox  */
+/* global sandbox */
 
 /**
  * Initializes test harness and starts Jasmine test runner.
@@ -20,7 +20,7 @@ var testSuite = (function () {
             target = createIframe();
         }
 
-        sandbox.render().appendTo(target);
+        target.appendChild(sandbox.render());
     }
 
     /**

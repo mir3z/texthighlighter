@@ -40,26 +40,12 @@
             'PARAM', 'METER', 'PROGRESS'
         ];
 
-    function color($el) {
-        return $el.css('background-color');
+    function color(el) {
+        return el.style.backgroundColor;
     }
 
-    function haveSameColor($a, $b) {
-        return color($a) === color($b);
-    }
-
-    function normalizeTextNodes(el) {
-        if (!el) { return; }
-
-        if (el.nodeType === NODE_TYPE.TEXT_NODE) {
-            while (el.nextSibling && el.nextSibling.nodeType === NODE_TYPE.TEXT_NODE) {
-                el.nodeValue += el.nextSibling.nodeValue;
-                el.parentNode.removeChild(el.nextSibling);
-            }
-        } else {
-            normalizeTextNodes(el.firstChild);
-        }
-        normalizeTextNodes(el.nextSibling);
+    function haveSameColor(a, b) {
+        return color(a) === color(b);
     }
 
     function refineRangeBoundaries(range) {
@@ -105,12 +91,149 @@
 
     // ------------------------------------------------------------------------------------------------
 
+    var utils = {
+
+        defaults: function (obj) {
+            var source, prop;
+
+            obj = obj || {};
+
+            for (var i = 1, length = arguments.length; i < length; i++) {
+                source = arguments[i];
+                for (prop in source) {
+                    if (source.hasOwnProperty(prop) && obj[prop] === void 0) {
+                        obj[prop] = source[prop];
+                    }
+                }
+            }
+
+            return obj;
+        },
+
+        unique: function (arr) {
+            return arr.filter(function (value, idx, self) {
+                return self.indexOf(value) === idx;
+            });
+        }
+
+    };
+
+    var dom = {
+        addClass: function (el, className) {
+            if (el.classList) {
+                el.classList.add(className);
+            } else {
+                el.className += ' ' + className;
+            }
+        },
+
+        removeClass: function (el, className) {
+            if (el.classList) {
+                el.classList.remove(className);
+            } else {
+                el.className = el.className.replace(
+                    new RegExp('(^|\\b)' + className + '(\\b|$)', 'gi'), ' '
+                );
+            }
+        },
+
+        prepend: function (refEl, nodesToPrepend) {
+            var nodes = Array.prototype.slice.call(nodesToPrepend),
+                i = nodes.length;
+
+            while (i--) {
+                refEl.insertBefore(nodes[i], refEl.firstChild);
+            }
+        },
+
+        append: function (refEl, nodesToAppend) {
+            var nodes = Array.prototype.slice.call(nodesToAppend);
+
+            for (var i = 0, len = nodes.length; i < len; ++i) {
+                refEl.appendChild(nodes[i]);
+            }
+        },
+
+        insertAfter: function (insertedNode, refEl) {
+            return refEl.parentNode.insertBefore(insertedNode, refEl.nextSibling);
+        },
+
+        insertBefore: function (insertedNode, refEl) {
+            return refEl.parentNode.insertBefore(insertedNode, refEl);
+        },
+
+        remove: function (el) {
+            el.parentNode.removeChild(el);
+        },
+
+        contains: function (container, child) {
+            return container !== child && container.contains(child);
+        },
+
+        wrap: function (el, wrapper) {
+            if (el.parentNode) {
+                el.parentNode.insertBefore(wrapper, el);
+            }
+
+            wrapper.appendChild(el);
+            return wrapper;
+        },
+
+        unwrap: function (el) {
+            var nodes = Array.prototype.slice.call(el.childNodes),
+                wrapper;
+
+            nodes.forEach(function (node) {
+                wrapper = node.parentNode;
+                dom.insertBefore(node, node.parentNode);
+                dom.remove(wrapper);
+            });
+
+            return nodes;
+        },
+
+        parents: function (el) {
+            var parent, path = [];
+
+            while (!!(parent = el.parentNode)) {
+                path.push(parent);
+                el = parent;
+            }
+
+            return path;
+        },
+
+        normalizeTextNodes: function (el) {
+            if (!el) { return; }
+
+            if (el.nodeType === NODE_TYPE.TEXT_NODE) {
+                while (el.nextSibling && el.nextSibling.nodeType === NODE_TYPE.TEXT_NODE) {
+                    el.nodeValue += el.nextSibling.nodeValue;
+                    el.parentNode.removeChild(el.nextSibling);
+                }
+            } else {
+                dom.normalizeTextNodes(el.firstChild);
+            }
+            dom.normalizeTextNodes(el.nextSibling);
+        },
+
+        fromHTML: function (html) {
+            var div = document.createElement('div');
+            div.innerHTML = html;
+            return div.childNodes;
+        }
+    };
+
+    // ------------------------------------------------------------------------------------------------
+
     function TextHighlighter(element, options) {
         this.el = element;
         this.$el = $(element);
-        this.options = $.extend({}, $[PLUGIN.name].defaults, options);
+        //this.options = $.extend({}, $[PLUGIN.name].defaults, options);
+        this.options = utils.defaults(options, $[PLUGIN.name].defaults);
 
-        this.$el.addClass(this.options.contextClass);
+        //this.$el.addClass(this.options.contextClass);
+        dom.addClass(this.el, this.options.contextClass);
         this.bindEvents();
     }
 
@@ -121,21 +244,22 @@
     };
 
     TextHighlighter.prototype.bindEvents = function () {
-        this.$el.bind('mouseup', { self: this }, this.highlightHandler);
+        //this.$el.bind('mouseup', { self: this }, this.highlightHandler);
+        this.el.addEventListener('mouseup', this.highlightHandler.bind(this));
     };
 
     TextHighlighter.prototype.unbindEvents = function () {
-        this.$el.unbind('mouseup', this.highlightHandler);
+        //this.$el.unbind('mouseup', this.highlightHandler);
+        this.el.removeEventListener('mouseup', this.highlightHandler.bind(this));
     };
 
     TextHighlighter.prototype.highlightHandler = function (event) {
-        var hl = $(event.currentTarget).getHighlighter();
-        hl.doHighlight();
+        this.doHighlight();
     };
 
     TextHighlighter.prototype.doHighlight = function () {
         var range = this.getCurrentRange(),
-            $wrapper,
+            wrapper,
             createdHighlights,
             normalizedHighlights;
 
@@ -145,12 +269,12 @@
         }
 
         if (this.options.onBeforeHighlight(range) === true) {
-            $wrapper = $.textHighlighter.createWrapper(this.options);
+            wrapper = $.textHighlighter.createWrapper(this.options);
 
-            createdHighlights = this.highlightRange(range, $wrapper);
+            createdHighlights = this.highlightRange(range, wrapper);
             normalizedHighlights = this.normalizeHighlights(createdHighlights);
 
-            this.options.onAfterHighlight(range.toString(), normalizedHighlights);
+            this.options.onAfterHighlight(range, normalizedHighlights);
         }
 
         this.removeAllRanges();
@@ -199,7 +323,7 @@
         return this.el.ownerDocument || this.el;
     };
 
-    TextHighlighter.prototype.highlightRange = function (range, $wrapper) {
+    TextHighlighter.prototype.highlightRange = function (range, wrapper) {
         if (!range || range.collapsed) {
             return [];
         }
@@ -212,21 +336,22 @@
             node = startContainer,
             highlights = [],
             highlight,
-            nodeParent,
-            wrapper;
+            wrapperClone,
+            nodeParent;
 
-        $wrapper.attr('data-highlighted', true);
 
         do {
             if (goDeeper && node.nodeType === NODE_TYPE.TEXT_NODE) {
 
                 if (IGNORE_TAGS.indexOf(node.parentNode.tagName) === -1 && node.nodeValue.trim() !== '') {
-                    wrapper = $wrapper.clone(true).get(0);
+                    wrapperClone = wrapper.cloneNode(true);
+                    wrapperClone.setAttribute(DATA_ATTR, true);
                     nodeParent = node.parentNode;
 
                     // highlight if node is inside the el
-                    if ($.contains(this.el, nodeParent) || nodeParent === this.el) {
-                        highlight = $(node).wrap(wrapper).parent().get(0);
+                    if (dom.contains(this.el, nodeParent) || nodeParent === this.el) {
+                        //highlight = $(node).wrap(wrapperClone).parent().get(0);
+                        highlight = dom.wrap(node, wrapperClone);
                         highlights.push(highlight);
                     }
                 }
@@ -265,19 +390,19 @@
         this.mergeSiblingHighlights(highlights);
 
         // omit removed nodes
-        normalizedHighlights = $.map(highlights, function(hl) {
+        normalizedHighlights = highlights.filter(function (hl) {
             return hl.parentElement ? hl : null;
         });
 
-        normalizedHighlights = $.unique(normalizedHighlights);
+        normalizedHighlights = utils.unique(normalizedHighlights);
 
         return normalizedHighlights;
     };
 
     TextHighlighter.prototype.flattenNestedHighlights = function (highlights) {
 
-        var $highlights = highlights.sort(function (a, b) {
-            return $(b).parents().length - $(a).parents().length;
+        highlights.sort(function (a, b) {
+            return dom.parents(b).length - dom.parents(a).length;
         });
 
         var again,
@@ -286,34 +411,32 @@
         do {
             again = false;
 
-            $.each($highlights, function (i) {
-                var $hl = $(this);
-                var hl = this;
-                var $parent = $hl.parent();
-                var $parentPrev = $parent.prev();
-                var $parentNext = $parent.next();
+            highlights.forEach(function (hl, i) {
+                var parent = hl.parentElement;
+                var parentPrev = parent.previousSibling;
+                var parentNext = parent.nextSibling;
 
-                if (self.isHighlight($parent)) {
+                if (self.isHighlight(parent)) {
 
-                    if (!haveSameColor($parent, $hl)) {
+                    if (!haveSameColor(parent, hl)) {
 
-                        if (self.isHighlight($parentPrev) && haveSameColor($parentPrev, $hl) && !hl.previousSibling) {
-                            $hl.insertAfter($parentPrev);
+                        if (self.isHighlight(parentPrev) && haveSameColor(parentPrev, hl) && !hl.previousSibling) {
+                            dom.insertAfter(hl, parentPrev);
                             again = true;
                         }
 
-                        if (self.isHighlight($parentNext) && haveSameColor($parentNext, $hl) && !hl.nextSibling) {
-                            $hl.insertBefore($parentNext);
+                        if (self.isHighlight(parentNext) && haveSameColor(parentNext, hl) && !hl.nextSibling) {
+                            dom.insertBefore(hl, parentNext);
                             again = true;
                         }
 
-                        if ($parent.is(':empty')) {
-                            $parent.remove();
+                        if (!parent.hasChildNodes()) {
+                            dom.remove(parent);
                         }
 
                     } else {
-                        $parent.get(0).replaceChild(this.childNodes[0], hl);
-                        $highlights[i] = $parent.get(0);
+                        parent.replaceChild(hl.firstChild, hl);
+                        highlights[i] = parent;
                         again = true;
                     }
 
@@ -328,28 +451,26 @@
 
         function shouldMerge(current, node) {
             return node && node.nodeType === NODE_TYPE.ELEMENT_NODE &&
-                haveSameColor($(current), $(node)) &&
-                $(node).hasClass(self.options.highlightedClass);
+                haveSameColor(current, node) &&
+                self.isHighlight(node);
         }
 
-        $.each(highlights, function() {
-            var highlight = this;
-
-            var prev = highlight.previousSibling;
-            var next = highlight.nextSibling;
+        highlights.forEach(function (highlight) {
+            var prev = highlight.previousSibling,
+                next = highlight.nextSibling;
 
             if (shouldMerge(highlight, prev)) {
-                $(highlight).prepend($(prev).contents());
-                $(prev).remove();
+                dom.prepend(highlight, prev.childNodes);
+                dom.remove(prev);
             }
             if (shouldMerge(highlight, next)) {
-                $(highlight).append($(next).contents());
-                $(next).remove();
+                dom.append(highlight, next.childNodes);
+                dom.remove(next);
             }
         });
 
-        $.each(highlights, function () {
-            normalizeTextNodes(this);
+        highlights.forEach(function (h) {
+            dom.normalizeTextNodes(h);
         });
     };
 
@@ -363,87 +484,86 @@
 
     TextHighlighter.prototype.removeHighlights = function (element) {
         var container = element || this.el,
-            $highlights = this.getAllHighlights(container, true),
+            highlights = this.getAllHighlights(container, true),
             self = this;
 
-        function unwrapHighlight(highlight) {
-            return $(highlight).contents().unwrap().filter(function () {
-                return this.nodeType === NODE_TYPE.TEXT_NODE;
-            });
-        }
-
         function mergeSiblingTextNodes(textNode) {
-            var prev = textNode.previousSibling;
-            var next = textNode.nextSibling;
+            var prev = textNode.previousSibling,
+                next = textNode.nextSibling;
 
             if (prev && prev.nodeType === NODE_TYPE.TEXT_NODE) {
                 textNode.nodeValue = prev.nodeValue + textNode.nodeValue;
-                prev.parentNode.removeChild(prev);
+                dom.remove(prev);
             }
             if (next && next.nodeType === NODE_TYPE.TEXT_NODE) {
                 textNode.nodeValue = textNode.nodeValue + next.nodeValue;
-                next.parentNode.removeChild(next);
+                dom.remove(next);
             }
         }
 
         function removeHighlight(highlight) {
-            var textNodes = unwrapHighlight(highlight);
-            $.each(textNodes, function () {
-                mergeSiblingTextNodes(this);
+            var textNodes = dom.unwrap(highlight);
+            textNodes.forEach(function (node) {
+                mergeSiblingTextNodes(node);
             });
         }
 
-        $highlights = $highlights.sort(function (a, b) {
-            return $(b).parents().length - $(a).parents().length;
+        highlights.sort(function (a, b) {
+            return dom.parents(b).length - dom.parents(a).length;
         });
 
-        $highlights.each(function () {
-            if (self.options.onRemoveHighlight(this) === true) {
-                removeHighlight(this);
+        highlights.forEach(function (hl) {
+            if (self.options.onRemoveHighlight(hl) === true) {
+                removeHighlight(hl);
             }
         });
     };
 
     TextHighlighter.prototype.getAllHighlights = function (container, andSelf) {
-        var $highlights = $(container).find('[' + DATA_ATTR + ']');
+        var highlights = container.querySelectorAll('[' + DATA_ATTR + ']');
+        highlights = Array.prototype.slice.call(highlights);
 
-        if (andSelf === true && $(container).attr(DATA_ATTR)) {
-            $highlights = $highlights.add(container);
+        if (andSelf === true && container.hasAttribute(DATA_ATTR)) {
+            highlights.push(container);
         }
-        return $highlights;
+
+        return highlights;
     };
 
-    TextHighlighter.prototype.isHighlight = function ($el) {
-        return !!$el.attr(DATA_ATTR);
+    TextHighlighter.prototype.isHighlight = function (el) {
+        return el && el.nodeType === NODE_TYPE.ELEMENT_NODE && el.hasAttribute(DATA_ATTR);
     };
 
     TextHighlighter.prototype.serializeHighlights = function () {
-        var $highlights = this.getAllHighlights(this.el, true),
+        var highlights = this.getAllHighlights(this.el, true),
             refEl = this.el,
             hlDescriptors = [];
 
         function getElementPath(el, refElement) {
             var path = [],
-                elIndex;
+                childNodes;
 
             do {
-                elIndex = $.inArray(el, el.parentNode.childNodes);
-                path.unshift(elIndex);
+                childNodes = Array.prototype.slice.call(el.parentNode.childNodes);
+                path.unshift(childNodes.indexOf(el));
                 el = el.parentNode;
             } while (el !== refElement);
 
             return path;
         }
 
-        $highlights = $highlights.sort(function (a, b) {
-            return $(a).parents().length - $(b).parents().length;
+        highlights.sort(function (a, b) {
+            return dom.parents(a).length - dom.parents(b).length;
         });
 
-        $highlights.each(function (i, highlight) {
+        highlights.forEach(function (highlight, i) {
             var offset = 0, // Hl offset from previous sibling within parent node.
                 length = highlight.textContent.length,
                 hlPath = getElementPath(highlight, refEl),
-                wrapper = $(highlight).clone().empty().get(0).outerHTML;
+                wrapper = highlight.cloneNode(true);
+
+            wrapper.innerHTML = '';
+            wrapper = wrapper.outerHTML;
 
             if (highlight.previousSibling && highlight.previousSibling.nodeType === NODE_TYPE.TEXT_NODE) {
                 offset = highlight.previousSibling.length;
@@ -451,7 +571,7 @@
 
             hlDescriptors.push([
                 wrapper,
-                $(highlight).text(),
+                highlight.textContent,
                 hlPath.join(':'),
                 offset,
                 length
@@ -500,18 +620,21 @@
             hlNode.splitText(hl.length);
 
             if (hlNode.nextSibling && !hlNode.nextSibling.nodeValue) {
-                hlNode.parentNode.removeChild(hlNode.nextSibling);
+                dom.remove(hlNode.nextSibling);
+                //hlNode.parentNode.removeChild(hlNode.nextSibling);
             }
 
             if (hlNode.previousSibling && !hlNode.previousSibling.nodeValue) {
-                hlNode.parentNode.removeChild(hlNode.previousSibling);
+                dom.remove(hlNode.previousSibling);
+                //hlNode.parentNode.removeChild(hlNode.previousSibling);
             }
 
-            highlight = $(hlNode).wrap(hl.wrapper).parent().get(0);
+            //highlight = $(hlNode).wrap(hl.wrapper).parent().get(0);
+            highlight = dom.wrap(hlNode, dom.fromHTML(hl.wrapper)[0]); // problem: wrapper is string
             highlights.push(highlight);
         }
 
-        $.each(hlDescriptors, function(i, hlDescriptor) {
+        hlDescriptors.forEach(function (hlDescriptor, i) {
             try {
                 deserializationFn(hlDescriptor);
             } catch (e) {
@@ -543,17 +666,21 @@
          * Returns HTML element to wrap selected text in.
          */
         createWrapper: function(options) {
-            return $('<span></span>')
-                .css('backgroundColor', options.color)
-                .addClass(options.highlightedClass);
+            var span = document.createElement('span');
+            span.style.backgroundColor = options.color;
+            span.className = options.highlightedClass;
+            return span;
+//            return $('<span></span>')
+//                .css('backgroundColor', options.color)
+//                .addClass(options.highlightedClass);
         },
         defaults: {
             color: '#ffff7b',
             highlightedClass: 'highlighted',
             contextClass: 'highlighter-context',
-            onRemoveHighlight: function() { return true; },
-            onBeforeHighlight: function() { return true; },
-            onAfterHighlight: function() { }
+            onRemoveHighlight: function () { return true; },
+            onBeforeHighlight: function () { return true; },
+            onAfterHighlight: function () { }
         }
     };
 

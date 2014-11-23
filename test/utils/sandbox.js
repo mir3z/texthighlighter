@@ -1,4 +1,4 @@
-/* global fixtures, $  */
+/* global fixtures, $ */
 
 /**
  * Manages test sandbox.
@@ -17,23 +17,31 @@ var sandbox = (function () {
      * @returns {Window}
      */
     function getWindow() {
-        var doc = sandbox.$.get(0).ownerDocument;
+        var doc = sandbox.el.ownerDocument;
         return doc.defaultView || doc.parentWindow;
     }
 
     return {
         /**
-         * jQuery object of the sandbox
+         * HTML object of the sandbox.
+         * @type {HTMLElement}
          */
-        $: null,
+        el: null,
 
         /**
-         * Renders sandbox and returns its jQuery object.
-         * @returns {jQuery}
+         * jQuery object of the sandbox.
+         * @type {jQuery}
+         */
+        $el: null,
+
+        /**
+         * Renders sandbox and returns its HTML element.
+         * @returns {HTMLElement}
          */
         render: function () {
-            this.$ = $('<div></div>').attr('id', ID);
-            return this.$;
+            this.$el = $('<div></div>').attr('id', ID);
+            this.el = this.$el.get(0);
+            return this.el;
         },
 
         /**
@@ -44,7 +52,7 @@ var sandbox = (function () {
          * @returns {object}
          */
         init: function (params) {
-            this.$.textHighlighter(params);
+            this.$el.textHighlighter(params);
             return sandbox.getHighlighter();
         },
 
@@ -54,14 +62,14 @@ var sandbox = (function () {
          * @returns {object}
          */
         getHighlighter: function () {
-            return this.$.getHighlighter();
+            return this.$el.getHighlighter();
         },
 
         /**
          * Empties sandbox and destroys highlighter.
          */
         empty: function () {
-            this.$.empty();
+            this.el.innerHTML = '';
             sandbox.getHighlighter().destroy();
         },
 
@@ -71,7 +79,7 @@ var sandbox = (function () {
          * @returns {string}
          */
         html: function (removeMarkedAttr) {
-            var html = this.$.html(),
+            var html = this.el.innerHTML,
                 wrapper;
 
             if (removeMarkedAttr) {
@@ -96,17 +104,17 @@ var sandbox = (function () {
                 marked,
                 markings = {};
 
-            this.$.html(dom);
+            this.$el.html(dom);
 
-            marked = this.$.find('[data-marked]');
+            marked = this.$el.find('[data-marked]');
 
             marked.each(function () {
                 var value = $(this).data('marked');
 
                 if (typeof markings[value] !== 'undefined') {
-                    markings[value] = markings[value].add($(this));
+                    markings[value].push(this);
                 } else {
-                    markings[value] = $(this);
+                    markings[value] = [this];
                 }
 
             });
@@ -126,7 +134,7 @@ var sandbox = (function () {
          */
         getTextNodes: function () {
             var textNodes = [];
-            this.$.contents().each(function getChildTextNodes() {
+            this.$el.contents().each(function getChildTextNodes() {
                 if (this.nodeType === 3) {
                     textNodes.push(this);
                 } else {

@@ -43,7 +43,7 @@ describe('Removing highlights', function () {
 
             if (params.which) {
                 params.which.forEach(function (el) {
-                    hl.removeHighlights(markings[el]);
+                    hl.removeHighlights(markings[el][0]);
                 });
             } else {
                 hl.removeHighlights();

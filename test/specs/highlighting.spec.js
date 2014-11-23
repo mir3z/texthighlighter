@@ -40,7 +40,7 @@ describe('Highlighting Range', function () {
                 nodes;
 
             if (markings.node) {
-                nodes = markings.node.map(function (i, el) { return el; });
+                nodes = markings.node;
             }
 
             range = params.rangeCreator.apply(this, nodes);
@@ -48,7 +48,7 @@ describe('Highlighting Range', function () {
             hl.highlightRange(range, $.textHighlighter.createWrapper(hl.options));
 
             expect(
-                hl.getAllHighlights(sandbox.$, true).get().map(function (h) {
+                hl.getAllHighlights(sandbox.el, true).map(function (h) {
                     return h.textContent;
                 })
             ).toEqual(params.expectedHighlights);
