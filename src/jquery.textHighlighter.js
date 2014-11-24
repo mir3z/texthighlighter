@@ -228,28 +228,22 @@
 
     function TextHighlighter(element, options) {
         this.el = element;
-        this.$el = $(element);
-        //this.options = $.extend({}, $[PLUGIN.name].defaults, options);
         this.options = utils.defaults(options, $[PLUGIN.name].defaults);
 
-        //this.$el.addClass(this.options.contextClass);
         dom.addClass(this.el, this.options.contextClass);
         this.bindEvents();
     }
 
     TextHighlighter.prototype.destroy = function () {
         this.unbindEvents();
-        this.$el.removeClass(this.options.contextClass);
-        this.$el.removeData(PLUGIN.name);
+        dom.removeClass(this.el, this.options.contextClass);
     };
 
     TextHighlighter.prototype.bindEvents = function () {
-        //this.$el.bind('mouseup', { self: this }, this.highlightHandler);
         this.el.addEventListener('mouseup', this.highlightHandler.bind(this));
     };
 
     TextHighlighter.prototype.unbindEvents = function () {
-        //this.$el.unbind('mouseup', this.highlightHandler);
         this.el.removeEventListener('mouseup', this.highlightHandler.bind(this));
     };
 
@@ -646,6 +640,12 @@
         return highlights;
     };
 
+    function wrap(fn, wrapper) {
+        return function () {
+            wrapper.call(this, fn);
+        };
+    }
+
     /**
      * Returns TextHighlighter instance.
      */
@@ -654,9 +654,19 @@
     };
 
     $.fn[PLUGIN.name] = function(options) {
-        return this.each(function() {
-            if (!$.data(this, PLUGIN.name)) {
-                $.data(this, PLUGIN.name, new TextHighlighter(this, options));
+        return this.each(function () {
+            var el = this,
+                inst;
+
+            if (!$.data(el, PLUGIN.name)) {
+                inst = new TextHighlighter(el, options);
+
+                inst.destroy = wrap(inst.destroy, function (destroy) {
+                    destroy.call(inst);
+                    $(el).removeData(PLUGIN.name);
+                });
+
+                $.data(el, PLUGIN.name, inst);
             }
         });
     };
@@ -670,9 +680,6 @@
             span.style.backgroundColor = options.color;
             span.className = options.highlightedClass;
             return span;
-//            return $('<span></span>')
-//                .css('backgroundColor', options.color)
-//                .addClass(options.highlightedClass);
         },
         defaults: {
             color: '#ffff7b',
