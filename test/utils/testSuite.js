@@ -49,7 +49,7 @@ var testSuite = (function () {
         /**
          * Initializes sandbox and starts Jasmine tests.
          * @param params
-         * @param {boolean} params.inIframe - if set to true, sandbox will be placed to the iframe.
+         * @param {boolean} params.inIframe - if set to true, sandbox will be placed into the iframe.
          */
         initialize: function (params) {
             window.onload = function () {

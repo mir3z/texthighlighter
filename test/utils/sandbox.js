@@ -69,8 +69,12 @@ var sandbox = (function () {
          * Empties sandbox and destroys highlighter.
          */
         empty: function () {
+            var hl = sandbox.getHighlighter();
+
             this.el.innerHTML = '';
-            sandbox.getHighlighter().destroy();
+            if (hl) {
+                hl.destroy();
+            }
         },
 
         /**

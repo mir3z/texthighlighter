@@ -45,7 +45,7 @@ describe('Highlighting Range', function () {
 
             range = params.rangeCreator.apply(this, nodes);
 
-            hl.highlightRange(range, $.textHighlighter.createWrapper(hl.options));
+            hl.highlightRange(range, TextHighlighter.createWrapper(hl.options));
 
             expect(
                 hl.getAllHighlights(sandbox.el, true).map(function (h) {
