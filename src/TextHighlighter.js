@@ -11,12 +11,26 @@
             'PARAM', 'METER', 'PROGRESS'
         ];
 
-    function color(el) {
-        return el.style.backgroundColor;
+    function haveSameColor(a, b) {
+        return dom(a).color() === dom(b).color();
     }
 
-    function haveSameColor(a, b) {
-        return color(a) === color(b);
+    function defaults(obj, source) {
+        obj = obj || {};
+
+        for (var prop in source) {
+            if (source.hasOwnProperty(prop) && obj[prop] === void 0) {
+                obj[prop] = source[prop];
+            }
+        }
+
+        return obj;
+    }
+
+    function unique(arr) {
+        return arr.filter(function (value, idx, self) {
+            return self.indexOf(value) === idx;
+        });
     }
 
     function refineRangeBoundaries(range) {
@@ -62,142 +76,126 @@
 
     // ------------------------------------------------------------------------------------------------
 
-    var utils = {
+    var dom = function (el) {
+        return {
 
-        defaults: function (obj) {
-            var source, prop;
+            addClass: function (className) {
+                if (el.classList) {
+                    el.classList.add(className);
+                } else {
+                    el.className += ' ' + className;
+                }
+            },
 
-            obj = obj || {};
+            removeClass: function (className) {
+                if (el.classList) {
+                    el.classList.remove(className);
+                } else {
+                    el.className = el.className.replace(
+                        new RegExp('(^|\\b)' + className + '(\\b|$)', 'gi'), ' '
+                    );
+                }
+            },
 
-            for (var i = 1, length = arguments.length; i < length; i++) {
-                source = arguments[i];
-                for (prop in source) {
-                    if (source.hasOwnProperty(prop) && obj[prop] === void 0) {
-                        obj[prop] = source[prop];
+            prepend: function (nodesToPrepend) {
+                var nodes = Array.prototype.slice.call(nodesToPrepend),
+                    i = nodes.length;
+
+                while (i--) {
+                    el.insertBefore(nodes[i], el.firstChild);
+                }
+            },
+
+            append: function (nodesToAppend) {
+                var nodes = Array.prototype.slice.call(nodesToAppend);
+
+                for (var i = 0, len = nodes.length; i < len; ++i) {
+                    el.appendChild(nodes[i]);
+                }
+            },
+
+            insertAfter: function (refEl) {
+                return refEl.parentNode.insertBefore(el, refEl.nextSibling);
+            },
+
+            insertBefore: function (refEl) {
+                return refEl.parentNode.insertBefore(el, refEl);
+            },
+
+            remove: function () {
+                el.parentNode.removeChild(el);
+                el = null;
+            },
+
+            contains: function (child) {
+                return el !== child && el.contains(child);
+            },
+
+            wrap: function (wrapper) {
+                if (el.parentNode) {
+                    el.parentNode.insertBefore(wrapper, el);
+                }
+
+                wrapper.appendChild(el);
+                return wrapper;
+            },
+
+            unwrap: function () {
+                var nodes = Array.prototype.slice.call(el.childNodes),
+                    wrapper;
+
+                nodes.forEach(function (node) {
+                    wrapper = node.parentNode;
+                    dom(node).insertBefore(node.parentNode);
+                    dom(wrapper).remove();
+                });
+
+                return nodes;
+            },
+
+            parents: function () {
+                var parent, path = [];
+
+                while (!!(parent = el.parentNode)) {
+                    path.push(parent);
+                    el = parent;
+                }
+
+                return path;
+            },
+
+            normalizeTextNodes: function () {
+                if (!el) {
+                    return;
+                }
+
+                if (el.nodeType === NODE_TYPE.TEXT_NODE) {
+                    while (el.nextSibling && el.nextSibling.nodeType === NODE_TYPE.TEXT_NODE) {
+                        el.nodeValue += el.nextSibling.nodeValue;
+                        el.parentNode.removeChild(el.nextSibling);
                     }
+                } else {
+                    dom(el.firstChild).normalizeTextNodes();
                 }
+                dom(el.nextSibling).normalizeTextNodes();
+            },
+
+            color: function () {
+                return el.style.backgroundColor;
+            },
+
+            fromHTML: function (html) {
+                var div = document.createElement('div');
+                div.innerHTML = html;
+                return div.childNodes;
             }
 
-            return obj;
-        },
-
-        unique: function (arr) {
-            return arr.filter(function (value, idx, self) {
-                return self.indexOf(value) === idx;
-            });
-        }
-
-    };
-
-    var dom = {
-        addClass: function (el, className) {
-            if (el.classList) {
-                el.classList.add(className);
-            } else {
-                el.className += ' ' + className;
-            }
-        },
-
-        removeClass: function (el, className) {
-            if (el.classList) {
-                el.classList.remove(className);
-            } else {
-                el.className = el.className.replace(
-                    new RegExp('(^|\\b)' + className + '(\\b|$)', 'gi'), ' '
-                );
-            }
-        },
-
-        prepend: function (refEl, nodesToPrepend) {
-            var nodes = Array.prototype.slice.call(nodesToPrepend),
-                i = nodes.length;
-
-            while (i--) {
-                refEl.insertBefore(nodes[i], refEl.firstChild);
-            }
-        },
-
-        append: function (refEl, nodesToAppend) {
-            var nodes = Array.prototype.slice.call(nodesToAppend);
-
-            for (var i = 0, len = nodes.length; i < len; ++i) {
-                refEl.appendChild(nodes[i]);
-            }
-        },
-
-        insertAfter: function (insertedNode, refEl) {
-            return refEl.parentNode.insertBefore(insertedNode, refEl.nextSibling);
-        },
-
-        insertBefore: function (insertedNode, refEl) {
-            return refEl.parentNode.insertBefore(insertedNode, refEl);
-        },
-
-        remove: function (el) {
-            el.parentNode.removeChild(el);
-        },
-
-        contains: function (container, child) {
-            return container !== child && container.contains(child);
-        },
-
-        wrap: function (el, wrapper) {
-            if (el.parentNode) {
-                el.parentNode.insertBefore(wrapper, el);
-            }
-
-            wrapper.appendChild(el);
-            return wrapper;
-        },
-
-        unwrap: function (el) {
-            var nodes = Array.prototype.slice.call(el.childNodes),
-                wrapper;
-
-            nodes.forEach(function (node) {
-                wrapper = node.parentNode;
-                dom.insertBefore(node, node.parentNode);
-                dom.remove(wrapper);
-            });
-
-            return nodes;
-        },
-
-        parents: function (el) {
-            var parent, path = [];
-
-            while (!!(parent = el.parentNode)) {
-                path.push(parent);
-                el = parent;
-            }
-
-            return path;
-        },
-
-        normalizeTextNodes: function (el) {
-            if (!el) { return; }
-
-            if (el.nodeType === NODE_TYPE.TEXT_NODE) {
-                while (el.nextSibling && el.nextSibling.nodeType === NODE_TYPE.TEXT_NODE) {
-                    el.nodeValue += el.nextSibling.nodeValue;
-                    el.parentNode.removeChild(el.nextSibling);
-                }
-            } else {
-                dom.normalizeTextNodes(el.firstChild);
-            }
-            dom.normalizeTextNodes(el.nextSibling);
-        },
-
-        fromHTML: function (html) {
-            var div = document.createElement('div');
-            div.innerHTML = html;
-            return div.childNodes;
-        }
+        };
     };
 
     function TextHighlighter(element, options) {
         this.el = element;
-        this.options = utils.defaults(options, {
+        this.options = defaults(options, {
             color: '#ffff7b',
             highlightedClass: 'highlighted',
             contextClass: 'highlighter-context',
@@ -206,13 +204,13 @@
             onAfterHighlight: function () { }
         });
 
-        dom.addClass(this.el, this.options.contextClass);
+        dom(this.el).addClass(this.options.contextClass);
         this.bindEvents();
     }
 
     TextHighlighter.prototype.destroy = function () {
         this.unbindEvents();
-        dom.removeClass(this.el, this.options.contextClass);
+        dom(this.el).removeClass(this.options.contextClass);
     };
 
     TextHighlighter.prototype.bindEvents = function () {
@@ -223,7 +221,7 @@
         this.el.removeEventListener('mouseup', this.highlightHandler.bind(this));
     };
 
-    TextHighlighter.prototype.highlightHandler = function (event) {
+    TextHighlighter.prototype.highlightHandler = function () {
         this.doHighlight();
     };
 
@@ -319,9 +317,9 @@
                     nodeParent = node.parentNode;
 
                     // highlight if node is inside the el
-                    if (dom.contains(this.el, nodeParent) || nodeParent === this.el) {
+                    if (dom(this.el).contains(nodeParent) || nodeParent === this.el) {
                         //highlight = $(node).wrap(wrapperClone).parent().get(0);
-                        highlight = dom.wrap(node, wrapperClone);
+                        highlight = dom(node).wrap(wrapperClone);
                         highlights.push(highlight);
                     }
                 }
@@ -354,7 +352,7 @@
     };
 
     TextHighlighter.prototype.normalizeHighlights = function (highlights) {
-        var normalizedHighlights = [];
+        var normalizedHighlights;
 
         this.flattenNestedHighlights(highlights);
         this.mergeSiblingHighlights(highlights);
@@ -364,22 +362,21 @@
             return hl.parentElement ? hl : null;
         });
 
-        normalizedHighlights = utils.unique(normalizedHighlights);
+        normalizedHighlights = unique(normalizedHighlights);
 
         return normalizedHighlights;
     };
 
     TextHighlighter.prototype.flattenNestedHighlights = function (highlights) {
-
-        highlights.sort(function (a, b) {
-            return dom.parents(b).length - dom.parents(a).length;
-        });
-
         var again,
             self = this;
 
-        do {
-            again = false;
+        highlights.sort(function (a, b) {
+            return dom(b).parents().length - dom(a).parents().length;
+        });
+
+        function flattenOnce() {
+            var again = false;
 
             highlights.forEach(function (hl, i) {
                 var parent = hl.parentElement;
@@ -391,17 +388,17 @@
                     if (!haveSameColor(parent, hl)) {
 
                         if (self.isHighlight(parentPrev) && haveSameColor(parentPrev, hl) && !hl.previousSibling) {
-                            dom.insertAfter(hl, parentPrev);
+                            dom(hl).insertAfter(parentPrev);
                             again = true;
                         }
 
                         if (self.isHighlight(parentNext) && haveSameColor(parentNext, hl) && !hl.nextSibling) {
-                            dom.insertBefore(hl, parentNext);
+                            dom(hl).insertBefore(parentNext);
                             again = true;
                         }
 
                         if (!parent.hasChildNodes()) {
-                            dom.remove(parent);
+                            dom(parent).remove();
                         }
 
                     } else {
@@ -413,6 +410,12 @@
                 }
 
             });
+
+            return again;
+        }
+
+        do {
+            again = flattenOnce();
         } while (again);
     };
 
@@ -430,17 +433,17 @@
                 next = highlight.nextSibling;
 
             if (shouldMerge(highlight, prev)) {
-                dom.prepend(highlight, prev.childNodes);
-                dom.remove(prev);
+                dom(highlight).prepend(prev.childNodes);
+                dom(prev).remove();
             }
             if (shouldMerge(highlight, next)) {
-                dom.append(highlight, next.childNodes);
-                dom.remove(next);
+                dom(highlight).append(next.childNodes);
+                dom(next).remove();
             }
         });
 
         highlights.forEach(function (h) {
-            dom.normalizeTextNodes(h);
+            dom(h).normalizeTextNodes();
         });
     };
 
@@ -463,23 +466,23 @@
 
             if (prev && prev.nodeType === NODE_TYPE.TEXT_NODE) {
                 textNode.nodeValue = prev.nodeValue + textNode.nodeValue;
-                dom.remove(prev);
+                dom(prev).remove();
             }
             if (next && next.nodeType === NODE_TYPE.TEXT_NODE) {
                 textNode.nodeValue = textNode.nodeValue + next.nodeValue;
-                dom.remove(next);
+                dom(next).remove();
             }
         }
 
         function removeHighlight(highlight) {
-            var textNodes = dom.unwrap(highlight);
+            var textNodes = dom(highlight).unwrap();
             textNodes.forEach(function (node) {
                 mergeSiblingTextNodes(node);
             });
         }
 
         highlights.sort(function (a, b) {
-            return dom.parents(b).length - dom.parents(a).length;
+            return dom(b).parents().length - dom(a).parents().length;
         });
 
         highlights.forEach(function (hl) {
@@ -490,8 +493,8 @@
     };
 
     TextHighlighter.prototype.getAllHighlights = function (container, andSelf) {
-        var highlights = container.querySelectorAll('[' + DATA_ATTR + ']');
-        highlights = Array.prototype.slice.call(highlights);
+        var nodeList = container.querySelectorAll('[' + DATA_ATTR + ']'),
+            highlights = Array.prototype.slice.call(nodeList);
 
         if (andSelf === true && container.hasAttribute(DATA_ATTR)) {
             highlights.push(container);
@@ -523,10 +526,10 @@
         }
 
         highlights.sort(function (a, b) {
-            return dom.parents(a).length - dom.parents(b).length;
+            return dom(a).parents().length - dom(b).parents().length;
         });
 
-        highlights.forEach(function (highlight, i) {
+        highlights.forEach(function (highlight) {
             var offset = 0, // Hl offset from previous sibling within parent node.
                 length = highlight.textContent.length,
                 hlPath = getElementPath(highlight, refEl),
@@ -590,17 +593,17 @@
             hlNode.splitText(hl.length);
 
             if (hlNode.nextSibling && !hlNode.nextSibling.nodeValue) {
-                dom.remove(hlNode.nextSibling);
+                dom(hlNode.nextSibling).remove();
                 //hlNode.parentNode.removeChild(hlNode.nextSibling);
             }
 
             if (hlNode.previousSibling && !hlNode.previousSibling.nodeValue) {
-                dom.remove(hlNode.previousSibling);
+                dom(hlNode.previousSibling).remove();
                 //hlNode.parentNode.removeChild(hlNode.previousSibling);
             }
 
             //highlight = $(hlNode).wrap(hl.wrapper).parent().get(0);
-            highlight = dom.wrap(hlNode, dom.fromHTML(hl.wrapper)[0]); // problem: wrapper is string
+            highlight = dom(hlNode).wrap(dom().fromHTML(hl.wrapper)[0]); // problem: wrapper is string
             highlights.push(highlight);
         }
 
@@ -608,7 +611,9 @@
             try {
                 deserializationFn(hlDescriptor);
             } catch (e) {
-                console.warn("Can't deserialize " + i + "-th descriptor. Cause: " + e);
+                if (console && console.warn) {
+                    console.warn("Can't deserialize " + i + "-th descriptor. Cause: " + e);
+                }
                 return true;
             }
         });
