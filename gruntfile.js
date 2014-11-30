@@ -4,10 +4,12 @@ module.exports = function (grunt) {
 
     var SRC_DIR = 'src/',
         SRC_FILES = [
+            SRC_DIR + 'TextHighlighter.js',
             SRC_DIR + 'jquery.textHighlighter.js'
         ],
         TEST_DIR = 'test/',
         SPEC_FILES = [
+            TEST_DIR + 'specs/basics.spec.js',
             TEST_DIR + 'specs/highlighting.spec.js',
             TEST_DIR + 'specs/flattening.spec.js',
             TEST_DIR + 'specs/merging.spec.js',
@@ -17,6 +19,7 @@ module.exports = function (grunt) {
             TEST_DIR + 'specs/callbacks.spec.js'
         ],
         BUILD_DIR = 'build/',
+        DOC_DIR = 'doc',
         BUILD_TARGET = 'jquery.textHighlighter.min.js';
 
     grunt.initConfig({
@@ -34,6 +37,19 @@ module.exports = function (grunt) {
             }
         },
 
+        jsdoc : {
+            dist : {
+                src: SRC_FILES,
+                options: {
+                    configure: 'jsdoc.conf.json',
+                    destination: DOC_DIR,
+                    private: false,
+                    template : "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template"
+                }
+            }
+        },
+
+
         jshint: {
             src: [ 'gruntfile.js', SRC_FILES, SPEC_FILES ],
             options: {
@@ -41,12 +57,13 @@ module.exports = function (grunt) {
             }
         },
 
-        clean: [ BUILD_DIR ]
+        clean: [ BUILD_DIR, DOC_DIR ]
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-closurecompiler');
+    grunt.loadNpmTasks('grunt-jsdoc');
 
     grunt.registerTask('build', ['closurecompiler:minify']);
     grunt.registerTask('default', ['build']);
