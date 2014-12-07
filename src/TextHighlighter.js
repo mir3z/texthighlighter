@@ -361,7 +361,7 @@
     /**
      * Creates TextHighlighter instance and binds to given DOM elements.
      * @param {HTMLElement} element - DOM element to which highlighted will be applied.
-     * @param {object} options - additional options.
+     * @param {object} [options] - additional options.
      * @param {string} options.color - highlight color.
      * @param {string} options.highlightedClass - class added to highlight, 'highlighted' by default.
      * @param {string} options.contextClass - class added to element to which highlighter is applied,
@@ -375,6 +375,10 @@
      * @class TextHighlighter
      */
     function TextHighlighter(element, options) {
+        if (!element) {
+            throw 'Missing anchor element';
+        }
+
         this.el = element;
         this.options = defaults(options, {
             color: '#ffff7b',

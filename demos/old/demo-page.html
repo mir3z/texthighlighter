@@ -4,9 +4,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script type="text/javascript" src="../lib/rangy-core.js"></script>
+    <!--<script type="text/javascript" src="../lib/rangy-core.js"></script>-->
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
-    <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
+    <script type="text/javascript" src="../../src/TextHighlighter.js" ></script>
+    <script type="text/javascript" src="../../src/jquery.textHighlighter.js"></script>
     <title>jQuery Text Highlighter Simple Demo</title>
 
     <style type="text/css">
@@ -90,6 +91,7 @@
             <div class="color" style="background-color: #66FF66"></div>
             <div class="color" style="background-color: #6666FF"></div>
           </div>
+          <p><button id="remove-highlights-btn">Remove all highlights</button></p>
         </li>
       </ul>
     </div>
@@ -243,6 +245,26 @@
 
     <script type="text/javascript" id="snippet-source">
       $(document).ready(function() {
+          var xKeyPressed = false;
+          var xKeyCode = 88;
+
+          $(window).keydown(function(e) {
+              xKeyPressed = (e.which == xKeyCode);
+          }).keyup(function(e) {
+              xKeyPressed = !(e.which == xKeyCode);
+          });
+
+          $('.highlighted').live('mouseup', function(e) {
+              if (xKeyPressed) {
+                  $('#sandbox').getHighlighter().removeHighlights(this);
+                  e.stopPropagation();
+              }
+          });
+
+          $('#remove-highlights-btn').click(function() {
+              $('#sandbox').getHighlighter().removeHighlights();
+          });
+
           $('#sandbox').textHighlighter();
 
           $('#color-picker div.color').click(function() {

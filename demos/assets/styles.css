@@ -1,0 +1,164 @@
+html, body, div, form, fieldset, legend, label {
+    margin: 0;
+    padding: 0;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+th, td {
+    text-align: left;
+    vertical-align: top;
+}
+h1, h2, h3, h4, h5, h6, th, td, caption { font-weight: normal; }
+img { border: 0; }
+
+/********************************************************************************************************************/
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    color: #333;
+    background: #e7e7e7;
+}
+
+.view {
+    width: 1024px;
+    margin: 0 auto;
+}
+
+.card {
+    background: #fff;
+    border-radius: 1px;
+    width: 665px;
+    margin: 25px auto 30px auto;
+    position: relative;
+    left: 180px;
+}
+
+.card .content {
+    padding: 30px;
+}
+
+.card img {
+    display: block;
+    margin: 0 auto;
+    border-radius: 2px;
+}
+
+#stamp {
+    font-family: 'Special Elite';
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 15px 5px;
+    font-size: 25px;
+    transform: rotateZ(15deg);
+    color: rgba(0, 0, 0, 0.1);
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+}
+
+.card h1 {
+    color: #555;
+}
+
+.top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 250px;
+    background: #03A9F4;
+    color: #f8f8f8;
+    box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16);
+}
+
+.side {
+    position: fixed;
+    width: 340px;
+    padding-right: 20px;
+    top: 0;
+    color: #e3f2fd;
+}
+
+.side ul {
+    list-style-type: square;
+    padding-left: 20px;
+}
+
+.code {
+    width: 310px;
+    position: fixed;
+    background: rgb(248, 248, 248);
+    top: 330px;
+    border-radius: 1px;
+    transform: rotateZ(-2deg);
+    -ms-transform: rotate(-2deg);
+}
+
+.code pre, .code pre code {
+    border: none;
+    font-size: 12px;
+    margin-top: 0;
+}
+
+.side h2 {
+    font-weight: bold;
+}
+
+table {
+    margin: 0 auto;
+}
+
+th {
+    border-bottom: 1px solid #ddd;
+}
+
+td, th {
+    padding: 5px;
+    min-width: 120px;
+}
+
+label {
+    display: inline-block;
+    min-width: 100px;
+    text-align: right;
+    margin-right: 10px;
+}
+
+form {
+    width: 300px;
+    margin: 0 auto;
+}
+
+form div {
+    margin: 5px 0;
+}
+
+input[type="submit"] {
+    display: block;
+    margin: 15px auto 0;
+}
+
+.fit {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.shadow {
+    box-shadow:
+        0 2px 5px 0 rgba(0, 0, 0, 0.26),
+        0 2px 10px 0 rgba(0, 0, 0, 0.16);
+}
+
+#footer {
+    text-align: center;
+    font-size: 10px;
+    color: #777;
+    margin: 30px 10px 10px;
+}

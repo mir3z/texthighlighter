@@ -4,10 +4,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="../lib/json2.min.js"></script>
     <script type="text/javascript" src="../lib/rangy-core.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.6.1.min.js"></script>
-    <script type="text/javascript" src="../src/jquery.textHighlighter.js"></script>
-    <title>jQuery Text Highlighter Demo Page :: Callbacks</title>
+    <script type="text/javascript" src="../../src/jquery.textHighlighter.js"></script>
+    <title>jQuery Text Highlighter Demo Page :: Serialization</title>
 
     <style type="text/css">
       #sandbox {
@@ -45,22 +46,48 @@
       .info-box ul li {
           margin-top: 5px;
       }
+      .info-box div {
+          margin: 5px auto;
+          width: 92%;
+      }
+      .info-box #color-picker {
+          border: none;
+          display: inline;
+      }
+      .info-box #color-picker div {
+          border: 1px solid #000;
+          width: 10px;
+          height: 10px;
+          display: inline-block;
+          cursor: pointer;
+          border-radius: 2px;
+      }
     </style>
   </head>
   <body>
     <div class="info-box">
       <ul>
-        <li>Select any text in the grey box below to highlight it. You should see 2 dialog boxes.</li>
-        <li>Click any highlighted text in the grey box below to remove it. You should see confirmation dialog box.</li>
+        <li>Select any text in the grey box below to highlight it.</li>
+        <li>Use buttons to serialize and deserialize highlights. See serialized highlights in textarea.</li>
       </ul>
+      <div>
+        <button id="serialize-btn">Serialize highlights</button>
+        <button id="deserialize-btn">Deserialize highlights</button>
+        <textarea rows="6" cols="90" style="width: 100%"></textarea>
+          <div id="color-picker">
+              <div class="color" style="background-color: #FF6666"></div>
+              <div class="color" style="background-color: #66FF66"></div>
+              <div class="color" style="background-color: #6666FF"></div>
+          </div>
+      </div>
     </div>
     <div id="sandbox">
       <p id="p1">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et neque vehicula mauris
-        interdum pulvinar a et orci. Suspendisse tempus justo sit amet orci tristique eu fringilla
+        interdum pulvinar a et orci. Suspendisse <b>tempus justo sit</b> amet orci tristique eu fringilla
         mauris porta. Ut porttitor pulvinar tempor. Nunc et lectus nisl. Aliquam pretium tempor
         magna, eu tristique velit scelerisque in. Vivamus non nulla odio. Morbi et massa diam. Donec
-        viverra risus vitae risus convallis ac bibendum metus consectetur. Vivamus rutrum tellus
+        viverra risus vitae risus <b>convallis ac bibendum</b> metus consectetur. Vivamus rutrum tellus
         massa. Vivamus nisi lorem, posuere quis laoreet porttitor, ultricies ut lorem. Sed et varius
         ante. Morbi sem nulla, gravida non lobortis ut, sodales vitae odio. Morbi et urna non massa
         lacinia eleifend. Nullam eu justo velit. Aenean mollis vehicula gravida. Curabitur ac
@@ -104,21 +131,29 @@
 
     <script type="text/javascript" id="snippet-source">
       $(document).ready(function() {
-          $('.highlighted').live('click', function() {
-              $('#sandbox').getHighlighter().removeHighlights(this);
+          var highlighter;
+
+          $('#serialize-btn').click(function() {
+              var jsonStr = highlighter.serializeHighlights();
+              $('textarea').val(jsonStr);
+
+              highlighter.removeHighlights();
           });
 
-          $('#sandbox').textHighlighter({
-              onRemoveHighlight: function(highlight) {
-                  return confirm('Do you really want to remove this highlight: "' + $(highlight).text() + '"?');
-              },
-              onBeforeHighlight: function(range) {
-                  return confirm('Do you really want to highlight this text: "' + range + '"?');
-              },
-              onAfterHighlight: function(highlights, range) {
-                  alert('You have selected "' + range + '" and created ' + highlights.length + ' highlight(s)!');
-              }
+          $('#deserialize-btn').click(function() {
+              var jsonStr = $('textarea').val();
+              highlighter.deserializeHighlights(jsonStr);
+
+              $('textarea').val('');
           });
+
+          $('#color-picker div.color').click(function() {
+              var color = $(this).css('background-color');
+              $('#sandbox').getHighlighter().setColor(color);
+          });
+
+          $('#sandbox').textHighlighter();
+          highlighter = $('#sandbox').getHighlighter();
       });
     </script>
   </body>
