@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>TextHighlighter Demo | Simple Usage</title>
+    <title>TextHighlighter Demo | Serialization</title>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400|Special+Elite' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="assets/reset.css" />
     <link rel="stylesheet" type="text/css" href="assets/styles.css" />
@@ -19,25 +19,33 @@
         <div class="top"></div>
 
         <div class="side">
-            <h2>TextHighlighter Demo</h2>
+            <h2>TextHighlighter Serialization</h2>
             <ul>
-                <li>Select any text in the sandbox to highlight it.</li>
+                <li>
+                    Select any text in the sandbox to highlight it.
+                </li>
                 <li>Change highlighting color: <div class="color-picker"></div></li>
                 <li>Remove all highlights: <button id="remove">Remove</button></li>
+                <li>Serialize all highlights: <button id="serialize">Serialize</button></li>
+                <li>Deserialize highlights: <button id="deserialize">Deserialize</button></li>
             </ul>
         </div>
 
         <div class="code shadow">
 <pre><code data-language="js">
-var hltr = new TextHighlighter(sandbox);
+var hltr = new TextHighlighter(sandbox),
+    serialized;
 
-colors.onColorChange(function (color) {
-    hltr.setColor(color);
+serializeBtn.onclick = function () {
+    serialized = hltr.serializeHighlights();
+    console.log(serialized);
+    hltr.removeHighlights();
 });
 
-buttonRemove.onclick = function () {
+deserializeBtn.onclick = function () {
     hltr.removeHighlights();
-};
+    hltr.deserializeHighlights(serialized);
+});
 </code></pre>
         </div>
 
@@ -148,10 +156,13 @@ buttonRemove.onclick = function () {
 
     <script type="text/javascript">
         (function () {
-            var removeBtn = document.getElementById('remove');
+            var removeBtn = document.getElementById('remove'),
+                serializeBtn  = document.getElementById('serialize'),
+                deserializeBtn  = document.getElementById('deserialize');
             var sandbox = document.getElementById('sandbox');
             var colors = new ColorPicker(document.querySelector('.color-picker'));
             var hltr = new TextHighlighter(sandbox);
+            var serialized = '';
 
             colors.onColorChange(function (color) {
                 hltr.setColor(color);
@@ -159,6 +170,17 @@ buttonRemove.onclick = function () {
 
             removeBtn.addEventListener('click', function () {
                 hltr.removeHighlights();
+            });
+
+            serializeBtn.addEventListener('click', function () {
+                serialized = hltr.serializeHighlights();
+                console.log(serialized);
+                hltr.removeHighlights();
+            });
+
+            deserializeBtn.addEventListener('click', function () {
+                hltr.removeHighlights();
+                hltr.deserializeHighlights(serialized);
             });
         })();
     </script>

@@ -765,6 +765,10 @@
             highlights = [],
             self = this;
 
+        if (!json) {
+            return highlights;
+        }
+
         try {
             hlDescriptors = JSON.parse(json);
         } catch (e) {

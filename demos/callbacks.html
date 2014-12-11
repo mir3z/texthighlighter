@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>TextHighlighter Demo | Simple Usage</title>
+    <title>TextHighlighter Demo | Callbacks</title>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400|Special+Elite' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="assets/reset.css" />
     <link rel="stylesheet" type="text/css" href="assets/styles.css" />
@@ -19,25 +19,30 @@
         <div class="top"></div>
 
         <div class="side">
-            <h2>TextHighlighter Demo</h2>
+            <h2>TextHighlighter Callbacks</h2>
             <ul>
-                <li>Select any text in the sandbox to highlight it.</li>
+                <li>
+                    Select any text in the sandbox to highlight it. You should see messages before and after
+                    highlighting.
+                </li>
                 <li>Change highlighting color: <div class="color-picker"></div></li>
-                <li>Remove all highlights: <button id="remove">Remove</button></li>
+                <li>Remove all highlights: <button id="remove">Remove</button>. You should see message before removing.</li>
             </ul>
         </div>
 
         <div class="code shadow">
 <pre><code data-language="js">
-var hltr = new TextHighlighter(sandbox);
-
-colors.onColorChange(function (color) {
-    hltr.setColor(color);
+new TextHighlighter(sandbox, {
+    onBeforeHighlight: function (range) {
+        // ...
+    },
+    onAfterHighlight: function (range, hlts) {
+        // ...
+    },
+    onRemoveHighlight: function (hlt) {
+        // ...
+    }
 });
-
-buttonRemove.onclick = function () {
-    hltr.removeHighlights();
-};
 </code></pre>
         </div>
 
@@ -151,7 +156,19 @@ buttonRemove.onclick = function () {
             var removeBtn = document.getElementById('remove');
             var sandbox = document.getElementById('sandbox');
             var colors = new ColorPicker(document.querySelector('.color-picker'));
-            var hltr = new TextHighlighter(sandbox);
+            var hltr = new TextHighlighter(sandbox, {
+                onBeforeHighlight: function (range) {
+                    return window.confirm('Selected text: ' + range + '\nReally highlight?');
+                },
+                onAfterHighlight: function (range, highlights) {
+                    window.alert('Created ' + highlights.length + ' highlight(s): ' + highlights.map(function (h) {
+                        return '"' + h.innerText + '"';
+                    }).join(', '));
+                },
+                onRemoveHighlight: function (hl) {
+                    return window.confirm('Do you really want to remove: "' + hl.innerText + '"');
+                }
+            });
 
             colors.onColorChange(function (color) {
                 hltr.setColor(color);
