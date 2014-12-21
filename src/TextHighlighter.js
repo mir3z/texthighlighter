@@ -370,8 +370,8 @@
      *  passed as param. Function should return true if highlight should be removed, or false - to prevent removal.
      * @param {function} options.onBeforeHighlight - function called before highlight is created. Range object is
      *  passed as param. Function should return true to continue processing, or false - to prevent highlighting.
-     * @param {function} options.onAfterHighlight - function called after highlight is created. Highlight is passed
-     *  as param.
+     * @param {function} options.onAfterHighlight - function called after highlight is created. Array of created
+     * wrappers is passed as param. You should not rely on the order of the array elements.
      * @class TextHighlighter
      */
     function TextHighlighter(element, options) {
@@ -409,9 +409,10 @@
 
     /**
      * Highlights current range.
+     * @param {boolean} keepRange - Don't remove range after highlighting. Default: false.
      * @memberof TextHighlighter
      */
-    TextHighlighter.prototype.doHighlight = function () {
+    TextHighlighter.prototype.doHighlight = function (keepRange) {
         var range = dom(this.el).getRange(),
             wrapper,
             createdHighlights,
@@ -430,7 +431,9 @@
             this.options.onAfterHighlight(range, normalizedHighlights);
         }
 
-        dom(this.el).removeAllRanges();
+        if (!keepRange) {
+            dom(this.el).removeAllRanges();
+        }
     };
 
     /**
@@ -456,7 +459,6 @@
             highlight,
             wrapperClone,
             nodeParent;
-
 
         do {
             if (goDeeper && node.nodeType === NODE_TYPE.TEXT_NODE) {
@@ -824,6 +826,41 @@
         });
 
         return highlights;
+    };
+
+    /**
+     * Finds and highlights given text.
+     * @param {string} text - text to search for
+     * @param {boolean} [caseSensitive] - if set to true, performs case sensitive search (default: true)
+     */
+    TextHighlighter.prototype.find = function (text, caseSensitive) {
+        var wnd = dom(this.el).getWindow(),
+            scrollX = wnd.scrollX,
+            scrollY = wnd.scrollY,
+            caseSens = (typeof caseSensitive === 'undefined' ? true : caseSensitive);
+
+        dom(this.el).removeAllRanges();
+
+        if (wnd.find) {
+            while (wnd.find(text, caseSens)) {
+                this.doHighlight(true);
+            }
+        } else if (wnd.document.body.createTextRange) {
+            var textRange = wnd.document.body.createTextRange();
+            textRange.moveToElementText(this.el);
+            while (textRange.findText(text, 1, caseSens ? 4 : 0)) {
+                if (!dom(this.el).contains(textRange.parentElement()) && textRange.parentElement() !== this.el) {
+                    break;
+                }
+
+                textRange.select();
+                this.doHighlight(true);
+                textRange.collapse(false);
+            }
+        }
+
+        dom(this.el).removeAllRanges();
+        wnd.scrollTo(scrollX, scrollY);
     };
 
     /**

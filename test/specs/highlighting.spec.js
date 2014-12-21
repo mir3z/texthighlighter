@@ -1,4 +1,4 @@
-/* global $, describe, it, afterEach, beforeEach, expect, fixtures, sandbox */
+/* global $, describe, it, afterEach, beforeEach, expect, fixtures, sandbox, TextHighlighter */
 
 describe('Highlighting Range', function () {
     'use strict';
