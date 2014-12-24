@@ -12,7 +12,7 @@
          * Attribute used to group highlight wrappers.
          * @type {string}
          */
-        HASH_ATTR = 'data-timestamp',
+        TIMESTAMP_ATTR = 'data-timestamp',
 
         NODE_TYPE = {
             ELEMENT_NODE: 1,
@@ -125,7 +125,7 @@
     }
 
     /**
-     * Groups given highlights by hash.
+     * Groups given highlights by timestamp.
      * @param {Array} highlights
      * @returns {Array} Grouped highlights.
      */
@@ -135,22 +135,22 @@
             grouped = [];
 
         highlights.forEach(function (hl) {
-            var hash = hl.getAttribute(HASH_ATTR);
+            var timestamp = hl.getAttribute(TIMESTAMP_ATTR);
 
-            if (typeof chunks[hash] === 'undefined') {
-                chunks[hash] = [];
-                order.push(hash);
+            if (typeof chunks[timestamp] === 'undefined') {
+                chunks[timestamp] = [];
+                order.push(timestamp);
             }
 
-            chunks[hash].push(hl);
+            chunks[timestamp].push(hl);
         });
 
-        order.forEach(function (hash) {
-            var group = chunks[hash];
+        order.forEach(function (timestamp) {
+            var group = chunks[timestamp];
 
             grouped.push({
                 chunks: group,
-                hash: hash,
+                timestamp: timestamp,
                 toString: function () {
                     return group.map(function (h) {
                         return h.textContent;
@@ -460,19 +460,22 @@
         var range = dom(this.el).getRange(),
             wrapper,
             createdHighlights,
-            normalizedHighlights;
+            normalizedHighlights,
+            timestamp;
 
         if (!range || range.collapsed) {
             return;
         }
 
         if (this.options.onBeforeHighlight(range) === true) {
+            timestamp = +new Date();
             wrapper = TextHighlighter.createWrapper(this.options);
+            wrapper.setAttribute(TIMESTAMP_ATTR, timestamp);
 
             createdHighlights = this.highlightRange(range, wrapper);
             normalizedHighlights = this.normalizeHighlights(createdHighlights);
 
-            this.options.onAfterHighlight(range, normalizedHighlights);
+            this.options.onAfterHighlight(range, normalizedHighlights, timestamp);
         }
 
         if (!keepRange) {
@@ -500,7 +503,6 @@
             done = false,
             node = startContainer,
             highlights = [],
-            hash = +new Date(),
             highlight,
             wrapperClone,
             nodeParent;
@@ -511,7 +513,6 @@
                 if (IGNORE_TAGS.indexOf(node.parentNode.tagName) === -1 && node.nodeValue.trim() !== '') {
                     wrapperClone = wrapper.cloneNode(true);
                     wrapperClone.setAttribute(DATA_ATTR, true);
-                    wrapperClone.setAttribute(HASH_ATTR, hash);
                     nodeParent = node.parentNode;
 
                     // highlight if a node is inside the el
@@ -745,7 +746,7 @@
      * @param {boolean} [params.andSelf] - if set to true and container is a highlight itself, add container to
      * returned results. Default: true.
      * @param {boolean} [params.grouped] - if set to true, highlights are grouped in logical groups of highlights added
-     * in the same moment. Each group is an object which has got array of highlights, 'toString' method and 'hash'
+     * in the same moment. Each group is an object which has got array of highlights, 'toString' method and 'timestamp'
      * property. Default: false.
      * @returns {Array} - array of highlights.
      * @memberof TextHighlighter

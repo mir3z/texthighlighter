@@ -1,4 +1,4 @@
-/* global describe, it, afterEach, beforeEach, expect, fixtures, sandbox */
+/* global describe, it, afterEach, beforeEach, expect, fixtures, sandbox, jasmine */
 
 describe('Callbacks', function () {
     'use strict';
@@ -98,10 +98,11 @@ describe('Callbacks', function () {
         testCallbacks({
             fixture: 'lorem.01',
             title: 'single highlight',
-            onAfterHighlight: function (range, highlights) {
+            onAfterHighlight: function (range, highlights, timestamp) {
                 expect(range.toString()).toEqual('ipsum');
                 expect(highlights.length).toEqual(1);
                 expect(highlights[0].textContent).toEqual('ipsum');
+                expect(timestamp).toEqual(jasmine.any(Number));
             },
             expectedHighlights: [ 'ipsum' ],
             rangeCreator: function (node) {
@@ -112,12 +113,13 @@ describe('Callbacks', function () {
         testCallbacks({
             fixture: 'lorem.02',
             title: 'multiple highlights',
-            onAfterHighlight: function (range, highlights) {
+            onAfterHighlight: function (range, highlights, timestamp) {
                 expect(range.toString()).toEqual('dolor sit amet consectetur');
                 expect(highlights.length).toEqual(3);
                 expect(
                     highlights.map(function (h) { return h.textContent; })
                 ).toEqual([ 'dolor ', 'sit amet', ' consectetur' ]);
+                expect(timestamp).toEqual(jasmine.any(Number));
             },
             expectedHighlights: [ 'dolor ', 'sit amet', ' consectetur' ],
             rangeCreator: function (node1) {
