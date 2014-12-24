@@ -152,7 +152,7 @@ buttonRemove.onclick = function () {
             var sandbox = document.getElementById('sandbox');
             var colors = new ColorPicker(document.querySelector('.color-picker'));
             var hltr = new TextHighlighter(sandbox);
-window.h = hltr;
+
             colors.onColorChange(function (color) {
                 hltr.setColor(color);
             });

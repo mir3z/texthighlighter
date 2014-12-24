@@ -603,28 +603,15 @@
 
                     if (!haveSameColor(parent, hl)) {
 
-//                        if (self.isHighlight(parentPrev) && haveSameColor(parentPrev, hl) && !hl.previousSibling) {
-//                            dom(hl).insertAfter(parentPrev);
-//                            again = true;
-//                        }
-//
-//                        else if (self.isHighlight(parentNext) && haveSameColor(parentNext, hl) && !hl.nextSibling) {
-//                            dom(hl).insertBefore(parentNext);
-//                            again = true;
-//                        }
-//
-//                        else {
+                        if (!hl.nextSibling) {
+                            dom(hl).insertBefore(parentNext || parent);
+                            again = true;
+                        }
 
-                            if (!hl.nextSibling) {
-                                dom(hl).insertBefore(parentNext || parent);
-                                again = true;
-                            }
-
-                            if (!hl.previousSibling) {
-                                dom(hl).insertAfter(parentPrev || parent);
-                                again = true;
-                            }
-//                        }
+                        if (!hl.previousSibling) {
+                            dom(hl).insertAfter(parentPrev || parent);
+                            again = true;
+                        }
 
                         if (!parent.hasChildNodes()) {
                             dom(parent).remove();
