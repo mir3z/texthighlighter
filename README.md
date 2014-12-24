@@ -43,10 +43,10 @@ Should work in all decent browsers and IE >= 9.
 
 ## Demos
 
-* Simple demo
-* Callbacks
-* Serialization
-* Iframe
+* [Simple demo](http://mir3z.github.io/texthighlighter/demos/simple.html)
+* [Callbacks](http://mir3z.github.io/texthighlighter/demos/callbacks.html)
+* [Serialization](http://mir3z.github.io/texthighlighter/demos/serialization.html)
+* [Iframe](http://mir3z.github.io/texthighlighter/demos/iframe.html)
 
 ## Documentation
    

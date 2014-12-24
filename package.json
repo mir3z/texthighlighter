@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mir3z/jquery.texthighlighter.git"
+    "url": "https://github.com/mir3z/texthighlighter.git"
   },
   "author": "mirz <mirz.hq@gmail.com>",
   "license": "MIT"
