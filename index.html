@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="TextHighlighter allows you to highlight text on web pages. Just select it!">
+    <meta name="keywords" content="highlighter,highlighting,js,javascript,html">
+    <meta name="author" content="mir3z">
+
+    <title>TextHighlighter</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400|Lobster' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="demos/assets/reset.css" />
+
+    <link rel="stylesheet" type="text/css" href="demos/assets/github.css" />
+    <script type="text/javascript" src="demos/assets/rainbow-custom.min.js"></script>
+
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-32698540-3']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: #333;
+            background: #e7e7e7;
+        }
+
+        .view {
+            margin: 0 auto;
+            position: relative;
+            width: 900px;
+        }
+
+        .bg {
+            background: url(hlbg.png) no-repeat;
+            width: 516px;
+            height: 280px;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 280px;
+            background: #03A9F4;
+            color: #f8f8f8;
+            box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16);
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 1px;
+            width: 625px;
+            margin: 10px auto;
+            left: 0;
+            position: static;
+            padding: 20px;
+        }
+
+        .card p {
+            margin-left: 20px;
+        }
+
+        .content {
+            margin-top: 225px;
+        }
+
+        .title {
+            display: inline;
+            color: #f8f8f8;
+            font-size: 65px;
+            position: relative;
+            font-family: "Lobster", sans-serif;
+            top: 90px;
+            left: 90px;
+            text-shadow: #555 1px 1px 2px;
+        }
+
+        .shadow {
+            box-shadow:
+            0 2px 5px 0 rgba(0, 0, 0, 0.26),
+            0 2px 10px 0 rgba(0, 0, 0, 0.16);
+        }
+
+        #footer {
+            text-align: center;
+            font-size: 10px;
+            color: #777;
+            margin: 50px 0 0 0;
+            padding: 30px 0 20px;
+            background-color: #eee;
+            border-top: 1px solid #ddd;
+        }
+
+        #footer .links {
+            margin: 15px;
+            font-size: 11px;
+        }
+
+        #footer .badges {
+
+        }
+
+        .col3 .card {
+            width: 25%;
+            display: inline-block;
+        }
+
+        .intro {
+            text-align: center;
+            margin: 20px;
+            padding: 10px;
+            font-size: 22px;
+            font-style: italic;
+        }
+
+        ul {
+            list-style-type: square;
+            padding-left: 20px;
+            margin-left: 15px;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            font-size: 1.2rem;
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid #2967a4;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
+            width: 220px;
+            text-align: center;
+            background-color: #03A9F4;
+            text-shadow: #333 0 0 1px;
+            margin-bottom: 30px;
+        }
+
+        .btn:active {
+            background-color: #038ecd;
+        }
+
+        .btn:hover {
+            box-shadow: inset #444 0 0 1px 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="top"></div>
+    <a href="https://github.com/mir3z/texthighlighter"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <div class="view">
+        <div class="bg"></div>
+        <h1 class="title">TextHighlighter</h1>
+
+        <div class="content">
+            <div class="intro">
+                TextHighlighter allows you to highlight text on web pages. <b>Just select it!</b>
+            </div>
+
+            <a href="https://github.com/mir3z/texthighlighter/releases" class="btn">
+                Download on GitHub <small>(v1.2.0)</small>
+            </a>
+
+            <div class="card shadow">
+                <h2>Getting started</h2>
+                <p>
+                    Download TextHighlighter directly from GitHub or install with Bower:
+                    <pre><code data-language="bash">$ bower install TextHighlighter</code></pre>
+                </p>
+                <p>
+                    Add script file to <code>head</code> section of your web page:
+                    <pre><code data-language="html">&lt;script type=&quot;text/javascript&quot; src=&quot;TextHighlighter.min.js&quot;&gt;&lt;/script&gt;</code></pre>
+                </p>
+                <p>
+                    And use it!
+                    <pre><code data-language="javascript">var hltr = new TextHighlighter(document.body);</code></pre>
+                </p>
+                <p>
+                    For more details see <a href="http://mir3z.github.io/texthighlighter/doc" target="_blank">API
+                    reference</a> or <a href="https://github.com/mir3z/texthighlighter/wiki" target="_blank">Wiki
+                    pages</a> on GitHub.
+                </p>
+                <p>
+                    Also check Demos section below for examples of usage.
+                </p>
+
+                <h2>Features</h2>
+                <ul>
+                    <li>Highlighting of selected text.</li>
+                    <li>Highlighting all occurrences of given text (find & highlight).</li>
+                    <li>Removing highlights.</li>
+                    <li>Selecting highlight color.</li>
+                    <li>Serialization & deserialization.</li>
+                    <li>Works well in iframes.</li>
+                    <li>Keeps DOM clean.</li>
+                    <li>No dependencies. No jQuery or other libraries needed.</li>
+                </ul>
+
+                <h2>Compatibility</h2>
+                <p>
+                    Should work in all decent browsers and IE >= 9.
+                </p>
+
+                <h2>Demos</h2>
+                <ul>
+                    <li><a href="demos/simple.html">Simple demo</a></li>
+                    <li><a href="demos/callbacks.html">Callbacks</a></li>
+                    <li><a href="demos/serialization.html">Serialization</a></li>
+                    <li><a href="demos/iframe.html">Iframe</a></li>
+                </ul>
+
+                <h2>Documentation</h2>
+                <p>
+                    You may check <a href="http://mir3z.github.io/texthighlighter/doc" target="_blank">API
+                    reference</a> or <a href="https://github.com/mir3z/texthighlighter/wiki" target="_blank">Wiki
+                    pages</a> on GitHub.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div id="footer">
+        <div class="badges">
+            <iframe src="http://ghbtns.com/github-btn.html?user=mir3z&repo=texthighlighter&type=watch&count=true"
+                    allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
+
+            <iframe src="http://ghbtns.com/github-btn.html?user=mir3z&repo=texthighlighter&type=fork&count=true"
+                    allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
+
+            <iframe src="http://ghbtns.com/github-btn.html?user=mir3z&repo=texthighlighter&type=follow&count=true"
+                    allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
+        </div>
+
+        <div class="links">
+            <a href="https://github.com/mir3z/texthighlighter">GitHub</a> |
+            <a href="https://github.com/mir3z/texthighlighter/wiki">Wiki Pages</a> |
+            <a href="http://mir3z.github.io/texthighlighter/doc">API</a> |
+            <a href="https://github.com/mir3z/texthighlighter/issues">Issues</a> |
+            <a href="http://mir3z.github.io/texthighlighter/test/test.html">Tests</a> |
+            <a href="https://github.com/mir3z/texthighlighter/releases">Releases</a> |
+            <a href="mailto:mirz.hq@gmail.com">Contact</a>
+        </div>
+
+        TextHighlighter is licensed under MIT. <br/>
+        Copyright &copy; 2011-2014 by mirz. All Rights Reserved.
+    </div>
+
+</body>
+</html>

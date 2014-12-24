@@ -1,0 +1,19 @@
+{
+  "name": "TextHighlighter",
+  "version": "1.2.0",
+  "description": "TextHighlighter",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-closurecompiler": "^0.9.9",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-jsdoc": "^0.5.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mir3z/texthighlighter.git"
+  },
+  "author": "mirz <mirz.hq@gmail.com>",
+  "license": "MIT"
+}
