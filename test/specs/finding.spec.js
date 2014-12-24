@@ -37,7 +37,7 @@ describe('Finding', function () {
 
             hl.find(params.searchFor, params.caseSensitive);
 
-            var highlights = hl.getAllHighlights(sandbox.el, true);
+            var highlights = hl.getHighlights({ container: sandbox.el });
             expect(highlights.length).toEqual(params.expectedHighlightsCount);
         });
     }

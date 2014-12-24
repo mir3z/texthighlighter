@@ -56,7 +56,7 @@ describe('Callbacks', function () {
             }
 
             expect(
-                hl.getAllHighlights(sandbox.el, true).map(function (h) {
+                hl.getHighlights({ container: sandbox.el }).map(function (h) {
                     return h.textContent;
                 })
             ).toEqual(params.expectedHighlights);
@@ -117,7 +117,7 @@ describe('Callbacks', function () {
                 expect(highlights.length).toEqual(3);
                 expect(
                     highlights.map(function (h) { return h.textContent; })
-                ).toEqual([ 'sit amet', 'dolor ', ' consectetur' ]);
+                ).toEqual([ 'dolor ', 'sit amet', ' consectetur' ]);
             },
             expectedHighlights: [ 'dolor ', 'sit amet', ' consectetur' ],
             rangeCreator: function (node1) {

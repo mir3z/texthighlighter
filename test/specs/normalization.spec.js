@@ -25,7 +25,9 @@ describe('Normalization', function () {
         'norm.17',
         'norm.18',
         'norm.19',
-        'norm.20'
+        'norm.20',
+        'norm.21',
+        'norm.22'
     ]);
 
     beforeEach(function () {
@@ -174,7 +176,19 @@ describe('Normalization', function () {
     testNormalization({ 
 		title: 'use case #20', 
 		fixture: '20', 
-		highlights: [ 'dolor', 'amet', 'Lorem ipsum ', ' sit ' ]
+		highlights: [ 'Lorem ipsum ', 'dolor', ' sit ', 'amet' ]
+    });
+
+    testNormalization({
+        title: 'use case #21',
+        fixture: '21',
+        highlights: [ 'ipsum ', 'dolor' ]
+    });
+
+    testNormalization({
+        title: 'use case #22',
+        fixture: '22',
+        highlights: [ 'dolor', ' sit ' ]
     });
 
 });

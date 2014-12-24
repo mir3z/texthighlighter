@@ -8,6 +8,12 @@
          */
         DATA_ATTR = 'data-highlighted',
 
+        /**
+         * Attribute used to group highlight wrappers.
+         * @type {string}
+         */
+        HASH_ATTR = 'data-timestamp',
+
         NODE_TYPE = {
             ELEMENT_NODE: 1,
             TEXT_NODE: 3
@@ -116,6 +122,44 @@
         arr.sort(function (a, b) {
             return dom(descending ? b : a).parents().length - dom(descending ? a : b).parents().length;
         });
+    }
+
+    /**
+     * Groups given highlights by hash.
+     * @param {Array} highlights
+     * @returns {Array} Grouped highlights.
+     */
+    function groupHighlights(highlights) {
+        var order = [],
+            chunks = {},
+            grouped = [];
+
+        highlights.forEach(function (hl) {
+            var hash = hl.getAttribute(HASH_ATTR);
+
+            if (typeof chunks[hash] === 'undefined') {
+                chunks[hash] = [];
+                order.push(hash);
+            }
+
+            chunks[hash].push(hl);
+        });
+
+        order.forEach(function (hash) {
+            var group = chunks[hash];
+
+            grouped.push({
+                chunks: group,
+                hash: hash,
+                toString: function () {
+                    return group.map(function (h) {
+                        return h.textContent;
+                    }).join('');
+                }
+            });
+        });
+
+        return grouped;
     }
 
     /**
@@ -371,7 +415,7 @@
      * @param {function} options.onBeforeHighlight - function called before highlight is created. Range object is
      *  passed as param. Function should return true to continue processing, or false - to prevent highlighting.
      * @param {function} options.onAfterHighlight - function called after highlight is created. Array of created
-     * wrappers is passed as param. You should not rely on the order of the array elements.
+     * wrappers is passed as param.
      * @class TextHighlighter
      */
     function TextHighlighter(element, options) {
@@ -456,6 +500,7 @@
             done = false,
             node = startContainer,
             highlights = [],
+            hash = +new Date(),
             highlight,
             wrapperClone,
             nodeParent;
@@ -466,11 +511,11 @@
                 if (IGNORE_TAGS.indexOf(node.parentNode.tagName) === -1 && node.nodeValue.trim() !== '') {
                     wrapperClone = wrapper.cloneNode(true);
                     wrapperClone.setAttribute(DATA_ATTR, true);
+                    wrapperClone.setAttribute(HASH_ATTR, hash);
                     nodeParent = node.parentNode;
 
-                    // highlight if node is inside the el
+                    // highlight if a node is inside the el
                     if (dom(this.el).contains(nodeParent) || nodeParent === this.el) {
-                        //highlight = $(node).wrap(wrapperClone).parent().get(0);
                         highlight = dom(node).wrap(wrapperClone);
                         highlights.push(highlight);
                     }
@@ -524,13 +569,16 @@
         });
 
         normalizedHighlights = unique(normalizedHighlights);
+        normalizedHighlights.sort(function (a, b) {
+            return a.offsetTop - b.offsetTop || a.offsetLeft - b.offsetLeft;
+        });
 
         return normalizedHighlights;
     };
 
     /**
      * Flattens highlights structure.
-     * Note: this method changes input highlights - they order and number after calling this method may change.
+     * Note: this method changes input highlights - their order and number after calling this method may change.
      * @param {Array} highlights - highlights to flatten.
      * @memberof TextHighlighter
      */
@@ -552,15 +600,28 @@
 
                     if (!haveSameColor(parent, hl)) {
 
-                        if (self.isHighlight(parentPrev) && haveSameColor(parentPrev, hl) && !hl.previousSibling) {
-                            dom(hl).insertAfter(parentPrev);
-                            again = true;
-                        }
+//                        if (self.isHighlight(parentPrev) && haveSameColor(parentPrev, hl) && !hl.previousSibling) {
+//                            dom(hl).insertAfter(parentPrev);
+//                            again = true;
+//                        }
+//
+//                        else if (self.isHighlight(parentNext) && haveSameColor(parentNext, hl) && !hl.nextSibling) {
+//                            dom(hl).insertBefore(parentNext);
+//                            again = true;
+//                        }
+//
+//                        else {
 
-                        if (self.isHighlight(parentNext) && haveSameColor(parentNext, hl) && !hl.nextSibling) {
-                            dom(hl).insertBefore(parentNext);
-                            again = true;
-                        }
+                            if (!hl.nextSibling) {
+                                dom(hl).insertBefore(parentNext || parent);
+                                again = true;
+                            }
+
+                            if (!hl.previousSibling) {
+                                dom(hl).insertAfter(parentPrev || parent);
+                                again = true;
+                            }
+//                        }
 
                         if (!parent.hasChildNodes()) {
                             dom(parent).remove();
@@ -586,7 +647,7 @@
 
     /**
      * Merges sibling highlights and normalizes descendant text nodes.
-     * Note: this method changes input highlights - they order and number after calling this method may change.
+     * Note: this method changes input highlights - their order and number after calling this method may change.
      * @param highlights
      * @memberof TextHighlighter
      */
@@ -642,7 +703,7 @@
      */
     TextHighlighter.prototype.removeHighlights = function (element) {
         var container = element || this.el,
-            highlights = this.getAllHighlights(container, true),
+            highlights = this.getHighlights({ container: container }),
             self = this;
 
         function mergeSiblingTextNodes(textNode) {
@@ -678,17 +739,33 @@
 
     /**
      * Returns highlights from given container.
-     * @param container - return highlights from this element.
-     * @param andSelf - if set to true and container is a highlight itself, include container to returned results.
+     * @param params
+     * @param {HTMLElement} [params.container] - return highlights from this element. Default: the element the
+     * highlighter is applied to.
+     * @param {boolean} [params.andSelf] - if set to true and container is a highlight itself, add container to
+     * returned results. Default: true.
+     * @param {boolean} [params.grouped] - if set to true, highlights are grouped in logical groups of highlights added
+     * in the same moment. Each group is an object which has got array of highlights, 'toString' method and 'hash'
+     * property. Default: false.
      * @returns {Array} - array of highlights.
      * @memberof TextHighlighter
      */
-    TextHighlighter.prototype.getAllHighlights = function (container, andSelf) {
-        var nodeList = container.querySelectorAll('[' + DATA_ATTR + ']'),
+    TextHighlighter.prototype.getHighlights = function (params) {
+        params = defaults(params, {
+            container: this.el,
+            andSelf: true,
+            grouped: false
+        });
+
+        var nodeList = params.container.querySelectorAll('[' + DATA_ATTR + ']'),
             highlights = Array.prototype.slice.call(nodeList);
 
-        if (andSelf === true && container.hasAttribute(DATA_ATTR)) {
-            highlights.push(container);
+        if (params.andSelf === true && params.container.hasAttribute(DATA_ATTR)) {
+            highlights.push(params.container);
+        }
+
+        if (params.grouped) {
+            highlights = groupHighlights(highlights);
         }
 
         return highlights;
@@ -711,7 +788,7 @@
      * @memberof TextHighlighter
      */
     TextHighlighter.prototype.serializeHighlights = function () {
-        var highlights = this.getAllHighlights(this.el, true),
+        var highlights = this.getHighlights(),
             refEl = this.el,
             hlDescriptors = [];
 
@@ -832,6 +909,7 @@
      * Finds and highlights given text.
      * @param {string} text - text to search for
      * @param {boolean} [caseSensitive] - if set to true, performs case sensitive search (default: true)
+     * @memberof TextHighlighter
      */
     TextHighlighter.prototype.find = function (text, caseSensitive) {
         var wnd = dom(this.el).getWindow(),

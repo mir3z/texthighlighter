@@ -25,7 +25,9 @@ describe('Flattening DOM tree', function () {
         'norm.17',
         'norm.18',
         'norm.19',
-        'norm.20'
+        'norm.20',
+        'norm.21',
+        'norm.22'
     ]);
 
     beforeEach(function () {
@@ -76,4 +78,7 @@ describe('Flattening DOM tree', function () {
     testFlattening({ title: 'use case #18', fixture: '18', expectedTextNodesCount: 6 });
     testFlattening({ title: 'use case #19', fixture: '19', expectedTextNodesCount: 6 });
     testFlattening({ title: 'use case #20', fixture: '20', expectedTextNodesCount: 7 });
+    testFlattening({ title: 'use case #21', fixture: '21', expectedTextNodesCount: 5 });
+    testFlattening({ title: 'use case #22', fixture: '22', expectedTextNodesCount: 5 });
 });
+

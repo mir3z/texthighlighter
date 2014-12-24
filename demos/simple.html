@@ -28,7 +28,7 @@
         </div>
 
         <div class="code shadow">
-<pre><code data-language="js">
+<pre><code data-language="javascript">
 var hltr = new TextHighlighter(sandbox);
 
 colors.onColorChange(function (color) {
@@ -152,7 +152,7 @@ buttonRemove.onclick = function () {
             var sandbox = document.getElementById('sandbox');
             var colors = new ColorPicker(document.querySelector('.color-picker'));
             var hltr = new TextHighlighter(sandbox);
-
+window.h = hltr;
             colors.onColorChange(function (color) {
                 hltr.setColor(color);
             });

@@ -48,7 +48,7 @@ describe('Highlighting Range', function () {
             hl.highlightRange(range, TextHighlighter.createWrapper(hl.options));
 
             expect(
-                hl.getAllHighlights(sandbox.el, true).map(function (h) {
+                hl.getHighlights({ container: sandbox.el }).map(function (h) {
                     return h.textContent;
                 })
             ).toEqual(params.expectedHighlights);
