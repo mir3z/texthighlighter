@@ -16,11 +16,12 @@ module.exports = function (grunt) {
             TEST_DIR + 'specs/normalization.spec',
             TEST_DIR + 'specs/removing.spec.js',
             TEST_DIR + 'specs/serialization.spec.js',
-            TEST_DIR + 'specs/callbacks.spec.js'
+            TEST_DIR + 'specs/callbacks.spec.js',
+            TEST_DIR + 'specs/finding.spec.js'
         ],
         BUILD_DIR = 'build/',
         DOC_DIR = 'doc',
-        BUILD_TARGET = 'jquery.textHighlighter.min.js';
+        BUILD_TARGET = 'TextHighlighter.min.js';
 
     grunt.initConfig({
         _TARGET: BUILD_DIR + BUILD_TARGET,
@@ -39,7 +40,7 @@ module.exports = function (grunt) {
 
         jsdoc : {
             dist : {
-                src: SRC_FILES,
+                src: SRC_FILES.concat('README.md'),
                 options: {
                     configure: 'jsdoc.conf.json',
                     destination: DOC_DIR,
@@ -48,7 +49,6 @@ module.exports = function (grunt) {
                 }
             }
         },
-
 
         jshint: {
             src: [ 'gruntfile.js', SRC_FILES, SPEC_FILES ],

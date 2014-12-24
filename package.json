@@ -1,7 +1,7 @@
 {
-  "name": "jQuery-TextHighlighter",
+  "name": "TextHighlighter",
   "version": "1.2.0",
-  "description": "jQuery TextHighlighter",
+  "description": "TextHighlighter",
   "dependencies": {},
   "devDependencies": {
     "grunt": "^0.4.5",
