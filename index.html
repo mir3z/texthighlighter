@@ -1,332 +1,261 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="keywords" content="jquery plugin highlighting text wrap range" />
-    <meta name="description" content="jQuery Text Highlighter is a jQuery plugin for highlighting text fragments in HTML documents" />
-    <title>jQuery Text Highlighter</title>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description" content="TextHighlighter allows you to highlight text on web pages. Just select it!">
+    <meta name="keywords" content="highlighter,highlighting,js,javascript,html">
+    <meta name="author" content="mir3z">
 
-    <style type="text/css">
-      body {
-          font-family: "Trebuchet MS",sans-serif;
-          margin: 0 60px 0;
+    <title>TextHighlighter</title>
 
-          color: #404040;
-      }
-      a {
-          color: #000;
-      }
-      h1 {
-        font-family: Georgia,serif;
-        font-style: italic;
-        text-align: center;
-        text-shadow: 1px 1px 1px #afafaf;
-        filter: dropshadow(color=#afafaf, offx=1, offy=1);
-      }
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400|Lobster' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="demos/assets/reset.css" />
 
-      div.short-info {
-          margin-bottom: 40px;
-      }
-
-      ul {
-          list-style-type: square;
-      }
-
-      table {
-          margin: 0 auto;
-          border: 1px solid #afafaf;
-      }
-
-      table td, table th {
-          padding: 3px 5px;
-      }
-
-      table th {
-          border-bottom: 1px solid #afafaf;
-          background: #afafaf;
-      }
-
-      table tr {
-          background-color: #efefef;
-      }
-      pre {
-          background-color: #efefef;
-          -webkit-border-radius: 4px;
-          -moz-border-radius: 4px;
-          border-radius: 4px;
-          padding: 8px;
-
-      }
-      #footer {
-          text-align: center;
-          margin: 40px auto 0;
-          padding: 15px;
-          width: 40%;
-          font-size: 10px;
-          color: #afafaf;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="demos/assets/github.css" />
+    <script type="text/javascript" src="demos/assets/rainbow-custom.min.js"></script>
 
     <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-32698540-3']);
-      _gaq.push(['_trackPageview']);
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-32698540-3']);
+        _gaq.push(['_trackPageview']);
 
-      (function() {
-          var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
     </script>
-  </head>
-  <body>
-    <h1>jQuery Text Highlighter</h1>
 
-    <div class="short-info">
-      <b>Version:</b> 0.2.1<br/>
-      <b>Download:</b>
-      <a href="https://github.com/mir3z/jquery.texthighlighter/archive/v0.2.1.zip">[zip]</a>
-      <a href="https://github.com/mir3z/jquery.texthighlighter/archive/v0.2.1.tar.gz">[tar.gz]</a>
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: #333;
+            background: #e7e7e7;
+        }
 
-      <br/>
-      <b>Repository:</b> <a href="https://github.com/mir3z/jquery.texthighlighter.git">github</a><br/>
-      <b>Bugtracker:</b> <a href="https://github.com/mir3z/jquery.texthighlighter/issues">github</a><br/>
-      <b>Licence:</b> <a href="http://www.opensource.org/licenses/mit-license.php">MIT</a> <br/>
-      <b>Contact:</b> <a href="mailto:mirz.hq@gmail.com">mirz.hq@gmail.com</a>
+        .view {
+            margin: 0 auto;
+            position: relative;
+            width: 900px;
+        }
+
+        .bg {
+            background: url(hlbg.png) no-repeat;
+            width: 516px;
+            height: 280px;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 280px;
+            background: #03A9F4;
+            color: #f8f8f8;
+            box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16);
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 1px;
+            width: 625px;
+            margin: 10px auto;
+            left: 0;
+            position: static;
+            padding: 20px;
+        }
+
+        .card p {
+            margin-left: 20px;
+        }
+
+        .content {
+            margin-top: 225px;
+        }
+
+        .title {
+            display: inline;
+            color: #f8f8f8;
+            font-size: 65px;
+            position: relative;
+            font-family: "Lobster", sans-serif;
+            top: 90px;
+            left: 90px;
+            text-shadow: #555 1px 1px 2px;
+        }
+
+        .shadow {
+            box-shadow:
+            0 2px 5px 0 rgba(0, 0, 0, 0.26),
+            0 2px 10px 0 rgba(0, 0, 0, 0.16);
+        }
+
+        #footer {
+            text-align: center;
+            font-size: 10px;
+            color: #777;
+            margin: 50px 0 0 0;
+            padding: 30px 0 20px;
+            background-color: #eee;
+            border-top: 1px solid #ddd;
+        }
+
+        #footer .links {
+            margin: 15px;
+            font-size: 11px;
+        }
+
+        #footer .badges {
+
+        }
+
+        .col3 .card {
+            width: 25%;
+            display: inline-block;
+        }
+
+        .intro {
+            text-align: center;
+            margin: 20px;
+            padding: 10px;
+            font-size: 22px;
+            font-style: italic;
+        }
+
+        ul {
+            list-style-type: square;
+            padding-left: 20px;
+            margin-left: 15px;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            font-size: 1.2rem;
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid #2967a4;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
+            width: 220px;
+            text-align: center;
+            background-color: #03A9F4;
+            text-shadow: #333 0 0 1px;
+            margin-bottom: 30px;
+        }
+
+        .btn:active {
+            background-color: #038ecd;
+        }
+
+        .btn:hover {
+            box-shadow: inset #444 0 0 1px 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="top"></div>
+    <a href="https://github.com/mir3z/texthighlighter"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <div class="view">
+        <div class="bg"></div>
+        <h1 class="title">TextHighlighter</h1>
+
+        <div class="content">
+            <div class="intro">
+                TextHighlighter allows you to highlight text on web pages. <b>Just select it!</b>
+            </div>
+
+            <a href="https://github.com/mir3z/texthighlighter/releases" class="btn">
+                Download on GitHub <small>(v1.2.0)</small>
+            </a>
+
+            <div class="card shadow">
+                <h2>Getting started</h2>
+                <p>
+                    Download TextHighlighter directly from GitHub or install with Bower:
+                    <pre><code data-language="bash">$ bower install TextHighlighter</code></pre>
+                </p>
+                <p>
+                    Add script file to <code>head</code> section of your web page:
+                    <pre><code data-language="html">&lt;script type=&quot;text/javascript&quot; src=&quot;TextHighlighter.min.js&quot;&gt;&lt;/script&gt;</code></pre>
+                </p>
+                <p>
+                    And use it!
+                    <pre><code data-language="javascript">var hltr = new TextHighlighter(document.body);</code></pre>
+                </p>
+                <p>
+                    For more details see <a href="http://mir3z.github.io/texthighlighter/doc" target="_blank">API
+                    reference</a> or <a href="https://github.com/mir3z/texthighlighter/wiki" target="_blank">Wiki
+                    pages</a> on GitHub.
+                </p>
+                <p>
+                    Also check Demos section below for examples of usage.
+                </p>
+
+                <h2>Features</h2>
+                <ul>
+                    <li>Highlighting of selected text.</li>
+                    <li>Highlighting all occurrences of given text (find & highlight).</li>
+                    <li>Removing highlights.</li>
+                    <li>Selecting highlight color.</li>
+                    <li>Serialization & deserialization.</li>
+                    <li>Works well in iframes.</li>
+                    <li>Keeps DOM clean.</li>
+                    <li>No dependencies. No jQuery or other libraries needed.</li>
+                </ul>
+
+                <h2>Compatibility</h2>
+                <p>
+                    Should work in all decent browsers and IE >= 9.
+                </p>
+
+                <h2>Demos</h2>
+                <ul>
+                    <li><a href="demos/simple.html">Simple demo</a></li>
+                    <li><a href="demos/callbacks.html">Callbacks</a></li>
+                    <li><a href="demos/serialization.html">Serialization</a></li>
+                    <li><a href="demos/iframe.html">Iframe</a></li>
+                </ul>
+
+                <h2>Documentation</h2>
+                <p>
+                    You may check <a href="http://mir3z.github.io/texthighlighter/doc" target="_blank">API
+                    reference</a> or <a href="https://github.com/mir3z/texthighlighter/wiki" target="_blank">Wiki
+                    pages</a> on GitHub.
+                </p>
+            </div>
+        </div>
     </div>
-
-    <h2>Overview</h2>
-    <p>
-      jQuery Text Highlighter is a <a href="http://jquery.com">jQuery</a> plugin for highlighting
-      text fragments in HTML documents. Highlighting is realized by wrapping selected text in
-      &lt;span&gt; tags.
-    </p>
-
-    <h2>Demos</h2>
-    <ul>
-      <li><a href="demos/demo-page.html">Simple demo</a></li>
-      <li><a href="demos/removing.html">Removing highlights</a></li>
-      <li><a href="demos/callbacks.html">Callbacks</a></li>
-      <li><a href="demos/multiple-instances.html">Multiple instances</a></li>
-      <li><a href="demos/demo-page-with-iframe.html">Iframe</a></li>
-      <li><a href="demos/custom-wrapper.html">Custom wrapper</a></li>
-      <li><a href="demos/serialization.html">Serialization & deserialization</a></li>
-    </ul>
-
-    <h2>Features</h2>
-    <ul>
-      <li>Highlighting text that spans multiple HTML tags.</li>
-      <li>Removing highlights.</li>
-      <li>Setting highlight color and custom text wrapper.</li>
-      <li>Callbacks for highlighting and removing highlights.</li>
-      <li>Serialization & deserialization of highlights.</li>
-    </ul>
-
-    <h2>Compability notes</h2>
-    <p>
-      This plugin has been tested to work in following browsers:
-    </p>
-    <ul>
-      <li>Mozilla Firefox 3, 3.6, 4, 5, 6, 7, 12, 19, 20, 22, 25</li>
-      <li>Internet Explorer 7, 8, 9, 10</li>
-      <li>Google Chrome 14, 18, 26, 28, 30</li>
-      <li>Opera 11.62, 12.4, 15, 16</li>
-      <li>Safari 5.1, 6</li>
-    </ul>
-
-    <p>
-      Serialization, however,  needs a few words of explanation. Let's
-      divide web browsers into 2 groups: IE prior to version 9 and the
-      rest. Currently highlights serialized in browsers from one group
-      cannot be successfully deserialized in web browser from the
-      second group due to the fact that IE < 9 ignores whitespace text
-      nodes. So generally it's not recommended to use the plugin in IE
-      older than version 9 if you are going to use serialization.
-    </p>
-
-    <h2>Dependencies</h2>
-    <ul>
-      <li><a href="http://jquery.com">jQuery</a> 1.4 or higher.</li>
-      <li>
-        Functioning of the plugin rely on <a
-        href="http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html">DOM Level 2 Range
-        object</a> but IE prior to version 9 doesn't support it, providing <a
-        href="http://msdn.microsoft.com/en-us/library/ms535872%28v=vs.85%29.aspx">TextRange</a>
-        instead. This plugin takes advantage of <a href="http://code.google.com/p/rangy/">rangy</a>
-        &ndash; a cross-browser range library which provides standards-based API for performing
-        common DOM Range tasks. The plugin is distributed with ("pack" version) and without rangy
-        library, but bear in mind that the latter doesn't work in older versions of IE.
-      </li>
-      <li>
-        Serialization uses JSON but IE prior to version 8 doesn't support it natively. You can
-        use <a href="https://github.com/douglascrockford/JSON-js">Douglas Crockford's
-        implementation</a> if you are going to use the plugin in old versions of IE.
-      </li>
-    </ul>
-
-    <h2>Usage</h2>
-    <ul>
-      <li>
-        To use jQuery Text Highlighter include <a href="http://jquery.com">jQuery</a> and plugin
-        source file inside the <code>&lt;head&gt;</code> tag of your HTML document:
-        <pre>&lt;script type="text/javascript" src="/path/to/jquery.min.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="/path/to/jquery.textHighlighter.pack.js"&gt;&lt;/script&gt;</pre>
-      </li>
-      <li>
-        To setup the plugin on DOM element with <code>id="sandbox"</code>, add the following code:
-        <pre>&lt;script type="text/javascript"&gt;
-    $(document).ready(function() {
-        $('#sandbox').textHighlighter();
-    });
-&lt;/script&gt;</pre>
-      </li>
-      <li>
-        You can access <code>TextHighlighter</code> object with the following code:
-        <pre>$('#sandbox').getHighlighter();</pre>
-      </li>
-      <li>
-        And then you can call one of its methods:
-        <pre>$('#sandbox').getHighlighter().setColor('#00ff00');</pre>
-      </li>
-    </ul>
-
-    <h2>Configuration</h2>
-    <table>
-      <thead>
-        <tr>
-          <th class="prop">Property</th>
-          <th class="type">Type</th>
-          <th class="default">Default</th>
-          <th class="desc">Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>color</td>
-          <td>string</td>
-          <td>#ffff7b</td>
-          <td>Highlight color. Must be valid CSS color.</td>
-        </tr>
-        <tr class="even">
-          <td>highlightedClass</td>
-          <td>string</td>
-          <td>highlighted</td>
-          <td>Class given to a wrapper of highlighted text.</td>
-        </tr>
-        <tr>
-          <td>contextClass</td>
-          <td>string</td>
-          <td>highlighter-context</td>
-          <td>Class given to en element on which the plugin is initialized.</td>
-        </tr>
-        <tr class="even">
-          <td>onRemoveHighlight</td>
-          <td>function</td>
-          <td></td>
-          <td>
-            Function that is called right before removing a highlight. The highlight is passed to
-            the function as param. If function returns false, highlight won't be removed. See the
-            source of the <a href="demos/callbacks.html">callbacks demo</a> for details.
-          </td>
-        </tr>
-        <tr>
-          <td>onBeforeHighlight</td>
-          <td>function</td>
-          <td></td>
-          <td>
-            Function that is called before highlighting a text. Range object is passed to the
-            function as param. If function returns false, text won't be highlighted. See the source
-            of the <a href="demos/callbacks.html">callbacks demo</a> for details.
-          </td>
-        </tr>
-        <tr class="even">
-          <td>onAfterHighlight</td>
-          <td>function</td>
-          <td></td>
-          <td>
-            Function that is called after highlighting a text. Array of created and normalized
-            highlights is passed as a first argument. Range object is passed as second argument. See
-            the source of the <a href="demos/callbacks.html">callbacks demo</a> for details.
-          </td>
-        </tr>
-        <tr>
-          <td>$.textHighlighter.defaults</td>
-          <td>object</td>
-          <td>...</td>
-          <td>Defines default plugin values.</td>
-        </tr>
-        <tr class="even">
-          <td>$.textHighlighter.createWrapper</td>
-          <td>function</td>
-          <td>...</td>
-          <td>
-            Function that should return wrapper which is used to wrap selected text (i.e. highlight
-            that text). Actual options defined in initialization are passed as param. See
-            <a href="demos/custom-wrapper.html">custom wrapper example</a> for details.
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2>Methods</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>destroy()</td>
-          <td>Disables plugin leaving all highlights untouched.</td>
-        </tr>
-        <tr class="even">
-          <td>setColor(color)</td>
-          <td>Sets highlight color. Color must be valid CSS color.</td>
-        </tr>
-        <tr>
-          <td>getColor()</td>
-          <td>Returns highlight color.</td>
-        </tr>
-        <tr class="even">
-          <td>removeHighlights([element])</td>
-          <td>
-            Removes all highlights within given element or within context element if no element
-            given.
-          </td>
-        </tr>
-        <tr>
-          <td>getAllHighlights(container, andSelf)</td>
-          <td>
-            Returns all highlights in given container. If container is a highlight itself
-            and andSelf is true, container will be returned as well.
-          </td>
-        </tr>
-        <tr>
-          <td>serializeHighlights()</td>
-          <td>Serializes all highlights to stringified JSON object. See <a href="demos/serialization.html">serialization example</a> for more details.</td>
-        </tr>
-        <tr class="even">
-          <td>deserializeHighlights(json)</td>
-          <td>Deserializes highlights given as stringified JSON. See <a href="demos/serialization.html">serialization example</a> for more details.</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2>Who's Using jQuery Text Highlighter?</h2>
-    <ul>
-      <li>
-      <a href="http://www.itsmorethanatextbook.com/index_extras/highlight_and_write_in.php">www.itsmorethanatextbook.com</a> &ndash; dynamic online textbooks.</li>
-    </ul>
-    <p>
-      If you are using or going to use the plugin, please <a href="mailto:mirz.hq@gmail.com">give me a feedback</a>!</p>
-
     <div id="footer">
-      Copyright &copy; 2011 - 2013 by mirz. All Rights Reserved.
+        <div class="badges">
+            <iframe src="http://ghbtns.com/github-btn.html?user=mir3z&repo=texthighlighter&type=watch&count=true"
+                    allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
+
+            <iframe src="http://ghbtns.com/github-btn.html?user=mir3z&repo=texthighlighter&type=fork&count=true"
+                    allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
+
+            <iframe src="http://ghbtns.com/github-btn.html?user=mir3z&repo=texthighlighter&type=follow&count=true"
+                    allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
+        </div>
+
+        <div class="links">
+            <a href="https://github.com/mir3z/texthighlighter">GitHub</a> |
+            <a href="https://github.com/mir3z/texthighlighter/wiki">Wiki Pages</a> |
+            <a href="http://mir3z.github.io/texthighlighter/doc">API</a> |
+            <a href="https://github.com/mir3z/texthighlighter/issues">Issues</a> |
+            <a href="http://mir3z.github.io/texthighlighter/test/test.html">Tests</a> |
+            <a href="https://github.com/mir3z/texthighlighter/releases">Releases</a> |
+            <a href="mailto:mirz.hq@gmail.com">Contact</a>
+        </div>
+
+        TextHighlighter is licensed under MIT. <br/>
+        Copyright &copy; 2011-2014 by mirz. All Rights Reserved.
     </div>
 
-  </body>
+</body>
 </html>

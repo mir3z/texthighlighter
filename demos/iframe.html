@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>TextHighlighter Demo | Iframe</title>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400|Special+Elite' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="assets/reset.css" />
+    <link rel="stylesheet" type="text/css" href="assets/styles.css" />
+    <link rel="stylesheet" type="text/css" href="assets/github.css" />
+    <link rel="stylesheet" type="text/css" href="assets/ColorPicker.css" />
+
+    <script type="text/javascript" src="assets/rainbow-custom.min.js"></script>
+
+    <script type="text/javascript" src="assets/ColorPicker.js"></script>
+    <script type="text/javascript" src="../src/TextHighlighter.js"></script>
+</head>
+<body>
+<div class="view">
+    <div class="top"></div>
+
+    <div class="side">
+        <h2>TextHighlighter Demo</h2>
+        <ul>
+            <li>Select any text in the sandbox to highlight it.</li>
+            <li>Change highlighting color: <div class="color-picker"></div></li>
+            <li>Remove all highlights: <button id="remove">Remove</button></li>
+        </ul>
+    </div>
+
+    <div class="code shadow">
+<pre><code data-language="javascript">
+var iframe = document.querySelector('iframe');
+
+iframe.onload = function () {
+    var hltr = new TextHighlighter(
+        iframe.contentDocument.body
+    );
+};
+</code></pre>
+    </div>
+
+    <div class="card shadow">
+        <div id="stamp">SANDBOX</div>
+        <div id="sandbox" class="content">
+           <iframe></iframe>
+        </div>
+    </div>
+</div>
+<div id="footer">
+    Copyright &copy; 2011-2014 by mirz. All Rights Reserved.
+</div>
+
+<script type="text/javascript">
+    (function () {
+        var removeBtn = document.getElementById('remove'),
+            iframe = document.querySelector('iframe'),
+            colors = new ColorPicker(document.querySelector('.color-picker')),
+            hltr;
+
+        iframe.onload = function () {
+            hltr = new TextHighlighter(iframe.contentDocument.body);
+
+            colors.onColorChange(function (color) {
+                hltr.setColor(color);
+            });
+
+            removeBtn.addEventListener('click', function () {
+                hltr.removeHighlights();
+            });
+        };
+        iframe.src = 'iframe-content.html';
+    })();
+</script>
+
+</body>
+</html>

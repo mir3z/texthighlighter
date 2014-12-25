@@ -1,0 +1,28 @@
+{
+    "tags"      : {
+        "allowUnknownTags" : true
+    },
+    "plugins"   : ["plugins/markdown"],
+
+    "templates" : {
+        "cleverLinks"           : false,
+        "monospaceLinks"        : false,
+        "dateFormat"            : "ddd MMM Do YYYY",
+        "outputSourceFiles"     : true,
+        "outputSourcePath"      : true,
+        "systemName"            : "TextHighlighter",
+        "footer"                : "",
+        "copyright"             : "TextHighlighter Copyright © 2011 - 2014 by mirz",
+        "navType"               : "inline",
+        "theme"                 : "cosmo",
+        "linenums"              : true,
+        "collapseSymbols"       : false,
+        "inverseNav"            : true,
+        "highlightTutorialCode" : true,
+        "protocol"              : "fred://"
+    },
+    "markdown"  : {
+        "parser"   : "gfm",
+        "hardwrap" : true
+    }
+}
