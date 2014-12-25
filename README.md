@@ -7,7 +7,7 @@ TextHighlighter allows you to highlight text on web pages. Just select it!
 Download TextHighlighter directly from GitHub or install with Bower:
 
 ```
-$ bower install TextHighlighter
+$ bower install text-highlighter
 ```
 
 Add script file to head section of your web page:
@@ -22,7 +22,8 @@ And use it!
 var hltr = new TextHighlighter(document.body);
 ```
 
-For more details see API reference or Wiki pages on GitHub.
+For more details see [API reference](http://mir3z.github.io/texthighlighter/doc/index.html) or 
+[Wiki](https://github.com/mir3z/texthighlighter/wiki) pages on GitHub.
 
 Also check Demos section below for examples of usage.
 
@@ -50,4 +51,5 @@ Should work in all decent browsers and IE >= 9.
 
 ## Documentation
    
-You may check API reference or Wiki pages on GitHub.
+You may check [API reference](http://mir3z.github.io/texthighlighter/doc/index.html) or 
+[Wiki](https://github.com/mir3z/texthighlighter/wiki) pages on GitHub.

@@ -1,0 +1,26 @@
+{
+  "name": "text-highlighter",
+  "version": "1.2.0",
+  "homepage": "https://github.com/mir3z/texthighlighter",
+  "authors": [
+    "mirz <mirz.hq@gmail.com>"
+  ],
+  "description": "TextHighlighter allows you to highlight text on web pages.",
+  "main": "build/TextHighlighter.min.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "highlighter",
+    "highlight",
+    "text"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
