@@ -427,6 +427,7 @@
 
         this.el = element;
         this.options = defaults(options, {
+            enabled: true,
             color: '#ffff7b',
             highlightedClass: 'highlighted',
             contextClass: 'highlighter-context',
