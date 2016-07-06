@@ -427,6 +427,7 @@
 
         this.el = element;
         this.options = defaults(options, {
+            enabled: true,
             color: '#ffff7b',
             highlightedClass: 'highlighted',
             contextClass: 'highlighter-context',
@@ -437,6 +438,10 @@
 
         dom(this.el).addClass(this.options.contextClass);
         bindEvents(this.el, this);
+        
+        if (this.options.enabled==false) {
+            this.disable();
+        }
     }
 
     /**
@@ -459,6 +464,9 @@
      * @memberof TextHighlighter
      */
     TextHighlighter.prototype.doHighlight = function (keepRange) {
+        
+        if (!this.options.enabled) return false;
+        
         var range = dom(this.el).getRange(),
             wrapper,
             createdHighlights,
@@ -514,7 +522,8 @@
 
                 if (IGNORE_TAGS.indexOf(node.parentNode.tagName) === -1 && node.nodeValue.trim() !== '') {
                     wrapperClone = wrapper.cloneNode(true);
-                    wrapperClone.setAttribute(DATA_ATTR, true);
+                    
+                    wrapperClone.setAttribute(DATA_ATTR, this.options.color!="");
                     nodeParent = node.parentNode;
 
                     // highlight if a node is inside the el
@@ -941,10 +950,28 @@
      * @static
      */
     TextHighlighter.createWrapper = function (options) {
-        var span = document.createElement('span');
+        var span = document.createElement(options.wrapper);
         span.style.backgroundColor = options.color;
         span.className = options.highlightedClass;
         return span;
+    };
+    
+    TextHighlighter.prototype.disable = function()
+    {
+        if (this.options.enabled) {
+             unbindEvents(this.el, this);
+             this.options.enabled=false;
+        }
+        
+    };
+    
+    TextHighlighter.prototype.enable = function()
+    {
+        if (!this.options.enabled) {
+             bindEvents(this.el, this);
+             this.options.enabled=true;
+        }
+        
     };
 
     global.TextHighlighter = TextHighlighter;
