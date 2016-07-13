@@ -8,7 +8,7 @@ TextHighlighter allows you to highlight text on web pages. Just select it!
 Download TextHighlighter directly from GitHub or install with Bower:
 
 ```
-$ bower install text-highlighter
+$ bower install nodehack-texthighlighter
 ```
 
 Add script file to head section of your web page:
