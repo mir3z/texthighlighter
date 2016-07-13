@@ -438,7 +438,7 @@
 
         dom(this.el).addClass(this.options.contextClass);
         bindEvents(this.el, this);
-        
+
         if (this.options.enabled==false) {
             this.disable();
         }
@@ -464,9 +464,9 @@
      * @memberof TextHighlighter
      */
     TextHighlighter.prototype.doHighlight = function (keepRange) {
-        
+
         if (!this.options.enabled) return false;
-        
+
         var range = dom(this.el).getRange(),
             wrapper,
             createdHighlights,
@@ -522,7 +522,7 @@
 
                 if (IGNORE_TAGS.indexOf(node.parentNode.tagName) === -1 && node.nodeValue.trim() !== '') {
                     wrapperClone = wrapper.cloneNode(true);
-                    
+
                     wrapperClone.setAttribute(DATA_ATTR, this.options.color!="");
                     nodeParent = node.parentNode;
 
@@ -705,36 +705,36 @@
             highlights = this.getHighlights({ container: container }),
             self = this;
 
-        function mergeSiblingTextNodes(textNode) {
-            var prev = textNode.previousSibling,
-                next = textNode.nextSibling;
-
-            if (prev && prev.nodeType === NODE_TYPE.TEXT_NODE) {
-                textNode.nodeValue = prev.nodeValue + textNode.nodeValue;
-                dom(prev).remove();
-            }
-            if (next && next.nodeType === NODE_TYPE.TEXT_NODE) {
-                textNode.nodeValue = textNode.nodeValue + next.nodeValue;
-                dom(next).remove();
-            }
-        }
-
-        function removeHighlight(highlight) {
-            var textNodes = dom(highlight).unwrap();
-
-            textNodes.forEach(function (node) {
-                mergeSiblingTextNodes(node);
-            });
-        }
-
         sortByDepth(highlights, true);
 
         highlights.forEach(function (hl) {
             if (self.options.onRemoveHighlight(hl) === true) {
-                removeHighlight(hl);
+                self.removeHighlight(hl);
             }
         });
     };
+
+    TextHighlighter.prototype.removeHighlight = function (highlight) {
+        var textNodes = dom(highlight).unwrap();
+
+        textNodes.forEach(function (node) {
+            mergeSiblingTextNodes(node);
+        });
+    };
+
+    function mergeSiblingTextNodes(textNode) {
+        var prev = textNode.previousSibling,
+            next = textNode.nextSibling;
+
+        if (prev && prev.nodeType === NODE_TYPE.TEXT_NODE) {
+            textNode.nodeValue = prev.nodeValue + textNode.nodeValue;
+            dom(prev).remove();
+        }
+        if (next && next.nodeType === NODE_TYPE.TEXT_NODE) {
+            textNode.nodeValue = textNode.nodeValue + next.nodeValue;
+            dom(next).remove();
+        }
+    }
 
     /**
      * Returns highlights from given container.
@@ -781,15 +781,33 @@
         return el && el.nodeType === NODE_TYPE.ELEMENT_NODE && el.hasAttribute(DATA_ATTR);
     };
 
+
     /**
-     * Serializes all highlights in the element the highlighter is applied to.
+     * Serializes the highlights passed into it or all highlights if no param
      * @returns {string} - stringified JSON with highlights definition
      * @memberof TextHighlighter
      */
-    TextHighlighter.prototype.serializeHighlights = function () {
-        var highlights = this.getHighlights(),
-            refEl = this.el,
-            hlDescriptors = [];
+    TextHighlighter.prototype.serializeHighlights = function (highlights) {
+      if (!highlights) {
+        highlights = this.getHighlights();
+      }
+      sortByDepth(highlights, false);
+
+      let hlDescriptors = [];
+      for (var i = 0; i < highlights.length; i++) {
+        hlDescriptors.push(this.serializeHighlight(highlights[i]));
+      }
+      return JSON.stringify(hlDescriptors);
+    }
+
+
+    /**
+     * Serializes the highlight passed into it.
+     * @returns {array} - JSON with highlights definition
+     * @memberof TextHighlighter
+     */
+    TextHighlighter.prototype.serializeHighlight = function (highlight) {
+        var refEl = this.el;
 
         function getElementPath(el, refElement) {
             var path = [],
@@ -804,31 +822,20 @@
             return path;
         }
 
-        sortByDepth(highlights, false);
 
-        highlights.forEach(function (highlight) {
-            var offset = 0, // Hl offset from previous sibling within parent node.
-                length = highlight.textContent.length,
-                hlPath = getElementPath(highlight, refEl),
-                wrapper = highlight.cloneNode(true);
+        var offset = 0, // Hl offset from previous sibling within parent node.
+            length = highlight.textContent.length,
+            hlPath = getElementPath(highlight, refEl),
+            wrapper = highlight.cloneNode(true);
 
-            wrapper.innerHTML = '';
-            wrapper = wrapper.outerHTML;
+        wrapper.innerHTML = '';
+        wrapper = wrapper.outerHTML;
 
-            if (highlight.previousSibling && highlight.previousSibling.nodeType === NODE_TYPE.TEXT_NODE) {
-                offset = highlight.previousSibling.length;
-            }
+        if (highlight.previousSibling && highlight.previousSibling.nodeType === NODE_TYPE.TEXT_NODE) {
+            offset = highlight.previousSibling.length;
+        }
 
-            hlDescriptors.push([
-                wrapper,
-                highlight.textContent,
-                hlPath.join(':'),
-                offset,
-                length
-            ]);
-        });
-
-        return JSON.stringify(hlDescriptors);
+        return [wrapper, highlight.textContent, hlPath.join(':'), offset, length];
     };
 
     /**
@@ -892,13 +899,13 @@
         }
 
         hlDescriptors.forEach(function (hlDescriptor) {
-            try {
-                deserializationFn(hlDescriptor);
-            } catch (e) {
-                if (console && console.warn) {
-                    console.warn("Can't deserialize highlight descriptor. Cause: " + e);
-                }
-            }
+          try {
+              deserializationFn(hlDescriptor);
+          } catch (e) {
+              if (console && console.warn) {
+                  console.warn("Can't deserialize highlight descriptor. Cause: " + e);
+              }
+          }
         });
 
         return highlights;
@@ -951,27 +958,29 @@
      */
     TextHighlighter.createWrapper = function (options) {
         var span = document.createElement(options.wrapper);
-        span.style.backgroundColor = options.color;
+        if (options.color) {
+          span.style.backgroundColor = options.color;
+        }                
         span.className = options.highlightedClass;
         return span;
     };
-    
+
     TextHighlighter.prototype.disable = function()
     {
         if (this.options.enabled) {
              unbindEvents(this.el, this);
              this.options.enabled=false;
         }
-        
+
     };
-    
+
     TextHighlighter.prototype.enable = function()
     {
         if (!this.options.enabled) {
              bindEvents(this.el, this);
              this.options.enabled=true;
         }
-        
+
     };
 
     global.TextHighlighter = TextHighlighter;
