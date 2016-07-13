@@ -1,6 +1,6 @@
 {
   "name": "TextHighlighter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "TextHighlighter",
   "dependencies": {},
   "devDependencies": {
@@ -12,8 +12,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mir3z/texthighlighter.git"
+    "url": "https://github.com/nodehack/texthighlighter.git"
   },
-  "author": "mirz <mirz.hq@gmail.com>",
+  "author": "mirz <mirz.hq@gmail.com>, Tom Feldmann <feldmata@gmail.com>",
   "license": "MIT"
 }
