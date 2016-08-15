@@ -1,9 +1,10 @@
 {
-  "name": "text-highlighter",
-  "version": "1.2.0",
-  "homepage": "https://github.com/mir3z/texthighlighter",
+  "name": "nodehack-texthighlighter",
+  "version": "1.2.1",
+  "homepage": "https://github.com/nodehack/texthighlighter",
   "authors": [
-    "mirz <mirz.hq@gmail.com>"
+    "mirz <mirz.hq@gmail.com>",
+    "Tom Feldmann <feldmata@gmail.com>"
   ],
   "description": "TextHighlighter allows you to highlight text on web pages.",
   "main": "build/TextHighlighter.min.js",
