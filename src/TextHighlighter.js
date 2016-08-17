@@ -26,7 +26,13 @@
         IGNORE_TAGS = [
             'SCRIPT', 'STYLE', 'SELECT', 'OPTION', 'BUTTON', 'OBJECT', 'APPLET', 'VIDEO', 'AUDIO', 'CANVAS', 'EMBED',
             'PARAM', 'METER', 'PROGRESS'
-        ];
+        ],
+
+        /**
+         * Function associated with events
+         *  @type {function}
+         */
+        FUNCTION_BIND;
 
     /**
      * Returns true if elements a i b have the same color.
@@ -395,13 +401,13 @@
     };
 
     function bindEvents(el, scope) {
-        el.addEventListener('mouseup', scope.highlightHandler.bind(scope));
-        el.addEventListener('touchend', scope.highlightHandler.bind(scope));
+        el.addEventListener('mouseup', FUNCTION_BIND);
+        el.addEventListener('touchend', FUNCTION_BIND);
     }
 
     function unbindEvents(el, scope) {
-        el.removeEventListener('mouseup', scope.highlightHandler.bind(scope));
-        el.removeEventListener('touchend', scope.highlightHandler.bind(scope));
+        el.removeEventListener('mouseup', FUNCTION_BIND);
+        el.removeEventListener('touchend', FUNCTION_BIND);
     }
 
     /**
@@ -436,6 +442,7 @@
         });
 
         dom(this.el).addClass(this.options.contextClass);
+        FUNCTION_BIND = this.highlightHandler.bind(this);
         bindEvents(this.el, this);
     }
 
