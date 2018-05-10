@@ -124,6 +124,27 @@
         });
     }
 
+    function sortSerializedByDepth(hlDesc) {
+        function compare(a, b) {
+            var len = Math.min(a.length, b.length);
+            var i = 0;
+
+            while (i < len) {
+                if (a[i] !== b[i]) {
+                    return a[i] - b[i];
+                } else {
+                    i++;
+                }
+            }
+
+            return a.length - b.length;
+        }
+
+        hlDesc.sort(function (a, b) {
+            return compare(a[2].split(':'), b[2].split(':'));
+        });
+    }
+
     /**
      * Groups given highlights by timestamp.
      * @param {Array} highlights
@@ -819,6 +840,8 @@
             ]);
         });
 
+        sortSerializedByDepth(hlDescriptors);
+
         return JSON.stringify(hlDescriptors);
     };
 
@@ -881,6 +904,8 @@
             highlight = dom(hlNode).wrap(dom().fromHTML(hl.wrapper)[0]);
             highlights.push(highlight);
         }
+
+        sortSerializedByDepth(hlDescriptors);
 
         hlDescriptors.forEach(function (hlDescriptor) {
             try {

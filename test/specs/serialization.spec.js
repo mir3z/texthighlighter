@@ -108,12 +108,12 @@ describe('Serialization', function () {
         title: 'use case #08',
         fixturePrefix: '06.s11n',
         fixturePostfix: 'h1',
-        expectedText: [ 'elit.', 'consectetur ', 'adipiscit ', 'sit amet ', 'ipsum dolor ' ]
+        expectedText: [ 'ipsum dolor ', 'sit amet ', 'consectetur ', 'adipiscit ', 'elit.' ]
     });
     testSerialization({
         title: 'use case #09',
         fixturePrefix: '06.s11n',
         fixturePostfix: 'h2',
-        expectedText: [ 'consectetur ', 'adipiscit ', 'sec', 'ipsum dolor ', 'ipsum dolor ', 'dolor ' ]
+        expectedText: [ 'ipsum dolor ', 'ipsum dolor ', 'dolor ', 'consectetur ', 'sec', 'adipiscit ' ]
     });
 });
